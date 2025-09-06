@@ -1,7 +1,7 @@
 const transporter = require('../config/email');
 
 const sendVerificationEmail = async (email, token) => {
-  const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${token}`;
+  const verificationUrl = `${process.env.FRONTEND_URL || 'https://facevitals-main-i343.vercel.app'}/verify-email?token=${token}`;
   
   const mailOptions = {
     from: process.env.EMAIL_USER,
