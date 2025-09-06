@@ -24,7 +24,7 @@ class App {
 
     // CORS configuration
     this.app.use(cors({
-      origin: process.env.FRONTEND_URL || 'https://facevitals-main-i343.vercel.app',
+      origin: "*",
       credentials: true
     }));
 
