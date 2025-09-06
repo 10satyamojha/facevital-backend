@@ -36,7 +36,7 @@ const sendVerificationEmail = async (email, token) => {
 };
 
 const sendPasswordResetEmail = async (email, token) => {
-  const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${token}`;
+  const resetUrl = `${process.env.FRONTEND_URL || 'https://facevitals-main-i343.vercel.app'}/reset-password?token=${token}`;
   
   const mailOptions = {
     from: process.env.EMAIL_USER,
