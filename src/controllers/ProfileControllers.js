@@ -230,9 +230,10 @@ class ProfileController {
       });
     }
   }
-async getpage(req,res,next){
-try{
-        const htmlContent = `<!DOCTYPE html>
+
+  async getpage(req, res, next) {
+    try {
+      const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -635,7 +636,7 @@ try{
 <body>
     <div class="cameraSection">
         <div class="cameraHeader">
-            <h1>❤️ Health Vitals Scanner</h1>
+            <h1>Health Vitals Scanner</h1>
             <p>Position your face in the oval and record for 30 seconds.</p>
         </div>
         
@@ -646,9 +647,9 @@ try{
             </div>
             
             <div id="errorState" class="errorState" style="display: none;">
-                <div class="errorIcon">⚠️</div>
+                <div class="errorIcon">⚠</div>
                 <p class="errorText" id="errorText">Failed to access camera</p>
-                <button class="controlBtn" onclick="window.location.reload()">🔄 Try Again</button>
+                <button class="controlBtn" onclick="window.location.reload()">Try Again</button>
             </div>
             
             <div id="cameraInterface" style="display: none;">
@@ -679,9 +680,9 @@ try{
                 
                 <!-- Controls -->
                 <div class="controlsGrid">
-                    <button id="startBtn" class="controlBtn">▶️ Start Recording</button>
-                    <button id="stopBtn" class="controlBtn danger" style="display: none;">⏹️ Stop Recording</button>
-                    <button id="recordAgainBtn" class="controlBtn" style="display: none;">▶️ Record Again</button>
+                    <button id="startBtn" class="controlBtn">Start Recording</button>
+                    <button id="stopBtn" class="controlBtn danger" style="display: none;">Stop Recording</button>
+                    <button id="recordAgainBtn" class="controlBtn" style="display: none;">Record Again</button>
                 </div>
             </div>
         </div>
@@ -1034,7 +1035,7 @@ try{
                     await saveToDatabase(mappedPrediction, videoBlob);
                     displayResults();
                 } else {
-                    throw new Error(prediction.error || "AI API से अनुपयुक्त response structure मिला।");
+                    throw new Error(prediction.error || "Invalid response structure from AI API.");
                 }
                 
             } catch (error) {
@@ -1290,41 +1291,29 @@ try{
 </body>
 </html>`;
 
-        // API Response structure
-        const apiResponse = {
-            success: true,
-            message: "Health Scanner page loaded successfully",
-            data: {
-                pageType: "health-scanner",
-                version: "1.0.0",
-                htmlContent: htmlContent,
-                timestamp: new Date().toISOString()
-            }
-        };
+      // Set proper headers
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
 
-        // Set proper headers
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('Expires', '0');
-
-        // Send HTML content directly
-        res.send(htmlContent);
+      // Send HTML content directly
+      res.send(htmlContent);
 
     } catch (error) {
-        console.error('Error serving health scanner page:', error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to load health scanner",
-            error: error.message
-        });
+      console.error('Error serving health scanner page:', error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to load health scanner",
+        error: error.message
+      });
     }
-});
+  }
 
-// Alternative JSON API endpoint (if you need JSON format)
-router.get('/health-scanner-json', async (req, res) => {
+  // Alternative JSON API endpoint (if you need JSON format)
+  async getHealthScannerJSON(req, res, next) {
     try {
-        const htmlContent = `<!DOCTYPE html>
+      const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1337,54 +1326,46 @@ router.get('/health-scanner-json', async (req, res) => {
 </body>
 </html>`;
 
-        const response = {
-            success: true,
-            message: "Health Scanner HTML content",
-            data: {
-                htmlContent: htmlContent,
-                pageInfo: {
-                    title: "Health Vitals Scanner",
-                    version: "1.0.0",
-                    features: [
-                        "Face detection with MediaPipe",
-                        "30-second video recording",
-                        "AI-powered health analysis",
-                        "Results visualization",
-                        "Scan history tracking"
-                    ],
-                    requirements: {
-                        camera: true,
-                        internet: true,
-                        browser: "Modern browser with WebRTC support"
-                    }
-                },
-                apiEndpoints: {
-                    aiAnalysis: AI_API_URL,
-                    saveData: API_BASE_URL + "/api/scan/saveHealthData",
-                    getHistory: API_BASE_URL + "/api/scan/getScanHistory",
-                    getScanDetails: API_BASE_URL + "/api/scan/:id"
-                }
+      const response = {
+        success: true,
+        message: "Health Scanner HTML content",
+        data: {
+          htmlContent: htmlContent,
+          pageInfo: {
+            title: "Health Vitals Scanner",
+            version: "1.0.0",
+            features: [
+              "Face detection with MediaPipe",
+              "30-second video recording",
+              "AI-powered health analysis",
+              "Results visualization",
+              "Scan history tracking"
+            ],
+            requirements: {
+              camera: true,
+              internet: true,
+              browser: "Modern browser with WebRTC support"
             }
-        };
+          },
+          apiEndpoints: {
+            aiAnalysis: 'https://anurudh-268064419384.asia-east1.run.app/analyze',
+            saveData: 'https://facevital-backend-3.onrender.com/api/scan/saveHealthData',
+            getHistory: 'https://facevital-backend-3.onrender.com/api/scan/getScanHistory',
+            getScanDetails: 'https://facevital-backend-3.onrender.com/api/scan/:id'
+          }
+        }
+      };
 
-        res.json(response);
+      res.json(response);
 
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to generate health scanner content",
-            error: error.message
-        });
+      res.status(500).json({
+        success: false,
+        message: "Failed to generate health scanner content",
+        error: error.message
+      });
     }
-});
-
-
-}
-
-
-
-
-  
+  }
 }
 
 module.exports = new ProfileController();
