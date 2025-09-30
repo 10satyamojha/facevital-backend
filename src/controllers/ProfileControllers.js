@@ -231,9 +231,8 @@ class ProfileController {
     }
   }
 
-  async getpage(req, res, next) {
+async getpage(req, res, next) {
     try {
-      // Build HTML content using string concatenation to avoid template literal conflicts
       let htmlContent = '<!DOCTYPE html>\n';
       htmlContent += '<html lang="en">\n';
       htmlContent += '<head>\n';
@@ -282,7 +281,7 @@ class ProfileController {
       htmlContent += '        .videoPreview { margin-bottom: 2rem; }\n';
       htmlContent += '        .previewVideo { width: 300px; height: 200px; border-radius: 12px; object-fit: cover; border: 2px solid var(--inputColor); }\n';
       htmlContent += '        .loadingState { text-align: center; padding: 2rem; color: var(--textColor); }\n';
-      htmlContent += '        .loadingSpinner { width: 24px; height: 24px; border: 3px solid var(--inputColor); border-top: 3px solid var(--PrimaryColor); border-radius: 50%; animation: spin 1s linear infinite; margin-right: 0.5rem; }\n';
+      htmlContent += '        .loadingSpinner { width: 24px; height: 24px; border: 3px solid var(--inputColor); border-top: 3px solid var(--PrimaryColor); border-radius: 50%; animation: spin 1s linear infinite; margin-right: 0.5rem; display: inline-block; }\n';
       htmlContent += '        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }\n';
       htmlContent += '        .predictionGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }\n';
       htmlContent += '        .predictionCard { background: var(--paleGreen); border: 1px solid var(--PrimaryColor); border-radius: 12px; padding: 1.5rem; text-align: center; transition: transform 0.2s ease; }\n';
@@ -290,16 +289,6 @@ class ProfileController {
       htmlContent += '        .predictionValue { font-size: 2.5rem; font-weight: 700; color: var(--PrimaryColor); margin-bottom: 0.5rem; }\n';
       htmlContent += '        .predictionLabel { font-size: var(--normalFontSize); color: var(--blackColor); font-weight: 600; margin-bottom: 0.25rem; }\n';
       htmlContent += '        .predictionUnit { font-size: var(--smallFontSize); color: var(--textColor); }\n';
-      htmlContent += '        .historyList { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1rem; }\n';
-      htmlContent += '        .historyItem { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--inputColor); border-radius: 8px; transition: background 0.2s; }\n';
-      htmlContent += '        .historyItem:hover { background: var(--itemCardHover); }\n';
-      htmlContent += '        .historyInfo { display: flex; flex-direction: column; }\n';
-      htmlContent += '        .historyDate { font-weight: 600; color: var(--blackColor); }\n';
-      htmlContent += '        .historyVitals { font-size: var(--smallFontSize); color: var(--textColor); }\n';
-      htmlContent += '        .modalOverlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }\n';
-      htmlContent += '        .modalContent { background: var(--whiteColor); padding: 2rem; border-radius: 16px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; position: relative; }\n';
-      htmlContent += '        .modalClose { position: absolute; top: 1rem; right: 1rem; background: none; border: none; cursor: pointer; color: var(--greyText); font-size: 1.5rem; }\n';
-      htmlContent += '        .modalBody .predictionGrid { margin-top: 1.5rem; }\n';
       htmlContent += '        @media screen and (max-width: 768px) {\n';
       htmlContent += '            .cameraSection { padding: 1rem; }\n';
       htmlContent += '            .cameraHeader { padding: 1.5rem; }\n';
@@ -368,61 +357,47 @@ class ProfileController {
       htmlContent += '                <h3>Recent Scans</h3>\n';
       htmlContent += '            </div>\n';
       htmlContent += '            <div id="historyContent">\n';
-      htmlContent += '                <div class="loadingState">\n';
-      htmlContent += '                    <div class="loadingSpinner"></div>\n';
-      htmlContent += '                    Loading history...\n';
-      htmlContent += '                </div>\n';
+      htmlContent += '                <p style="text-align: center; color: var(--textColor);">Scan history feature is disabled</p>\n';
       htmlContent += '            </div>\n';
       htmlContent += '        </div>\n';
       htmlContent += '    </div>\n';
-      htmlContent += '    <div id="scanModal" class="modalOverlay" style="display: none;">\n';
-      htmlContent += '        <div class="modalContent">\n';
-      htmlContent += '            <button class="modalClose" onclick="closeScanModal()">×</button>\n';
-      htmlContent += '            <div id="modalBody"></div>\n';
-      htmlContent += '        </div>\n';
-      htmlContent += '    </div>\n';
 
-      // Add JavaScript functionality
       htmlContent += '    <script>\n';
-      htmlContent += '        let videoRef, canvasRef, cameraInstance, mediaRecorderRef, recordingTimerRef, recordedBlobRef;\n';
+      htmlContent += '        let videoRef, canvasRef, mediaRecorderRef, recordingTimerRef, recordedBlobRef;\n';
       htmlContent += '        let stream = null;\n';
-      htmlContent += '        let scriptsLoaded = false;\n';
       htmlContent += '        let isRecording = false;\n';
       htmlContent += '        let recordingDuration = 0;\n';
       htmlContent += '        let recordedVideoUrl = null;\n';
       htmlContent += '        let aiPrediction = null;\n';
-      htmlContent += '        let isAnalyzing = false;\n';
-      htmlContent += '        let isSaving = false;\n';
-      htmlContent += '        let saveSuccess = false;\n';
-      htmlContent += '        let analysisComplete = false;\n';
-      htmlContent += '        let scanHistory = [];\n';
-      htmlContent += '        let selectedScan = null;\n';
-      htmlContent += '        const API_BASE_URL = "https://facevital-backend-3.onrender.com";\n';
       htmlContent += '        const AI_API_URL = "https://anurudh-268064419384.asia-east1.run.app/analyze";\n';
       htmlContent += '        const WIDTH = 384;\n';
       htmlContent += '        const HEIGHT = 518;\n';
+      
       htmlContent += '        document.addEventListener("DOMContentLoaded", function() {\n';
       htmlContent += '            initializeScanner();\n';
       htmlContent += '        });\n';
-     
+      
       htmlContent += '        function formatTime(seconds) {\n';
       htmlContent += '            const mins = Math.floor(seconds / 60);\n';
       htmlContent += '            const secs = seconds % 60;\n';
       htmlContent += '            return mins.toString().padStart(2, "0") + ":" + secs.toString().padStart(2, "0");\n';
       htmlContent += '        }\n';
+      
       htmlContent += '        function showStatus(message, type) {\n';
       htmlContent += '            const statusEl = document.getElementById("statusIndicator");\n';
+      htmlContent += '            statusEl.className = "statusIndicator " + type;\n';
+      htmlContent += '            statusEl.textContent = message;\n';
       htmlContent += '            statusEl.style.display = "flex";\n';
       htmlContent += '        }\n';
+      
       htmlContent += '        function hideStatus() {\n';
       htmlContent += '            document.getElementById("statusIndicator").style.display = "none";\n';
       htmlContent += '        }\n';
+      
       htmlContent += '        async function initializeScanner() {\n';
       htmlContent += '            try {\n';
       htmlContent += '                await loadMediaPipeScripts();\n';
-      htmlContent += '                scriptsLoaded = true;\n';
       htmlContent += '                await startCamera();\n';
-      htmlContent += '                await fetchScanHistory();\n';
       htmlContent += '                setupEventListeners();\n';
       htmlContent += '                document.getElementById("loadingState").style.display = "none";\n';
       htmlContent += '                document.getElementById("cameraInterface").style.display = "block";\n';
@@ -431,6 +406,7 @@ class ProfileController {
       htmlContent += '                showError(error.message || "Failed to initialize scanner");\n';
       htmlContent += '            }\n';
       htmlContent += '        }\n';
+      
       htmlContent += '        function loadMediaPipeScripts() {\n';
       htmlContent += '            return new Promise((resolve, reject) => {\n';
       htmlContent += '                let loadedCount = 0;\n';
@@ -454,6 +430,7 @@ class ProfileController {
       htmlContent += '                });\n';
       htmlContent += '            });\n';
       htmlContent += '        }\n';
+      
       htmlContent += '        async function startCamera() {\n';
       htmlContent += '            try {\n';
       htmlContent += '                videoRef = document.getElementById("videoElement");\n';
@@ -470,11 +447,13 @@ class ProfileController {
       htmlContent += '                throw new Error("Could not access the camera. Please grant permission in your browser.");\n';
       htmlContent += '            }\n';
       htmlContent += '        }\n';
+      
       htmlContent += '        function setupEventListeners() {\n';
       htmlContent += '            document.getElementById("startBtn").addEventListener("click", startRecording);\n';
       htmlContent += '            document.getElementById("stopBtn").addEventListener("click", stopRecording);\n';
       htmlContent += '            document.getElementById("recordAgainBtn").addEventListener("click", startRecording);\n';
       htmlContent += '        }\n';
+      
       htmlContent += '        function startRecording() {\n';
       htmlContent += '            if (!stream) return;\n';
       htmlContent += '            resetAll();\n';
@@ -514,15 +493,14 @@ class ProfileController {
       htmlContent += '                }\n';
       htmlContent += '            }, 1000);\n';
       htmlContent += '        }\n';
+      
       htmlContent += '        function stopRecording() {\n';
       htmlContent += '            if (mediaRecorderRef && mediaRecorderRef.state === "recording") {\n';
       htmlContent += '                mediaRecorderRef.stop();\n';
       htmlContent += '            }\n';
       htmlContent += '        }\n';
+      
       htmlContent += '        async function callAIAPI(videoBlob) {\n';
-      htmlContent += '            isAnalyzing = true;\n';
-      htmlContent += '            analysisComplete = false;\n';
-      htmlContent += '            aiPrediction = null;\n';
       htmlContent += '            showStatus("Analyzing your video...", "warning");\n';
       htmlContent += '            try {\n';
       htmlContent += '                const formData = new FormData();\n';
@@ -543,7 +521,7 @@ class ProfileController {
       htmlContent += '                        stressLevel: prediction.stress_indicator ? (prediction.stress_indicator * 100).toFixed(1) : null\n';
       htmlContent += '                    };\n';
       htmlContent += '                    aiPrediction = mappedPrediction;\n';
-      htmlContent += '                    await saveToDatabase(mappedPrediction, videoBlob);\n';
+      htmlContent += '                    showStatus("Analysis complete!", "success");\n';
       htmlContent += '                    displayResults();\n';
       htmlContent += '                } else {\n';
       htmlContent += '                    throw new Error(prediction.error || "Invalid response structure from AI API.");\n';
@@ -552,33 +530,9 @@ class ProfileController {
       htmlContent += '                console.error("AI API Error:", error);\n';
       htmlContent += '                showStatus("Analysis failed: " + error.message, "error");\n';
       htmlContent += '                aiPrediction = { error: error.message };\n';
-      htmlContent += '            } finally {\n';
-      htmlContent += '                isAnalyzing = false;\n';
-      htmlContent += '                analysisComplete = true;\n';
       htmlContent += '            }\n';
       htmlContent += '        }\n';
-      htmlContent += '        async function saveToDatabase(predictionData, videoBlob) {\n';
-      htmlContent += '            const authHeaders = getAuthHeaders();\n';
-      htmlContent += '            if (!authHeaders) {\n';
-      htmlContent += '                console.log("No auth token, skipping database save");\n';
-      htmlContent += '                return;\n';
-      htmlContent += '            }\n';
-      htmlContent += '            try {\n';
-      htmlContent += '                const formData = new FormData();\n';
-      htmlContent += '                formData.append("video", videoBlob, "health-scan.webm");\n';
-      htmlContent += '                formData.append("predictions", JSON.stringify(predictionData));\n';
-      htmlContent += '                formData.append("heartRate", predictionData.heartRate || "");\n';
-      htmlContent += '                formData.append("scanDuration", recordingDuration);\n';
-      htmlContent += '                await axios.post(API_BASE_URL + "/api/scan/saveHealthData", formData, {\n';
-      htmlContent += '                    headers: { ...authHeaders, "Content-Type": "multipart/form-data" }\n';
-      htmlContent += '                });\n';
-      htmlContent += '                showStatus("Analysis complete and data saved.", "success");\n';
-      htmlContent += '                fetchScanHistory();\n';
-      htmlContent += '            } catch (error) {\n';
-      htmlContent += '                console.error("Error saving to database:", error);\n';
-      htmlContent += '                showStatus("Analysis complete but failed to save.", "warning");\n';
-      htmlContent += '            }\n';
-      htmlContent += '        }\n';
+      
       htmlContent += '        function displayResults() {\n';
       htmlContent += '            if (!aiPrediction || aiPrediction.error) return;\n';
       htmlContent += '            const previewVideo = document.getElementById("previewVideo");\n';
@@ -608,33 +562,7 @@ class ProfileController {
       htmlContent += '            `;\n';
       htmlContent += '            document.getElementById("resultsSection").style.display = "block";\n';
       htmlContent += '        }\n';
-      htmlContent += '        async function fetchScanHistory() {\n';
-      htmlContent += '            const authHeaders = getAuthHeaders();\n';
-      htmlContent += '            if (!authHeaders) {\n';
-      htmlContent += '                document.getElementById("historyContent").innerHTML = `<p style="text-align: center; color: var(--textColor);">Login required to view scan history.</p>`;\n';
-      htmlContent += '                return;\n';
-      htmlContent += '            }\n';
-      htmlContent += '            try {\n';
-      htmlContent += '                const response = await axios.get(API_BASE_URL + "/api/scan/getScanHistory?limit=5", {\n';
-      htmlContent += '                    headers: authHeaders\n';
-      htmlContent += '                });\n';
-      htmlContent += '                scanHistory = response.data.results || [];\n';
-      htmlContent += '                displayScanHistory();\n';
-      htmlContent += '            } catch (error) {\n';
-      htmlContent += '                console.error("Error fetching history:", error);\n';
-      htmlContent += '                scanHistory = [];\n';
-      htmlContent += '                document.getElementById("historyContent").innerHTML = `<p style="text-align: center; color: var(--textColor);">Failed to load scan history.</p>`;\n';
-      htmlContent += '            }\n';
-      htmlContent += '        }\n';
-      htmlContent += '        function displayScanHistory() {\n';
-      htmlContent += '            const historyContent = document.getElementById("historyContent");\n';
-      htmlContent += '            if (scanHistory.length === 0) {\n';
-      htmlContent += '                historyContent.innerHTML = `<p style="text-align: center; color: var(--textColor);">No scan history found.</p>`;\n';
-      htmlContent += '                return;\n';
-      htmlContent += '            }\n';
-      htmlContent += '            const historyHTML = `<ul class="historyList">${scanHistory.map(scan => `<li class="historyItem"><div class="historyInfo"><span class="historyDate">${new Date(scan.timestamp).toLocaleString()}</span><span class="historyVitals">HR: ${scan.heartRate || "N/A"}</span></div><button class="controlBtn secondary" style="min-width: 120px; padding: 0.5rem 1rem;" onclick="fetchScanDetails(\\`${scan._id}\\`)">View Details</button></li>`).join("")}</ul>`;\n';
-      htmlContent += '            historyContent.innerHTML = historyHTML;\n';
-      htmlContent += '        }\n';
+      
       htmlContent += '        function resetAll() {\n';
       htmlContent += '            isRecording = false;\n';
       htmlContent += '            recordingDuration = 0;\n';
@@ -650,22 +578,23 @@ class ProfileController {
       htmlContent += '            document.getElementById("stopBtn").style.display = "none";\n';
       htmlContent += '            document.getElementById("recordAgainBtn").style.display = "none";\n';
       htmlContent += '        }\n';
+      
       htmlContent += '        function showError(message) {\n';
       htmlContent += '            document.getElementById("loadingState").style.display = "none";\n';
       htmlContent += '            document.getElementById("cameraInterface").style.display = "none";\n';
       htmlContent += '            document.getElementById("errorText").textContent = message;\n';
       htmlContent += '            document.getElementById("errorState").style.display = "flex";\n';
       htmlContent += '        }\n';
+      
       htmlContent += '    </script>\n';
       htmlContent += '</body>\n';
+      htmlContent += '</html>\n';
 
-      // Set proper headers
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
 
-      // Send HTML content directly
       res.send(htmlContent);
 
     } catch (error) {
