@@ -404,14 +404,7 @@ class ProfileController {
       htmlContent += '        document.addEventListener("DOMContentLoaded", function() {\n';
       htmlContent += '            initializeScanner();\n';
       htmlContent += '        });\n';
-      // htmlContent += '        function getAuthHeaders() {\n';
-      // htmlContent += '            const token = localStorage.getItem("token") || localStorage.getItem("authToken") || localStorage.getItem("accessToken");\n';
-      // htmlContent += '            if (!token) {\n';
-      // htmlContent += '                console.error("Auth token is not available for API call.");\n';
-      // htmlContent += '                return null;\n';
-      // htmlContent += '            }\n';
-      // htmlContent += '            return { "Authorization": "Bearer " + token };\n';
-      // htmlContent += '        }\n';
+     
       htmlContent += '        function formatTime(seconds) {\n';
       htmlContent += '            const mins = Math.floor(seconds / 60);\n';
       htmlContent += '            const secs = seconds % 60;\n';
