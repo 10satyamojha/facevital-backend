@@ -33,12 +33,18 @@ class App {
     this.app.use(express.urlencoded({ extended: true }));
 
     // Rate limiting
-    const limiter = rateLimit({
-      windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 100, // limit each IP to 100 requests per windowMs
-      message: 'Too many requests from this IP'
-    });
-
+ const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  // YE ADD KARO:
+  trustProxy: true, // Trust the proxy
+  skip: (req) => {
+    // Optional: skip rate limiting for certain routes
+    return false;
+  }
+});
     // Stricter rate limit for auth endpoints
     const authLimiter = rateLimit({
       windowMs: 15 * 60 * 1000,
