@@ -527,38 +527,97 @@ async function getpage(req, res, next) {
             }
         }
 
-        async function callAIAPI(blob) { 
-            showStatus("Analyzing video...", "warning"); 
-            try { 
-                const fd = new FormData(); 
-                fd.append("file", blob, "scan.webm"); 
-                const res = await axios.post(AI_API_URL, fd, { 
-                    headers: { "Content-Type": "multipart/form-data" }, 
-                    timeout: 120000 
-                }); 
-                const pred = res.data; 
-                
-                if (typeof pred === "object" && pred && !pred.error) { 
-                    aiPrediction = { 
-                        heartRate: pred.heart_rate_bpm, 
-                        bloodPressure: { 
-                            systolic: pred.blood_pressure?.systolic, 
-                            diastolic: pred.blood_pressure?.diastolic 
-                        }, 
-                        oxygenSaturation: pred.spo2_percent, 
-                        stressLevel: pred.stress_indicator ? (pred.stress_indicator * 100).toFixed(1) : null 
-                    }; 
-                    await saveToDatabase(aiPrediction, blob); 
-                    displayResults(); 
-                } else {
-                    throw new Error(pred.error || "Invalid AI response"); 
-                }
-            } catch (error) { 
-                console.error("AI Error:", error); 
-                showStatus("Analysis failed: " + error.message, "error"); 
-            } 
+       async function callAIAPI(blob) { 
+    showStatus("Analyzing video...", "warning"); 
+    try { 
+        // Validate blob before sending
+        if (!blob || blob.size === 0) {
+            throw new Error("Invalid video data - blob is empty");
         }
-
+        
+        console.log("Sending video to AI API:", {
+            size: `${(blob.size / 1024 / 1024).toFixed(2)} MB`,
+            type: blob.type,
+            duration: recordingDuration + "s"
+        });
+        
+        const fd = new FormData(); 
+        fd.append("file", blob, "scan.webm"); 
+        
+        const res = await axios.post(AI_API_URL, fd, { 
+            headers: { 
+                "Content-Type": "multipart/form-data" 
+            }, 
+            timeout: 120000,
+            onUploadProgress: (progressEvent) => {
+                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                showStatus(`Uploading... ${percentCompleted}%`, "warning");
+            }
+        }); 
+        
+        console.log("AI API Response:", res.data);
+        
+        const pred = res.data; 
+        
+        // Better validation
+        if (!pred || typeof pred !== "object") {
+            throw new Error("Invalid response format from AI server");
+        }
+        
+        if (pred.error) {
+            throw new Error(pred.error);
+        }
+        
+        // Check if essential data exists
+        if (!pred.heart_rate_bpm && !pred.blood_pressure && !pred.spo2_percent) {
+            throw new Error("No vital signs detected in the analysis");
+        }
+        
+        aiPrediction = { 
+            heartRate: pred.heart_rate_bpm ? Math.round(pred.heart_rate_bpm) : null, 
+            bloodPressure: { 
+                systolic: pred.blood_pressure?.systolic ? Math.round(pred.blood_pressure.systolic) : null, 
+                diastolic: pred.blood_pressure?.diastolic ? Math.round(pred.blood_pressure.diastolic) : null
+            }, 
+            oxygenSaturation: pred.spo2_percent ? Math.round(pred.spo2_percent) : null, 
+            stressLevel: pred.stress_indicator ? (pred.stress_indicator * 100).toFixed(1) : null,
+            // Additional fields from backend
+            respiratoryRate: pred.respiratory_rate_bpm ? Math.round(pred.respiratory_rate_bpm) : null,
+            age: pred.age || null,
+            gender: pred.gender || null,
+            healthRisk: pred.health_risk_indicator ? (pred.health_risk_indicator * 100).toFixed(1) : null
+        }; 
+        
+        console.log("Parsed predictions:", aiPrediction);
+        
+        await saveToDatabase(aiPrediction, blob); 
+        displayResults(); 
+        
+    } catch (error) { 
+        console.error("AI API Error:", error); 
+        
+        // Better error messages
+        let errorMessage = "Analysis failed";
+        
+        if (error.code === 'ECONNABORTED') {
+            errorMessage = "Request timeout - video too long or slow connection";
+        } else if (error.response) {
+            // Server responded with error
+            errorMessage = `Server error: ${error.response.data?.error || error.response.statusText}`;
+            console.error("Server response:", error.response.data);
+        } else if (error.request) {
+            // Request made but no response
+            errorMessage = "No response from AI server - check your connection";
+        } else {
+            errorMessage = error.message || "Unknown error occurred";
+        }
+        
+        showStatus(errorMessage, "error"); 
+        
+        // Re-enable recording button
+        document.getElementById("recordAgainBtn").style.display = "block";
+    } 
+}
         async function saveToDatabase(pred, blob) { 
             const auth = getAuthHeaders(); 
             if (!auth) { 
