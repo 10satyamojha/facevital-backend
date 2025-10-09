@@ -159,7 +159,7 @@ async function getpage(req, res, next) {
                     <canvas id="canvasElement" style="position: absolute; top: 0; left: 0; width: 384px; height: 518px; pointer-events: none; z-index: 20;"></canvas>
                     <div style="position: absolute; inset: 0; pointer-events: none; z-index: 30; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(16px); -webkit-mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%); mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%); background: rgba(255,255,255,0.10);"></div>
                     <div style="position: absolute; left: 6%; top: 4%; width: 88%; height: 92%; border: 5px dashed #fff; border-radius: 50%; z-index: 31; pointer-events: none;"></div>
-                    <div style="position: absolute; width: 100%; text-align: center; color: #fff; font-weight: 600; font-size: 1.15rem; text-shadow: 0 2px 12px #003046cc; top: 14px; left: 0; z-index: 40; pointer-events: none;">Place your face in the oval</div>
+                    <div style="position: absolute; width: 100%; mb-3 text-align: center; color: #fff; font-weight: 600; font-size: 1.15rem; text-shadow: 0 2px 12px #003046cc; top: 14px; left: 0; z-index: 40; pointer-events: none;">Place your face in the oval</div>
                     <div id="recordingIndicator" class="recordingIndicator" style="display: none;">
                         <div class="recordingDot"></div>
                         <span id="recordingTime">REC 00:00</span>
