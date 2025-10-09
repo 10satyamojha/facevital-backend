@@ -490,7 +490,7 @@ async function getpage(req, res, next) {
             document.getElementById("videoContainer").style.border = "4px solid #ff4757"; 
             
             const chunks = []; 
-            mediaRecorderRef = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp9" }); 
+          mediaRecorderRef = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp9" });
             
             mediaRecorderRef.ondataavailable = e => { 
                 if (e.data.size > 0) chunks.push(e.data); 
@@ -507,9 +507,9 @@ async function getpage(req, res, next) {
                 document.getElementById("stopBtn").style.display = "none"; 
                 document.getElementById("recordAgainBtn").style.display = "block"; 
                 
-                const blob = new Blob(chunks, { type: "video/webm" }); 
+                const blob = new Blob(chunks, { type: "video/webm" });
                 recordedVideoUrl = URL.createObjectURL(blob); 
-                await callAIAPI(blob); 
+              await callAIAPI(blob);
             }; 
             
             mediaRecorderRef.start(); 
