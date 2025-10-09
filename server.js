@@ -290,6 +290,7 @@ async function getpage(req, res, next) {
             console.log("FaceMesh initialized");
         }
 
+        
         function onFaceMeshResults(results) {
             if (!canvasRef) return;
             
@@ -298,19 +299,34 @@ async function getpage(req, res, next) {
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
             if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-    for (const landmarks of results.multiFaceLandmarks) {
-        // Subtle white mesh for tesselation
-        drawConnectors(ctx, landmarks, FACEMESH_TESSELATION, { color: '#F5F5F5B3', lineWidth: 1 });
-        // Soft gray for right eye
-        drawConnectors(ctx, landmarks, FACEMESH_RIGHT_EYE, { color: '#B0BEC5', lineWidth: 2 });
-        // Muted blue for left eye (professional touch)
-        drawConnectors(ctx, landmarks, FACEMESH_LEFT_EYE, { color: '#90A4AE', lineWidth: 2 });
-        // Clean gray for face oval
-        drawConnectors(ctx, landmarks, FACEMESH_FACE_OVAL, { color: '#CFD8DC', lineWidth: 2 });
-        // Light gray for lips (avoiding pink/red)
-        drawConnectors(ctx, landmarks, FACEMESH_LIPS, { color: '#B0BEC5', lineWidth: 2 });
-    }
-}
+                for (const landmarks of results.multiFaceLandmarks) {
+                    // Professional white mesh like the photo
+                    // Main tesselation with thin white lines
+                    drawConnectors(ctx, landmarks, FACEMESH_TESSELATION, { color: '#FFFFFF', lineWidth: 1 });
+                    
+                    // Face oval with slightly thicker lines
+                    drawConnectors(ctx, landmarks, FACEMESH_FACE_OVAL, { color: '#FFFFFF', lineWidth: 2 });
+                    
+                    // Eyes
+                    drawConnectors(ctx, landmarks, FACEMESH_RIGHT_EYE, { color: '#FFFFFF', lineWidth: 1.5 });
+                    drawConnectors(ctx, landmarks, FACEMESH_LEFT_EYE, { color: '#FFFFFF', lineWidth: 1.5 });
+                    
+                    // Eyebrows
+                    drawConnectors(ctx, landmarks, FACEMESH_RIGHT_EYEBROW, { color: '#FFFFFF', lineWidth: 1.5 });
+                    drawConnectors(ctx, landmarks, FACEMESH_LEFT_EYEBROW, { color: '#FFFFFF', lineWidth: 1.5 });
+                    
+                    // Lips
+                    drawConnectors(ctx, landmarks, FACEMESH_LIPS, { color: '#FFFFFF', lineWidth: 1.5 });
+                    
+                    // Draw landmark points in white
+                    for (const landmark of landmarks) {
+                        ctx.beginPath();
+                        ctx.arc(landmark.x * WIDTH, landmark.y * HEIGHT, 1.5, 0, 2 * Math.PI);
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fill();
+                    }
+                }
+            }
 
             ctx.restore();
         }
