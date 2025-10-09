@@ -234,12 +234,36 @@ async function getpage(req, res, next) {
             return token ? { Authorization: "Bearer " + token } : null; 
         }
 
+        function getCanvasDimensions() {
+            return { width: WIDTH, height: HEIGHT };
+        }
+
+        // Helper function to draw connectors
+        function drawConnectors(ctx, landmarks, connections, style) {
+            if (!landmarks || !connections) return;
+            
+            ctx.strokeStyle = style.color;
+            ctx.lineWidth = style.lineWidth;
+            
+            for (const connection of connections) {
+                const start = landmarks[connection[0]];
+                const end = landmarks[connection[1]];
+                
+                if (start && end) {
+                    ctx.beginPath();
+                    ctx.moveTo(start.x * ctx.canvas.width, start.y * ctx.canvas.height);
+                    ctx.lineTo(end.x * ctx.canvas.width, end.y * ctx.canvas.height);
+                    ctx.stroke();
+                }
+            }
+        }
+
         // FIXED: Proper MediaPipe script loading with sequence
         function loadMediaPipeScripts() {
             return new Promise((resolve, reject) => {
                 const scripts = [
-                    "https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js",
                     "https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js",
+                    "https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js",
                     "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"
                 ];
                 
@@ -306,7 +330,7 @@ async function getpage(req, res, next) {
             ctx.drawImage(results.image, 0, 0, dims.width, dims.height);
 
             if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-                // Calculate bounding box for person with body included
+                // Calculate bounding box for FACE ONLY
                 const landmarks = results.multiFaceLandmarks[0];
                 
                 let minX = 1, maxX = 0, minY = 1, maxY = 0;
@@ -317,10 +341,10 @@ async function getpage(req, res, next) {
                     maxY = Math.max(maxY, landmark.y);
                 });
                 
-                // Expand to include upper body
-                const paddingX = 0.4;
-                const paddingTop = 0.3;
-                const paddingBottom = 0.8;
+                // Small padding for face only (no body)
+                const paddingX = 0.15;
+                const paddingTop = 0.15;
+                const paddingBottom = 0.15;
                 
                 minX = Math.max(0, minX - paddingX);
                 maxX = Math.min(1, maxX + paddingX);
@@ -359,20 +383,22 @@ async function getpage(req, res, next) {
                 ctx.restore();
                 
                 // Draw white professional mesh
-                for (const landmarks of results.multiFaceLandmarks) {
-                    drawConnectors(ctx, landmarks, FACEMESH_TESSELATION, { color: '#FFFFFF', lineWidth: 1 });
-                    drawConnectors(ctx, landmarks, FACEMESH_FACE_OVAL, { color: '#FFFFFF', lineWidth: 2 });
-                    drawConnectors(ctx, landmarks, FACEMESH_RIGHT_EYE, { color: '#FFFFFF', lineWidth: 1.5 });
-                    drawConnectors(ctx, landmarks, FACEMESH_LEFT_EYE, { color: '#FFFFFF', lineWidth: 1.5 });
-                    drawConnectors(ctx, landmarks, FACEMESH_RIGHT_EYEBROW, { color: '#FFFFFF', lineWidth: 1.5 });
-                    drawConnectors(ctx, landmarks, FACEMESH_LEFT_EYEBROW, { color: '#FFFFFF', lineWidth: 1.5 });
-                    drawConnectors(ctx, landmarks, FACEMESH_LIPS, { color: '#FFFFFF', lineWidth: 1.5 });
-                    
-                    for (const landmark of landmarks) {
-                        ctx.beginPath();
-                        ctx.arc(landmark.x * dims.width, landmark.y * dims.height, 1.5, 0, 2 * Math.PI);
-                        ctx.fillStyle = '#FFFFFF';
-                        ctx.fill();
+                if (typeof FACEMESH_TESSELATION !== 'undefined') {
+                    for (const landmarks of results.multiFaceLandmarks) {
+                        drawConnectors(ctx, landmarks, FACEMESH_TESSELATION, { color: '#FFFFFF', lineWidth: 1 });
+                        drawConnectors(ctx, landmarks, FACEMESH_FACE_OVAL, { color: '#FFFFFF', lineWidth: 2 });
+                        drawConnectors(ctx, landmarks, FACEMESH_RIGHT_EYE, { color: '#FFFFFF', lineWidth: 1.5 });
+                        drawConnectors(ctx, landmarks, FACEMESH_LEFT_EYE, { color: '#FFFFFF', lineWidth: 1.5 });
+                        drawConnectors(ctx, landmarks, FACEMESH_RIGHT_EYEBROW, { color: '#FFFFFF', lineWidth: 1.5 });
+                        drawConnectors(ctx, landmarks, FACEMESH_LEFT_EYEBROW, { color: '#FFFFFF', lineWidth: 1.5 });
+                        drawConnectors(ctx, landmarks, FACEMESH_LIPS, { color: '#FFFFFF', lineWidth: 1.5 });
+                        
+                        for (const landmark of landmarks) {
+                            ctx.beginPath();
+                            ctx.arc(landmark.x * dims.width, landmark.y * dims.height, 1.5, 0, 2 * Math.PI);
+                            ctx.fillStyle = '#FFFFFF';
+                            ctx.fill();
+                        }
                     }
                 }
             } else {
@@ -389,6 +415,7 @@ async function getpage(req, res, next) {
 
             ctx.restore();
         }
+
         async function initializeScanner() { 
             try { 
                 console.log("Loading MediaPipe scripts...");
