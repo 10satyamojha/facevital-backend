@@ -291,46 +291,104 @@ async function getpage(req, res, next) {
         }
 
         
-        function onFaceMeshResults(results) {
+       function onFaceMeshResults(results) {
             if (!canvasRef) return;
+            
+            const dims = getCanvasDimensions();
+            canvasRef.width = dims.width;
+            canvasRef.height = dims.height;
             
             const ctx = canvasRef.getContext('2d');
             ctx.save();
-            ctx.clearRect(0, 0, WIDTH, HEIGHT);
+            ctx.clearRect(0, 0, dims.width, dims.height);
+            
+            // Draw the video frame
+            ctx.drawImage(results.image, 0, 0, dims.width, dims.height);
 
             if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+                // Calculate bounding box for person with body included
+                const landmarks = results.multiFaceLandmarks[0];
+                
+                let minX = 1, maxX = 0, minY = 1, maxY = 0;
+                landmarks.forEach(landmark => {
+                    minX = Math.min(minX, landmark.x);
+                    maxX = Math.max(maxX, landmark.x);
+                    minY = Math.min(minY, landmark.y);
+                    maxY = Math.max(maxY, landmark.y);
+                });
+                
+                // Expand to include upper body
+                const paddingX = 0.4;
+                const paddingTop = 0.3;
+                const paddingBottom = 0.8;
+                
+                minX = Math.max(0, minX - paddingX);
+                maxX = Math.min(1, maxX + paddingX);
+                minY = Math.max(0, minY - paddingTop);
+                maxY = Math.min(1, maxY + paddingBottom);
+                
+                // Create a temporary canvas for blur effect
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = dims.width;
+                tempCanvas.height = dims.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // Draw original image
+                tempCtx.drawImage(results.image, 0, 0, dims.width, dims.height);
+                
+                // Apply blur to entire image
+                tempCtx.filter = 'blur(20px) brightness(0.5)';
+                tempCtx.drawImage(tempCanvas, 0, 0);
+                tempCtx.filter = 'none';
+                
+                // Draw blurred background
+                ctx.drawImage(tempCanvas, 0, 0);
+                
+                // Clear person area and draw sharp version
+                ctx.save();
+                ctx.beginPath();
+                const centerX = ((minX + maxX) / 2) * dims.width;
+                const centerY = ((minY + maxY) / 2) * dims.height;
+                const radiusX = ((maxX - minX) / 2) * dims.width;
+                const radiusY = ((maxY - minY) / 2) * dims.height;
+                ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+                ctx.clip();
+                
+                // Draw clear person
+                ctx.drawImage(results.image, 0, 0, dims.width, dims.height);
+                ctx.restore();
+                
+                // Draw white professional mesh
                 for (const landmarks of results.multiFaceLandmarks) {
-                    // Professional white mesh like the photo
-                    // Main tesselation with thin white lines
                     drawConnectors(ctx, landmarks, FACEMESH_TESSELATION, { color: '#FFFFFF', lineWidth: 1 });
-                    
-                    // Face oval with slightly thicker lines
                     drawConnectors(ctx, landmarks, FACEMESH_FACE_OVAL, { color: '#FFFFFF', lineWidth: 2 });
-                    
-                    // Eyes
                     drawConnectors(ctx, landmarks, FACEMESH_RIGHT_EYE, { color: '#FFFFFF', lineWidth: 1.5 });
                     drawConnectors(ctx, landmarks, FACEMESH_LEFT_EYE, { color: '#FFFFFF', lineWidth: 1.5 });
-                    
-                    // Eyebrows
                     drawConnectors(ctx, landmarks, FACEMESH_RIGHT_EYEBROW, { color: '#FFFFFF', lineWidth: 1.5 });
                     drawConnectors(ctx, landmarks, FACEMESH_LEFT_EYEBROW, { color: '#FFFFFF', lineWidth: 1.5 });
-                    
-                    // Lips
                     drawConnectors(ctx, landmarks, FACEMESH_LIPS, { color: '#FFFFFF', lineWidth: 1.5 });
                     
-                    // Draw landmark points in white
                     for (const landmark of landmarks) {
                         ctx.beginPath();
-                        ctx.arc(landmark.x * WIDTH, landmark.y * HEIGHT, 1.5, 0, 2 * Math.PI);
+                        ctx.arc(landmark.x * dims.width, landmark.y * dims.height, 1.5, 0, 2 * Math.PI);
                         ctx.fillStyle = '#FFFFFF';
                         ctx.fill();
                     }
                 }
+            } else {
+                // No face detected - show slight blur
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = dims.width;
+                tempCanvas.height = dims.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.drawImage(results.image, 0, 0, dims.width, dims.height);
+                tempCtx.filter = 'blur(8px) brightness(0.7)';
+                tempCtx.drawImage(tempCanvas, 0, 0);
+                ctx.drawImage(tempCanvas, 0, 0);
             }
 
             ctx.restore();
         }
-
         async function initializeScanner() { 
             try { 
                 console.log("Loading MediaPipe scripts...");
