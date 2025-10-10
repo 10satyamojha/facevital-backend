@@ -837,7 +837,7 @@ async function getpage(req, res, next) {
         document.addEventListener("DOMContentLoaded", initializeScanner);
     </script>
 </body>
-</html>\`;
+</html>`;
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
