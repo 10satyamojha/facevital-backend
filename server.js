@@ -521,7 +521,7 @@ async function getpage(req, res, next) {
                     <canvas id="canvasElement"></canvas>
                     <div class="videoOverlay"></div>
                     <div class="videoOval"></div>
-                    <div class="videoText">Place your face in the oval</div>
+                   
                     <div id="recordingIndicator" class="recordingIndicator" style="display: none;">
                         <div class="recordingDot"></div>
                         <span id="recordingTime">REC 00:00</span>
@@ -529,7 +529,7 @@ async function getpage(req, res, next) {
                 </div>
                 <div id="statusIndicator" style="display: none;"></div>
                 <div class="controlsGrid">
-                    <button id="startBtn" class="controlBtn">Start Recording</button>
+                    <button id="startBtn" class="controlBtn">Start Scanning</button>
                     <button id="stopBtn" class="controlBtn danger" style="display: none;">Stop Recording</button>
                     <button id="recordAgainBtn" class="controlBtn" style="display: none;">Record Again</button>
                 </div>
