@@ -427,11 +427,7 @@ async function getpage(req, res, next) {
             inset: 0;
             pointer-events: none;
             z-index: 30;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(16px);
-            -webkit-mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
-            mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
-            background: rgba(255,255,255,0.10);
+            display: none;
         }
         .videoOval {
             position: absolute;
@@ -443,6 +439,7 @@ async function getpage(req, res, next) {
             border-radius: 50%;
             z-index: 31;
             pointer-events: none;
+            display: none;
         }
         .videoText {
             position: absolute;
@@ -457,6 +454,7 @@ async function getpage(req, res, next) {
             z-index: 40;
             pointer-events: none;
             padding: 0 1rem;
+            display: none;
         }
         @media screen and (min-width: 480px) {
             .historyItem {
@@ -503,7 +501,7 @@ async function getpage(req, res, next) {
     <div class="cameraSection">
         <div class="cameraHeader">
             <h1>Health Vitals Scanner</h1>
-            <p>Position your face in the oval and record for 30 seconds.</p>
+            <p>Position your face in frame and record for 30 seconds.</p>
         </div>
         <div class="cameraContainer">
             <div class="loadingState" id="loadingState">
@@ -529,7 +527,7 @@ async function getpage(req, res, next) {
                 </div>
                 <div id="statusIndicator" style="display: none;"></div>
                 <div class="controlsGrid">
-                    <button id="startBtn" class="controlBtn">Start Scanning</button>
+                    <button id="startBtn" class="controlBtn">Start Scan</button>
                     <button id="stopBtn" class="controlBtn danger" style="display: none;">Stop Recording</button>
                     <button id="recordAgainBtn" class="controlBtn" style="display: none;">Record Again</button>
                 </div>
@@ -678,50 +676,6 @@ async function getpage(req, res, next) {
             ctx.drawImage(results.image, 0, 0, dims.width, dims.height);
 
             if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-                const landmarks = results.multiFaceLandmarks[0];
-                
-                let minX = 1, maxX = 0, minY = 1, maxY = 0;
-                landmarks.forEach(landmark => {
-                    minX = Math.min(minX, landmark.x);
-                    maxX = Math.max(maxX, landmark.x);
-                    minY = Math.min(minY, landmark.y);
-                    maxY = Math.max(maxY, landmark.y);
-                });
-                
-                const paddingX = 0.15;
-                const paddingTop = 0.15;
-                const paddingBottom = 0.15;
-                
-                minX = Math.max(0, minX - paddingX);
-                maxX = Math.min(1, maxX + paddingX);
-                minY = Math.max(0, minY - paddingTop);
-                maxY = Math.min(1, maxY + paddingBottom);
-                
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = dims.width;
-                tempCanvas.height = dims.height;
-                const tempCtx = tempCanvas.getContext('2d');
-                
-                tempCtx.drawImage(results.image, 0, 0, dims.width, dims.height);
-                
-                tempCtx.filter = 'blur(20px) brightness(0.5)';
-                tempCtx.drawImage(tempCanvas, 0, 0);
-                tempCtx.filter = 'none';
-                
-                ctx.drawImage(tempCanvas, 0, 0);
-                
-                ctx.save();
-                ctx.beginPath();
-                const centerX = ((minX + maxX) / 2) * dims.width;
-                const centerY = ((minY + maxY) / 2) * dims.height;
-                const radiusX = ((maxX - minX) / 2) * dims.width;
-                const radiusY = ((maxY - minY) / 2) * dims.height;
-                ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
-                ctx.clip();
-                
-                ctx.drawImage(results.image, 0, 0, dims.width, dims.height);
-                ctx.restore();
-                
                 if (typeof FACEMESH_TESSELATION !== 'undefined') {
                     for (const landmarks of results.multiFaceLandmarks) {
                         drawConnectors(ctx, landmarks, FACEMESH_TESSELATION, { color: '#FFFFFF', lineWidth: 1 });
@@ -740,15 +694,6 @@ async function getpage(req, res, next) {
                         }
                     }
                 }
-            } else {
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = dims.width;
-                tempCanvas.height = dims.height;
-                const tempCtx = tempCanvas.getContext('2d');
-                tempCtx.drawImage(results.image, 0, 0, dims.width, dims.height);
-                tempCtx.filter = 'blur(8px) brightness(0.7)';
-                tempCtx.drawImage(tempCanvas, 0, 0);
-                ctx.drawImage(tempCanvas, 0, 0);
             }
 
             ctx.restore();
@@ -886,7 +831,7 @@ async function getpage(req, res, next) {
                     timeout: 120000,
                     onUploadProgress: (progressEvent) => {
                         const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                        showStatus(`Uploading... ${percentCompleted}%`, "warning");
+                        showStatus(\`Uploading... \${percentCompleted}%\`, "warning");
                     }
                 }); 
                 
@@ -933,7 +878,7 @@ async function getpage(req, res, next) {
                 if (error.code === 'ECONNABORTED') {
                     errorMessage = "Request timeout - video too long or slow connection";
                 } else if (error.response) {
-                    errorMessage = `Server error: ${error.response.data?.error || error.response.statusText}`;
+                    errorMessage = \`Server error: \${error.response.data?.error || error.response.statusText}\`;
                     console.error("Server response:", error.response.data);
                 } else if (error.request) {
                     errorMessage = "No response from AI server - check your connection";
@@ -1000,7 +945,7 @@ async function getpage(req, res, next) {
         document.addEventListener("DOMContentLoaded", initializeScanner);
     </script>
 </body>
-</html>`;
+</html>\`;
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
