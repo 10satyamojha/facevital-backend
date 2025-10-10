@@ -851,7 +851,7 @@ async function getpage(req, res, next) {
     });
   }
 }
-
+}}
 // Routes
 app.get('/', getpage);
 app.get('/scanner', getpage);
