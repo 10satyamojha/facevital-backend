@@ -68,7 +68,7 @@ async function getpage(req, res, next) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Health Vitals Scanner</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
     <style>
@@ -81,59 +81,421 @@ async function getpage(req, res, next) {
             --smallFontSize: 0.875rem;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bgColor); min-height: 100vh; }
-        .cameraSection { min-height: 100vh; background: var(--bgColor); padding: 1.5rem; }
-        .cameraHeader { background: var(--whiteColor); padding: 2rem; border-radius: 16px; margin-bottom: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
-        .cameraHeader h1 { font-size: var(--h1FontSize); color: var(--blackColor); font-weight: 700; margin-bottom: 0.5rem; }
-        .cameraHeader p { font-size: var(--normalFontSize); color: var(--textColor); }
-        .cameraContainer { background: var(--whiteColor); border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 2rem; display: flex; flex-direction: column; align-items: center; gap: 2rem; }
-        .errorState { background: var(--inputColor); border-radius: 16px; padding: 4rem 2rem; text-align: center; border: 2px dashed var(--greyText); width: 384px; height: 518px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .errorIcon { color: #ff4757; margin-bottom: 1rem; font-size: 4rem; }
-        .errorText { font-size: var(--normalFontSize); color: var(--textColor); margin-bottom: 1.5rem; }
-        .controlsGrid { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
-        .controlBtn { background: var(--PrimaryColor); color: var(--whiteColor); border: none; padding: 0.875rem 1.75rem; border-radius: 8px; font-size: var(--normalFontSize); font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.75rem; min-width: 160px; justify-content: center; }
-        .controlBtn:hover { background: var(--HoverColor); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
-        .controlBtn.secondary { background: var(--inputColor); color: var(--blackColor); border: 2px solid var(--itemCardHover); }
-        .controlBtn.danger { background: #ff4757; }
-        .recordingIndicator { background: #ff4757; color: var(--whiteColor); padding: 0.5rem 1rem; border-radius: 12px; font-size: var(--smallFontSize); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; position: absolute; top: 1rem; left: 1rem; z-index: 100; }
-        .recordingDot { width: 8px; height: 8px; background: var(--whiteColor); border-radius: 50%; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .statusIndicator { padding: 0.75rem 1rem; border-radius: 8px; font-size: var(--normalFontSize); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem; width: 100%; max-width: 384px; justify-content: center; }
-        .statusIndicator.success { background: rgba(16, 185, 129, 0.1); color: var(--successColor); }
-        .statusIndicator.warning { background: rgba(245, 158, 11, 0.1); color: var(--warningColor); }
-        .statusIndicator.error { background: rgba(255, 71, 87, 0.1); color: #ff4757; }
-        .resultsSection, .historySection { background: var(--whiteColor); border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-top: 2rem; width: 100%; max-width: 900px; }
-        .sectionHeader { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; color: var(--blackColor); }
-        .sectionHeader h3 { font-size: var(--h2FontSize); font-weight: 700; }
-        .videoPreview { margin-bottom: 2rem; }
-        .previewVideo { width: 300px; height: 200px; border-radius: 12px; object-fit: cover; border: 2px solid var(--inputColor); }
-        .loadingState { text-align: center; padding: 2rem; color: var(--textColor); }
-        .loadingSpinner { width: 24px; height: 24px; border: 3px solid var(--inputColor); border-top: 3px solid var(--PrimaryColor); border-radius: 50%; animation: spin 1s linear infinite; display: inline-block; margin-right: 0.5rem; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .predictionGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
-        .predictionCard { background: var(--paleGreen); border: 1px solid var(--PrimaryColor); border-radius: 12px; padding: 1.5rem; text-align: center; transition: transform 0.2s ease; }
-        .predictionCard:hover { transform: translateY(-2px); }
-        .predictionValue { font-size: 2.5rem; font-weight: 700; color: var(--PrimaryColor); margin-bottom: 0.5rem; }
-        .predictionLabel { font-size: var(--normalFontSize); color: var(--blackColor); font-weight: 600; }
-        .predictionUnit { font-size: var(--smallFontSize); color: var(--textColor); }
-        .historyList { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1rem; }
-        .historyItem { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--inputColor); border-radius: 8px; transition: background 0.2s; }
-        .historyItem:hover { background: var(--itemCardHover); }
-        .historyInfo { display: flex; flex-direction: column; }
-        .historyDate { font-weight: 600; color: var(--blackColor); }
-        .historyVitals { font-size: var(--smallFontSize); color: var(--textColor); }
-        .modalOverlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modalContent { background: var(--whiteColor); padding: 2rem; border-radius: 16px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; position: relative; }
-        .modalClose { position: absolute; top: 1rem; right: 1rem; background: none; border: none; cursor: pointer; color: var(--greyText); font-size: 1.5rem; }
-        @media screen and (max-width: 768px) { 
-            .cameraSection { padding: 1rem; } 
-            .cameraHeader { padding: 1.5rem; } 
-            .cameraHeader h1 { font-size: 1.5rem; } 
-            .cameraContainer { padding: 1rem; } 
-            .controlsGrid { flex-direction: column; align-items: center; } 
-            .controlBtn { width: 100%; max-width: 280px; } 
-            .predictionGrid { grid-template-columns: 1fr; } 
-            .previewVideo { width: 100%; max-width: 300px; } 
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: var(--bgColor); 
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .cameraSection { 
+            min-height: 100vh; 
+            background: var(--bgColor); 
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .cameraHeader { 
+            background: var(--whiteColor); 
+            padding: 1.5rem; 
+            border-radius: 16px; 
+            margin-bottom: 1.5rem; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+            text-align: center;
+            width: 100%;
+            max-width: 900px;
+        }
+        .cameraHeader h1 { 
+            font-size: clamp(1.25rem, 5vw, 2rem);
+            color: var(--blackColor); 
+            font-weight: 700; 
+            margin-bottom: 0.5rem; 
+        }
+        .cameraHeader p { 
+            font-size: clamp(0.875rem, 3vw, 1rem);
+            color: var(--textColor); 
+        }
+        .cameraContainer { 
+            background: var(--whiteColor); 
+            border-radius: 16px; 
+            padding: 1.5rem; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+            margin-bottom: 1.5rem;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 900px;
+        }
+        .errorState { 
+            background: var(--inputColor); 
+            border-radius: 16px; 
+            padding: 2rem 1rem; 
+            text-align: center; 
+            border: 2px dashed var(--greyText); 
+            width: 100%;
+            max-width: 384px;
+            min-height: 300px;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .errorIcon { 
+            color: #ff4757; 
+            margin-bottom: 1rem; 
+            font-size: clamp(2.5rem, 8vw, 4rem);
+        }
+        .errorText { 
+            font-size: var(--normalFontSize); 
+            color: var(--textColor); 
+            margin-bottom: 1.5rem; 
+        }
+        .controlsGrid { 
+            display: flex; 
+            gap: 1rem; 
+            flex-wrap: wrap; 
+            justify-content: center;
+            width: 100%;
+            max-width: 384px;
+        }
+        .controlBtn { 
+            background: var(--PrimaryColor); 
+            color: var(--whiteColor); 
+            border: none; 
+            padding: 0.875rem 1.5rem; 
+            border-radius: 8px; 
+            font-size: var(--normalFontSize); 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 0.75rem; 
+            min-width: 140px;
+            flex: 1;
+            min-height: 48px;
+            touch-action: manipulation;
+        }
+        .controlBtn:hover { 
+            background: var(--HoverColor); 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15); 
+        }
+        .controlBtn.secondary { 
+            background: var(--inputColor); 
+            color: var(--blackColor); 
+            border: 2px solid var(--itemCardHover); 
+        }
+        .controlBtn.danger { 
+            background: #ff4757; 
+        }
+        .recordingIndicator { 
+            background: #ff4757; 
+            color: var(--whiteColor); 
+            padding: 0.5rem 1rem; 
+            border-radius: 12px; 
+            font-size: var(--smallFontSize); 
+            font-weight: 600; 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+            position: absolute; 
+            top: 0.5rem; 
+            left: 0.5rem; 
+            z-index: 100; 
+        }
+        .recordingDot { 
+            width: 8px; 
+            height: 8px; 
+            background: var(--whiteColor); 
+            border-radius: 50%; 
+            animation: pulse 1.5s infinite; 
+        }
+        @keyframes pulse { 
+            0%, 100% { opacity: 1; } 
+            50% { opacity: 0.5; } 
+        }
+        .statusIndicator { 
+            padding: 0.75rem 1rem; 
+            border-radius: 8px; 
+            font-size: var(--normalFontSize); 
+            font-weight: 600; 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+            margin-top: 1rem; 
+            width: 100%; 
+            max-width: 384px; 
+            justify-content: center; 
+        }
+        .statusIndicator.success { 
+            background: rgba(16, 185, 129, 0.1); 
+            color: var(--successColor); 
+        }
+        .statusIndicator.warning { 
+            background: rgba(245, 158, 11, 0.1); 
+            color: var(--warningColor); 
+        }
+        .statusIndicator.error { 
+            background: rgba(255, 71, 87, 0.1); 
+            color: #ff4757; 
+        }
+        .resultsSection, .historySection { 
+            background: var(--whiteColor); 
+            border-radius: 16px; 
+            padding: 1.5rem; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+            margin-top: 1.5rem; 
+            width: 100%; 
+            max-width: 900px; 
+        }
+        .sectionHeader { 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+            margin-bottom: 1.5rem; 
+            color: var(--blackColor); 
+        }
+        .sectionHeader h3 { 
+            font-size: clamp(1.125rem, 4vw, 1.5rem);
+            font-weight: 700; 
+        }
+        .videoPreview { 
+            margin-bottom: 1.5rem; 
+        }
+        .previewVideo { 
+            width: 100%;
+            max-width: 384px;
+            height: auto;
+            aspect-ratio: 384/518;
+            border-radius: 12px; 
+            object-fit: cover; 
+            border: 2px solid var(--inputColor);
+            display: block;
+            margin: 0 auto;
+        }
+        .loadingState { 
+            text-align: center; 
+            padding: 2rem 1rem; 
+            color: var(--textColor); 
+        }
+        .loadingSpinner { 
+            width: 24px; 
+            height: 24px; 
+            border: 3px solid var(--inputColor); 
+            border-top: 3px solid var(--PrimaryColor); 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+            display: inline-block; 
+            margin-right: 0.5rem; 
+        }
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+        .predictionGrid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+            gap: 1rem;
+        }
+        .predictionCard { 
+            background: var(--paleGreen); 
+            border: 1px solid var(--PrimaryColor); 
+            border-radius: 12px; 
+            padding: 1.25rem; 
+            text-align: center; 
+            transition: transform 0.2s ease; 
+        }
+        .predictionCard:hover { 
+            transform: translateY(-2px); 
+        }
+        .predictionValue { 
+            font-size: clamp(1.75rem, 6vw, 2.5rem);
+            font-weight: 700; 
+            color: var(--PrimaryColor); 
+            margin-bottom: 0.5rem;
+            word-break: break-word;
+        }
+        .predictionLabel { 
+            font-size: clamp(0.875rem, 3vw, 1rem);
+            color: var(--blackColor); 
+            font-weight: 600; 
+        }
+        .predictionUnit { 
+            font-size: var(--smallFontSize); 
+            color: var(--textColor); 
+        }
+        .historyList { 
+            list-style: none; 
+            padding: 0; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 1rem; 
+        }
+        .historyItem { 
+            display: flex; 
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 1rem; 
+            background: var(--inputColor); 
+            border-radius: 8px; 
+            transition: background 0.2s; 
+        }
+        .historyItem:hover { 
+            background: var(--itemCardHover); 
+        }
+        .historyInfo { 
+            display: flex; 
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .historyDate { 
+            font-weight: 600; 
+            color: var(--blackColor);
+            font-size: clamp(0.875rem, 3vw, 1rem);
+        }
+        .historyVitals { 
+            font-size: var(--smallFontSize); 
+            color: var(--textColor); 
+        }
+        .modalOverlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            bottom: 0; 
+            background: rgba(0,0,0,0.6); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 1000;
+            padding: 1rem;
+        }
+        .modalContent { 
+            background: var(--whiteColor); 
+            padding: 1.5rem; 
+            border-radius: 16px; 
+            width: 100%;
+            max-width: 600px; 
+            max-height: 90vh; 
+            overflow-y: auto; 
+            position: relative; 
+        }
+        .modalClose { 
+            position: absolute; 
+            top: 1rem; 
+            right: 1rem; 
+            background: none; 
+            border: none; 
+            cursor: pointer; 
+            color: var(--greyText); 
+            font-size: 1.5rem;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #videoContainer {
+            position: relative;
+            width: 100%;
+            max-width: 384px;
+            aspect-ratio: 384/518;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            border: 2px solid #e5e7eb;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin: 0 auto;
+        }
+        #videoElement, #canvasElement {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #canvasElement {
+            pointer-events: none;
+            z-index: 20;
+        }
+        .videoOverlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 30;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(16px);
+            -webkit-mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
+            mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
+            background: rgba(255,255,255,0.10);
+        }
+        .videoOval {
+            position: absolute;
+            left: 6%;
+            top: 4%;
+            width: 88%;
+            height: 92%;
+            border: 5px dashed #fff;
+            border-radius: 50%;
+            z-index: 31;
+            pointer-events: none;
+        }
+        .videoText {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: clamp(0.875rem, 3.5vw, 1.15rem);
+            text-shadow: 0 2px 12px #003046cc;
+            top: 14px;
+            left: 0;
+            z-index: 40;
+            pointer-events: none;
+            padding: 0 1rem;
+        }
+        @media screen and (min-width: 480px) {
+            .historyItem {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .controlsGrid {
+                flex-wrap: nowrap;
+            }
+        }
+        @media screen and (max-width: 479px) { 
+            .cameraSection { 
+                padding: 0.75rem; 
+            } 
+            .cameraHeader { 
+                padding: 1rem; 
+                margin-bottom: 1rem;
+            } 
+            .cameraContainer { 
+                padding: 1rem; 
+                gap: 1rem;
+            }
+            .controlBtn {
+                width: 100%;
+                min-width: unset;
+            }
+            .predictionGrid { 
+                grid-template-columns: 1fr; 
+            }
+            .resultsSection, .historySection {
+                padding: 1rem;
+                margin-top: 1rem;
+            }
+            .scan-detail-btn {
+                width: 100%;
+                min-width: unset !important;
+                padding: 0.75rem 1rem !important;
+            }
         }
     </style>
 </head>
@@ -153,13 +515,13 @@ async function getpage(req, res, next) {
                 <p class="errorText" id="errorText">Failed to access camera</p>
                 <button class="controlBtn" id="retryBtn">Try Again</button>
             </div>
-            <div id="cameraInterface" style="display: none;">
-                <div style="position: relative; width: 384px; height: 518px; border-radius: 1.5rem; overflow: hidden; border: 2px solid #e5e7eb; box-shadow: 0 4px 20px rgba(0,0,0,0.08);" id="videoContainer">
-                    <video id="videoElement" autoplay playsinline muted style="width: 384px; height: 518px; object-fit: cover;"></video>
-                    <canvas id="canvasElement" style="position: absolute; top: 0; left: 0; width: 384px; height: 518px; pointer-events: none; z-index: 20;"></canvas>
-                    <div style="position: absolute; inset: 0; pointer-events: none; z-index: 30; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(16px); -webkit-mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%); mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%); background: rgba(255,255,255,0.10);"></div>
-                    <div style="position: absolute; left: 6%; top: 4%; width: 88%; height: 92%; border: 5px dashed #fff; border-radius: 50%; z-index: 31; pointer-events: none;"></div>
-                    <div style="position: absolute; width: 100%; mb-3 text-align: center; color: #fff; font-weight: 600; font-size: 1.15rem; text-shadow: 0 2px 12px #003046cc; top: 14px; left: 0; z-index: 40; pointer-events: none;">Place your face in the oval</div>
+            <div id="cameraInterface" style="display: none; width: 100%;">
+                <div id="videoContainer">
+                    <video id="videoElement" autoplay playsinline muted></video>
+                    <canvas id="canvasElement"></canvas>
+                    <div class="videoOverlay"></div>
+                    <div class="videoOval"></div>
+                    <div class="videoText">Place your face in the oval</div>
                     <div id="recordingIndicator" class="recordingIndicator" style="display: none;">
                         <div class="recordingDot"></div>
                         <span id="recordingTime">REC 00:00</span>
@@ -190,10 +552,7 @@ async function getpage(req, res, next) {
                 <h3>Recent Scans</h3>
             </div>
             <div id="historyContent">
-                <div class="loadingState">
-                    <div class="loadingSpinner"></div>
-                    Loading history...
-                </div>
+                <p style="text-align:center;color:var(--textColor)">No scan history available</p>
             </div>
         </div>
     </div>
@@ -209,7 +568,6 @@ async function getpage(req, res, next) {
         let camera = null;
         let isRecording = false, recordingDuration = 0;
         let recordedVideoUrl = null, aiPrediction = null, scanHistory = [];
-        const API_BASE_URL = "https://facevital-backend-3.onrender.com";
         const AI_API_URL = "https://anurudh-268064419384.asia-east1.run.app/analyze";
         const WIDTH = 384, HEIGHT = 518;
 
@@ -229,16 +587,10 @@ async function getpage(req, res, next) {
             document.getElementById("statusIndicator").style.display = "none"; 
         }
 
-        function getAuthHeaders() { 
-            const token = localStorage.getItem("authToken"); 
-            return token ? { Authorization: "Bearer " + token } : null; 
-        }
-
         function getCanvasDimensions() {
             return { width: WIDTH, height: HEIGHT };
         }
 
-        // Helper function to draw connectors
         function drawConnectors(ctx, landmarks, connections, style) {
             if (!landmarks || !connections) return;
             
@@ -258,7 +610,6 @@ async function getpage(req, res, next) {
             }
         }
 
-        // FIXED: Proper MediaPipe script loading with sequence
         function loadMediaPipeScripts() {
             return new Promise((resolve, reject) => {
                 const scripts = [
@@ -291,7 +642,6 @@ async function getpage(req, res, next) {
             });
         }
 
-        // FIXED: Initialize MediaPipe FaceMesh properly
         async function initializeFaceMesh() {
             if (typeof FaceMesh === 'undefined') {
                 throw new Error("FaceMesh not loaded");
@@ -314,8 +664,7 @@ async function getpage(req, res, next) {
             console.log("FaceMesh initialized");
         }
 
-        
-       function onFaceMeshResults(results) {
+        function onFaceMeshResults(results) {
             if (!canvasRef) return;
             
             const dims = getCanvasDimensions();
@@ -326,11 +675,9 @@ async function getpage(req, res, next) {
             ctx.save();
             ctx.clearRect(0, 0, dims.width, dims.height);
             
-            // Draw the video frame
             ctx.drawImage(results.image, 0, 0, dims.width, dims.height);
 
             if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-                // Calculate bounding box for FACE ONLY
                 const landmarks = results.multiFaceLandmarks[0];
                 
                 let minX = 1, maxX = 0, minY = 1, maxY = 0;
@@ -341,7 +688,6 @@ async function getpage(req, res, next) {
                     maxY = Math.max(maxY, landmark.y);
                 });
                 
-                // Small padding for face only (no body)
                 const paddingX = 0.15;
                 const paddingTop = 0.15;
                 const paddingBottom = 0.15;
@@ -351,24 +697,19 @@ async function getpage(req, res, next) {
                 minY = Math.max(0, minY - paddingTop);
                 maxY = Math.min(1, maxY + paddingBottom);
                 
-                // Create a temporary canvas for blur effect
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = dims.width;
                 tempCanvas.height = dims.height;
                 const tempCtx = tempCanvas.getContext('2d');
                 
-                // Draw original image
                 tempCtx.drawImage(results.image, 0, 0, dims.width, dims.height);
                 
-                // Apply blur to entire image
                 tempCtx.filter = 'blur(20px) brightness(0.5)';
                 tempCtx.drawImage(tempCanvas, 0, 0);
                 tempCtx.filter = 'none';
                 
-                // Draw blurred background
                 ctx.drawImage(tempCanvas, 0, 0);
                 
-                // Clear person area and draw sharp version
                 ctx.save();
                 ctx.beginPath();
                 const centerX = ((minX + maxX) / 2) * dims.width;
@@ -378,11 +719,9 @@ async function getpage(req, res, next) {
                 ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
                 ctx.clip();
                 
-                // Draw clear person
                 ctx.drawImage(results.image, 0, 0, dims.width, dims.height);
                 ctx.restore();
                 
-                // Draw white professional mesh
                 if (typeof FACEMESH_TESSELATION !== 'undefined') {
                     for (const landmarks of results.multiFaceLandmarks) {
                         drawConnectors(ctx, landmarks, FACEMESH_TESSELATION, { color: '#FFFFFF', lineWidth: 1 });
@@ -402,7 +741,6 @@ async function getpage(req, res, next) {
                     }
                 }
             } else {
-                // No face detected - show slight blur
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = dims.width;
                 tempCanvas.height = dims.height;
@@ -428,7 +766,6 @@ async function getpage(req, res, next) {
                 await startCamera(); 
                 
                 setupEventListeners(); 
-                await fetchScanHistory(); 
                 
                 document.getElementById("loadingState").style.display = "none"; 
                 document.getElementById("cameraInterface").style.display = "block"; 
@@ -453,7 +790,6 @@ async function getpage(req, res, next) {
                 
                 videoRef.srcObject = stream;
                 
-                // Start MediaPipe camera
                 if (typeof Camera !== 'undefined' && faceMesh) {
                     camera = new Camera(videoRef, {
                         onFrame: async () => {
@@ -490,7 +826,7 @@ async function getpage(req, res, next) {
             document.getElementById("videoContainer").style.border = "4px solid #ff4757"; 
             
             const chunks = []; 
-          mediaRecorderRef = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp9" });
+            mediaRecorderRef = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp9" });
             
             mediaRecorderRef.ondataavailable = e => { 
                 if (e.data.size > 0) chunks.push(e.data); 
@@ -509,7 +845,7 @@ async function getpage(req, res, next) {
                 
                 const blob = new Blob(chunks, { type: "video/webm" });
                 recordedVideoUrl = URL.createObjectURL(blob); 
-              await callAIAPI(blob);
+                await callAIAPI(blob);
             }; 
             
             mediaRecorderRef.start(); 
@@ -527,118 +863,87 @@ async function getpage(req, res, next) {
             }
         }
 
-       async function callAIAPI(blob) { 
-    showStatus("Analyzing video...", "warning"); 
-    try { 
-        // Validate blob before sending
-        if (!blob || blob.size === 0) {
-            throw new Error("Invalid video data - blob is empty");
-        }
-        
-        console.log("Sending video to AI API:", {
-            size: `${(blob.size / 1024 / 1024).toFixed(2)} MB`,
-            type: blob.type,
-            duration: recordingDuration + "s"
-        });
-        
-        const fd = new FormData(); 
-        fd.append("file", blob, "scan.webm"); 
-        
-        const res = await axios.post(AI_API_URL, fd, { 
-            headers: { 
-                "Content-Type": "multipart/form-data" 
-            }, 
-            timeout: 120000,
-            onUploadProgress: (progressEvent) => {
-                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                showStatus(`Uploading... ${percentCompleted}%`, "warning");
-            }
-        }); 
-        
-        console.log("AI API Response:", res.data);
-        
-        const pred = res.data; 
-        
-        // Better validation
-        if (!pred || typeof pred !== "object") {
-            throw new Error("Invalid response format from AI server");
-        }
-        
-        if (pred.error) {
-            throw new Error(pred.error);
-        }
-        
-        // Check if essential data exists
-        if (!pred.heart_rate_bpm && !pred.blood_pressure && !pred.spo2_percent) {
-            throw new Error("No vital signs detected in the analysis");
-        }
-        
-        aiPrediction = { 
-            heartRate: pred.heart_rate_bpm ? Math.round(pred.heart_rate_bpm) : null, 
-            bloodPressure: { 
-                systolic: pred.blood_pressure?.systolic ? Math.round(pred.blood_pressure.systolic) : null, 
-                diastolic: pred.blood_pressure?.diastolic ? Math.round(pred.blood_pressure.diastolic) : null
-            }, 
-            oxygenSaturation: pred.spo2_percent ? Math.round(pred.spo2_percent) : null, 
-            stressLevel: pred.stress_indicator ? (pred.stress_indicator * 100).toFixed(1) : null,
-            // Additional fields from backend
-            respiratoryRate: pred.respiratory_rate_bpm ? Math.round(pred.respiratory_rate_bpm) : null,
-            age: pred.age || null,
-            gender: pred.gender || null,
-            healthRisk: pred.health_risk_indicator ? (pred.health_risk_indicator * 100).toFixed(1) : null
-        }; 
-        
-        console.log("Parsed predictions:", aiPrediction);
-        
-        await saveToDatabase(aiPrediction, blob); 
-        displayResults(); 
-        
-    } catch (error) { 
-        console.error("AI API Error:", error); 
-        
-        // Better error messages
-        let errorMessage = "Analysis failed";
-        
-        if (error.code === 'ECONNABORTED') {
-            errorMessage = "Request timeout - video too long or slow connection";
-        } else if (error.response) {
-            // Server responded with error
-            errorMessage = `Server error: ${error.response.data?.error || error.response.statusText}`;
-            console.error("Server response:", error.response.data);
-        } else if (error.request) {
-            // Request made but no response
-            errorMessage = "No response from AI server - check your connection";
-        } else {
-            errorMessage = error.message || "Unknown error occurred";
-        }
-        
-        showStatus(errorMessage, "error"); 
-        
-        // Re-enable recording button
-        document.getElementById("recordAgainBtn").style.display = "block";
-    } 
-}
-        async function saveToDatabase(pred, blob) { 
-            const auth = getAuthHeaders(); 
-            if (!auth) { 
-                console.log("No auth, skipping save"); 
-                showStatus("Analysis complete! (Not saved - login required)", "success");
-                return; 
-            } 
+        async function callAIAPI(blob) { 
+            showStatus("Analyzing video...", "warning"); 
             try { 
+                if (!blob || blob.size === 0) {
+                    throw new Error("Invalid video data - blob is empty");
+                }
+                
+                console.log("Sending video to AI API:", {
+                    size: `${(blob.size / 1024 / 1024).toFixed(2)} MB`,
+                    type: blob.type,
+                    duration: recordingDuration + "s"
+                });
+                
                 const fd = new FormData(); 
-                fd.append("video", blob, "scan.webm"); 
-                fd.append("predictions", JSON.stringify(pred)); 
-                fd.append("heartRate", pred.heartRate || ""); 
-                fd.append("scanDuration", recordingDuration); 
-                await axios.post(API_BASE_URL + "/api/scan/saveHealthData", fd, { 
-                    headers: { ...auth, "Content-Type": "multipart/form-data" } 
+                fd.append("file", blob, "scan.webm"); 
+                
+                const res = await axios.post(AI_API_URL, fd, { 
+                    headers: { 
+                        "Content-Type": "multipart/form-data" 
+                    }, 
+                    timeout: 120000,
+                    onUploadProgress: (progressEvent) => {
+                        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                        showStatus(`Uploading... ${percentCompleted}%`, "warning");
+                    }
                 }); 
-                showStatus("Complete! Data saved.", "success"); 
-                fetchScanHistory(); 
+                
+                console.log("AI API Response:", res.data);
+                
+                const pred = res.data; 
+                
+                if (!pred || typeof pred !== "object") {
+                    throw new Error("Invalid response format from AI server");
+                }
+                
+                if (pred.error) {
+                    throw new Error(pred.error);
+                }
+                
+                if (!pred.heart_rate_bpm && !pred.blood_pressure && !pred.spo2_percent) {
+                    throw new Error("No vital signs detected in the analysis");
+                }
+                
+                aiPrediction = { 
+                    heartRate: pred.heart_rate_bpm ? Math.round(pred.heart_rate_bpm) : null, 
+                    bloodPressure: { 
+                        systolic: pred.blood_pressure?.systolic ? Math.round(pred.blood_pressure.systolic) : null, 
+                        diastolic: pred.blood_pressure?.diastolic ? Math.round(pred.blood_pressure.diastolic) : null
+                    }, 
+                    oxygenSaturation: pred.spo2_percent ? Math.round(pred.spo2_percent) : null, 
+                    stressLevel: pred.stress_indicator ? (pred.stress_indicator * 100).toFixed(1) : null,
+                    respiratoryRate: pred.respiratory_rate_bpm ? Math.round(pred.respiratory_rate_bpm) : null,
+                    age: pred.age || null,
+                    gender: pred.gender || null,
+                    healthRisk: pred.health_risk_indicator ? (pred.health_risk_indicator * 100).toFixed(1) : null
+                }; 
+                
+                console.log("Parsed predictions:", aiPrediction);
+                
+                displayResults(); 
+                showStatus("Analysis complete!", "success");
+                
             } catch (error) { 
-                console.error("Save error:", error); 
-                showStatus("Analysis complete but save failed", "warning"); 
+                console.error("AI API Error:", error); 
+                
+                let errorMessage = "Analysis failed";
+                
+                if (error.code === 'ECONNABORTED') {
+                    errorMessage = "Request timeout - video too long or slow connection";
+                } else if (error.response) {
+                    errorMessage = `Server error: ${error.response.data?.error || error.response.statusText}`;
+                    console.error("Server response:", error.response.data);
+                } else if (error.request) {
+                    errorMessage = "No response from AI server - check your connection";
+                } else {
+                    errorMessage = error.message || "Unknown error occurred";
+                }
+                
+                showStatus(errorMessage, "error"); 
+                
+                document.getElementById("recordAgainBtn").style.display = "block";
             } 
         }
 
@@ -658,87 +963,11 @@ async function getpage(req, res, next) {
                 '<div class="predictionCard"><div class="predictionValue">' + o2 + '</div><div class="predictionLabel">Oxygen Saturation</div><div class="predictionUnit">%</div></div>' +
                 '<div class="predictionCard"><div class="predictionValue">' + stress + '</div><div class="predictionLabel">Stress Level</div><div class="predictionUnit">%</div></div>';
             
-            document.getElementById("resultsSection").style.display = "block"; 
-        }
-
-        async function fetchScanHistory() { 
-            const auth = getAuthHeaders(); 
-            if (!auth) { 
-                document.getElementById("historyContent").innerHTML = '<p style="text-align:center;color:var(--textColor)">Login required to view scan history</p>'; 
-                return; 
-            } 
-            try { 
-                const res = await axios.get(API_BASE_URL + "/api/scan/getScanHistory?limit=5", { 
-                    headers: auth 
-                }); 
-                scanHistory = res.data.results || []; 
-                displayScanHistory(); 
-            } catch (error) { 
-                console.error("History error:", error); 
-                document.getElementById("historyContent").innerHTML = '<p style="text-align:center;color:var(--textColor)">Failed to load history</p>'; 
-            } 
-        }
-
-        function displayScanHistory() { 
-            const el = document.getElementById("historyContent"); 
-            if (scanHistory.length === 0) { 
-                el.innerHTML = '<p style="text-align:center;color:var(--textColor)">No scan history found</p>'; 
-                return; 
-            } 
+            document.getElementById("resultsSection").style.display = "block";
             
-            let html = '<ul class="historyList">';
-            scanHistory.forEach(s => {
-                const date = new Date(s.timestamp).toLocaleString();
-                const hr = s.heartRate || "N/A";
-                html += '<li class="historyItem">' +
-                    '<div class="historyInfo">' +
-                    '<span class="historyDate">' + date + '</span>' +
-                    '<span class="historyVitals">HR: ' + hr + '</span>' +
-                    '</div>' +
-                    '<button class="controlBtn secondary scan-detail-btn" style="min-width:120px;padding:0.5rem 1rem;" data-id="' + s._id + '">View</button>' +
-                    '</li>';
-            });
-            html += '</ul>';
-            el.innerHTML = html;
-            
-            document.querySelectorAll('.scan-detail-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    fetchScanDetails(this.getAttribute('data-id'));
-                });
-            });
-        }
-
-        async function fetchScanDetails(id) { 
-            const auth = getAuthHeaders(); 
-            if (!auth) return; 
-            try { 
-                const res = await axios.get(API_BASE_URL + "/api/scan/" + id, { 
-                    headers: auth 
-                }); 
-                const scan = res.data.scan; 
-                const date = new Date(scan.timestamp).toLocaleString();
-                const hr = scan.heartRate || "--";
-                const bp = (scan.predictions?.bloodPressure?.systolic && scan.predictions?.bloodPressure?.diastolic)
-                    ? scan.predictions.bloodPressure.systolic + "/" + scan.predictions.bloodPressure.diastolic
-                    : "--/--";
-                const o2 = scan.predictions?.oxygenSaturation || "--";
-                const stress = scan.predictions?.stressLevel || "--";
-                
-                document.getElementById("modalBody").innerHTML = 
-                    '<h2>Scan Details</h2>' +
-                    '<p><strong>Date:</strong> ' + date + '</p>' +
-                    '<div class="predictionGrid" style="margin-top:1.5rem;">' +
-                    '<div class="predictionCard"><div class="predictionValue">' + hr + '</div><div class="predictionLabel">Heart Rate</div><div class="predictionUnit">BPM</div></div>' +
-                    '<div class="predictionCard"><div class="predictionValue">' + bp + '</div><div class="predictionLabel">Blood Pressure</div><div class="predictionUnit">mmHg</div></div>' +
-                    '<div class="predictionCard"><div class="predictionValue">' + o2 + '</div><div class="predictionLabel">Oxygen Saturation</div><div class="predictionUnit">%</div></div>' +
-                    '<div class="predictionCard"><div class="predictionValue">' + stress + '</div><div class="predictionLabel">Stress Level</div><div class="predictionUnit">%</div></div>' +
-                    '</div>';
-                
-                document.getElementById("scanModal").style.display = "flex"; 
-            } catch (error) { 
-                console.error("Fetch details error:", error); 
-                alert("Failed to load scan details");
-            } 
+            setTimeout(() => {
+                document.getElementById("resultsSection").scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
         }
 
         function closeScanModal() { 
