@@ -409,8 +409,9 @@ async function getpage(req, res, next) {
             border: 2px solid #e5e7eb;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             margin: 0 auto;
+            background: #000;
         }
-        #videoElement, #canvasElement {
+        #videoElement {
             position: absolute;
             top: 0;
             left: 0;
@@ -419,42 +420,13 @@ async function getpage(req, res, next) {
             object-fit: cover;
         }
         #canvasElement {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
             z-index: 20;
-        }
-        .videoOverlay {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 30;
-            display: none;
-        }
-        .videoOval {
-            position: absolute;
-            left: 6%;
-            top: 4%;
-            width: 88%;
-            height: 92%;
-            border: 5px dashed #fff;
-            border-radius: 50%;
-            z-index: 31;
-            pointer-events: none;
-            display: none;
-        }
-        .videoText {
-            position: absolute;
-            width: 100%;
-            text-align: center;
-            color: #fff;
-            font-weight: 600;
-            font-size: clamp(0.875rem, 3.5vw, 1.15rem);
-            text-shadow: 0 2px 12px #003046cc;
-            top: 14px;
-            left: 0;
-            z-index: 40;
-            pointer-events: none;
-            padding: 0 1rem;
-            display: none;
         }
         @media screen and (min-width: 480px) {
             .historyItem {
@@ -489,11 +461,6 @@ async function getpage(req, res, next) {
                 padding: 1rem;
                 margin-top: 1rem;
             }
-            .scan-detail-btn {
-                width: 100%;
-                min-width: unset !important;
-                padding: 0.75rem 1rem !important;
-            }
         }
     </style>
 </head>
@@ -517,9 +484,6 @@ async function getpage(req, res, next) {
                 <div id="videoContainer">
                     <video id="videoElement" autoplay playsinline muted></video>
                     <canvas id="canvasElement"></canvas>
-                    <div class="videoOverlay"></div>
-                    <div class="videoOval"></div>
-                   
                     <div id="recordingIndicator" class="recordingIndicator" style="display: none;">
                         <div class="recordingDot"></div>
                         <span id="recordingTime">REC 00:00</span>
@@ -565,7 +529,7 @@ async function getpage(req, res, next) {
         let faceMesh = null;
         let camera = null;
         let isRecording = false, recordingDuration = 0;
-        let recordedVideoUrl = null, aiPrediction = null, scanHistory = [];
+        let recordedVideoUrl = null, aiPrediction = null;
         const AI_API_URL = "https://anurudh-268064419384.asia-east1.run.app/analyze";
         const WIDTH = 384, HEIGHT = 518;
 
@@ -585,24 +549,17 @@ async function getpage(req, res, next) {
             document.getElementById("statusIndicator").style.display = "none"; 
         }
 
-        function getCanvasDimensions() {
-            return { width: WIDTH, height: HEIGHT };
-        }
-
         function drawConnectors(ctx, landmarks, connections, style) {
             if (!landmarks || !connections) return;
-            
             ctx.strokeStyle = style.color;
             ctx.lineWidth = style.lineWidth;
-            
             for (const connection of connections) {
                 const start = landmarks[connection[0]];
                 const end = landmarks[connection[1]];
-                
                 if (start && end) {
                     ctx.beginPath();
-                    ctx.moveTo(start.x * ctx.canvas.width, start.y * ctx.canvas.height);
-                    ctx.lineTo(end.x * ctx.canvas.width, end.y * ctx.canvas.height);
+                    ctx.moveTo(start.x * WIDTH, start.y * HEIGHT);
+                    ctx.lineTo(end.x * WIDTH, end.y * HEIGHT);
                     ctx.stroke();
                 }
             }
@@ -615,28 +572,24 @@ async function getpage(req, res, next) {
                     "https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js",
                     "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"
                 ];
-                
-                let loadedCount = 0;
-                
-                function loadScript(index) {
+                let index = 0;
+                function loadScript() {
                     if (index >= scripts.length) {
                         resolve();
                         return;
                     }
-                    
                     const script = document.createElement("script");
                     script.src = scripts[index];
                     script.crossOrigin = "anonymous";
                     script.onload = () => {
-                        loadedCount++;
-                        console.log("Loaded MediaPipe script:", scripts[index]);
-                        loadScript(index + 1);
+                        console.log("Loaded:", scripts[index]);
+                        index++;
+                        loadScript();
                     };
                     script.onerror = () => reject(new Error("Failed to load: " + scripts[index]));
                     document.head.appendChild(script);
                 }
-                
-                loadScript(0);
+                loadScript();
             });
         }
 
@@ -644,77 +597,60 @@ async function getpage(req, res, next) {
             if (typeof FaceMesh === 'undefined') {
                 throw new Error("FaceMesh not loaded");
             }
-
             faceMesh = new FaceMesh({
-                locateFile: (file) => {
-                    return \`https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/\${file}\`;
-                }
+                locateFile: (file) => \`https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/\${file}\`
             });
-
             faceMesh.setOptions({
                 maxNumFaces: 1,
                 refineLandmarks: true,
                 minDetectionConfidence: 0.5,
                 minTrackingConfidence: 0.5
             });
-
             faceMesh.onResults(onFaceMeshResults);
             console.log("FaceMesh initialized");
         }
 
         function onFaceMeshResults(results) {
             if (!canvasRef) return;
-            
-            const dims = getCanvasDimensions();
-            canvasRef.width = dims.width;
-            canvasRef.height = dims.height;
-            
+            canvasRef.width = WIDTH;
+            canvasRef.height = HEIGHT;
             const ctx = canvasRef.getContext('2d');
-            ctx.save();
-            ctx.clearRect(0, 0, dims.width, dims.height);
-            
-            ctx.drawImage(results.image, 0, 0, dims.width, dims.height);
+            ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
             if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
                 if (typeof FACEMESH_TESSELATION !== 'undefined') {
                     for (const landmarks of results.multiFaceLandmarks) {
-                        drawConnectors(ctx, landmarks, FACEMESH_TESSELATION, { color: '#FFFFFF', lineWidth: 1 });
-                        drawConnectors(ctx, landmarks, FACEMESH_FACE_OVAL, { color: '#FFFFFF', lineWidth: 2 });
-                        drawConnectors(ctx, landmarks, FACEMESH_RIGHT_EYE, { color: '#FFFFFF', lineWidth: 1.5 });
-                        drawConnectors(ctx, landmarks, FACEMESH_LEFT_EYE, { color: '#FFFFFF', lineWidth: 1.5 });
-                        drawConnectors(ctx, landmarks, FACEMESH_RIGHT_EYEBROW, { color: '#FFFFFF', lineWidth: 1.5 });
-                        drawConnectors(ctx, landmarks, FACEMESH_LEFT_EYEBROW, { color: '#FFFFFF', lineWidth: 1.5 });
-                        drawConnectors(ctx, landmarks, FACEMESH_LIPS, { color: '#FFFFFF', lineWidth: 1.5 });
+                        drawConnectors(ctx, landmarks, FACEMESH_TESSELATION, { color: '#C0C0C0', lineWidth: 0.5 });
+                        drawConnectors(ctx, landmarks, FACEMESH_FACE_OVAL, { color: '#E0E0E0', lineWidth: 2 });
+                        drawConnectors(ctx, landmarks, FACEMESH_RIGHT_EYE, { color: '#FFFFFF', lineWidth: 1 });
+                        drawConnectors(ctx, landmarks, FACEMESH_LEFT_EYE, { color: '#FFFFFF', lineWidth: 1 });
+                        drawConnectors(ctx, landmarks, FACEMESH_RIGHT_EYEBROW, { color: '#FFFFFF', lineWidth: 1 });
+                        drawConnectors(ctx, landmarks, FACEMESH_LEFT_EYEBROW, { color: '#FFFFFF', lineWidth: 1 });
+                        drawConnectors(ctx, landmarks, FACEMESH_LIPS, { color: '#FFFFFF', lineWidth: 1 });
                         
                         for (const landmark of landmarks) {
                             ctx.beginPath();
-                            ctx.arc(landmark.x * dims.width, landmark.y * dims.height, 1.5, 0, 2 * Math.PI);
+                            ctx.arc(landmark.x * WIDTH, landmark.y * HEIGHT, 1, 0, 2 * Math.PI);
                             ctx.fillStyle = '#FFFFFF';
                             ctx.fill();
                         }
                     }
                 }
             }
-
-            ctx.restore();
         }
 
         async function initializeScanner() { 
             try { 
                 console.log("Loading MediaPipe scripts...");
                 await loadMediaPipeScripts(); 
-                
                 console.log("Initializing FaceMesh...");
                 await initializeFaceMesh();
-                
                 console.log("Starting camera...");
                 await startCamera(); 
-                
                 setupEventListeners(); 
-                
                 document.getElementById("loadingState").style.display = "none"; 
                 document.getElementById("cameraInterface").style.display = "block"; 
-                console.log("Scanner initialized successfully");
+                console.log("Scanner initialized");
             } catch (error) { 
                 console.error("Init failed:", error); 
                 showError(error.message || "Failed to initialize"); 
@@ -725,16 +661,12 @@ async function getpage(req, res, next) {
             try { 
                 videoRef = document.getElementById("videoElement");
                 canvasRef = document.getElementById("canvasElement");
-                
                 if (stream) stream.getTracks().forEach(t => t.stop()); 
-                
                 stream = await navigator.mediaDevices.getUserMedia({ 
                     video: { width: WIDTH, height: HEIGHT, facingMode: "user" }, 
                     audio: false 
                 }); 
-                
                 videoRef.srcObject = stream;
-                
                 if (typeof Camera !== 'undefined' && faceMesh) {
                     camera = new Camera(videoRef, {
                         onFrame: async () => {
@@ -744,10 +676,10 @@ async function getpage(req, res, next) {
                         height: HEIGHT
                     });
                     camera.start();
-                    console.log("MediaPipe camera started");
+                    console.log("Camera started");
                 }
             } catch (error) { 
-                throw new Error("Camera access denied. Please allow camera permissions."); 
+                throw new Error("Camera access denied"); 
             } 
         }
 
@@ -772,11 +704,9 @@ async function getpage(req, res, next) {
             
             const chunks = []; 
             mediaRecorderRef = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp9" });
-            
             mediaRecorderRef.ondataavailable = e => { 
                 if (e.data.size > 0) chunks.push(e.data); 
             }; 
-            
             mediaRecorderRef.onstop = async () => { 
                 if (recordingTimerRef) { 
                     clearInterval(recordingTimerRef); 
@@ -787,14 +717,11 @@ async function getpage(req, res, next) {
                 document.getElementById("videoContainer").style.border = "2px solid #e5e7eb"; 
                 document.getElementById("stopBtn").style.display = "none"; 
                 document.getElementById("recordAgainBtn").style.display = "block"; 
-                
                 const blob = new Blob(chunks, { type: "video/webm" });
                 recordedVideoUrl = URL.createObjectURL(blob); 
                 await callAIAPI(blob);
             }; 
-            
             mediaRecorderRef.start(); 
-            
             recordingTimerRef = setInterval(() => { 
                 recordingDuration++; 
                 document.getElementById("recordingTime").textContent = "REC " + formatTime(recordingDuration); 
@@ -811,46 +738,23 @@ async function getpage(req, res, next) {
         async function callAIAPI(blob) { 
             showStatus("Analyzing video...", "warning"); 
             try { 
-                if (!blob || blob.size === 0) {
-                    throw new Error("Invalid video data - blob is empty");
-                }
-                
-                console.log("Sending video to AI API:", {
-                    size: `${(blob.size / 1024 / 1024).toFixed(2)} MB`,
-                    type: blob.type,
-                    duration: recordingDuration + "s"
-                });
-                
+                if (!blob || blob.size === 0) throw new Error("Invalid video data");
                 const fd = new FormData(); 
                 fd.append("file", blob, "scan.webm"); 
-                
                 const res = await axios.post(AI_API_URL, fd, { 
-                    headers: { 
-                        "Content-Type": "multipart/form-data" 
-                    }, 
+                    headers: { "Content-Type": "multipart/form-data" }, 
                     timeout: 120000,
                     onUploadProgress: (progressEvent) => {
-                        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                        showStatus(\`Uploading... \${percentCompleted}%\`, "warning");
+                        const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                        showStatus(\`Uploading... \${percent}%\`, "warning");
                     }
                 }); 
-                
-                console.log("AI API Response:", res.data);
-                
                 const pred = res.data; 
-                
-                if (!pred || typeof pred !== "object") {
-                    throw new Error("Invalid response format from AI server");
-                }
-                
-                if (pred.error) {
-                    throw new Error(pred.error);
-                }
-                
+                if (!pred || typeof pred !== "object") throw new Error("Invalid response");
+                if (pred.error) throw new Error(pred.error);
                 if (!pred.heart_rate_bpm && !pred.blood_pressure && !pred.spo2_percent) {
-                    throw new Error("No vital signs detected in the analysis");
+                    throw new Error("No vital signs detected");
                 }
-                
                 aiPrediction = { 
                     heartRate: pred.heart_rate_bpm ? Math.round(pred.heart_rate_bpm) : null, 
                     bloodPressure: { 
@@ -858,36 +762,23 @@ async function getpage(req, res, next) {
                         diastolic: pred.blood_pressure?.diastolic ? Math.round(pred.blood_pressure.diastolic) : null
                     }, 
                     oxygenSaturation: pred.spo2_percent ? Math.round(pred.spo2_percent) : null, 
-                    stressLevel: pred.stress_indicator ? (pred.stress_indicator * 100).toFixed(1) : null,
-                    respiratoryRate: pred.respiratory_rate_bpm ? Math.round(pred.respiratory_rate_bpm) : null,
-                    age: pred.age || null,
-                    gender: pred.gender || null,
-                    healthRisk: pred.health_risk_indicator ? (pred.health_risk_indicator * 100).toFixed(1) : null
+                    stressLevel: pred.stress_indicator ? (pred.stress_indicator * 100).toFixed(1) : null
                 }; 
-                
-                console.log("Parsed predictions:", aiPrediction);
-                
                 displayResults(); 
                 showStatus("Analysis complete!", "success");
-                
             } catch (error) { 
-                console.error("AI API Error:", error); 
-                
+                console.error("API Error:", error); 
                 let errorMessage = "Analysis failed";
-                
                 if (error.code === 'ECONNABORTED') {
-                    errorMessage = "Request timeout - video too long or slow connection";
+                    errorMessage = "Request timeout";
                 } else if (error.response) {
                     errorMessage = \`Server error: \${error.response.data?.error || error.response.statusText}\`;
-                    console.error("Server response:", error.response.data);
                 } else if (error.request) {
-                    errorMessage = "No response from AI server - check your connection";
+                    errorMessage = "No response from server";
                 } else {
-                    errorMessage = error.message || "Unknown error occurred";
+                    errorMessage = error.message || "Unknown error";
                 }
-                
                 showStatus(errorMessage, "error"); 
-                
                 document.getElementById("recordAgainBtn").style.display = "block";
             } 
         }
@@ -909,7 +800,6 @@ async function getpage(req, res, next) {
                 '<div class="predictionCard"><div class="predictionValue">' + stress + '</div><div class="predictionLabel">Stress Level</div><div class="predictionUnit">%</div></div>';
             
             document.getElementById("resultsSection").style.display = "block";
-            
             setTimeout(() => {
                 document.getElementById("resultsSection").scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 300);
