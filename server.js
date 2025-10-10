@@ -598,7 +598,9 @@ async function getpage(req, res, next) {
                 throw new Error("FaceMesh not loaded");
             }
             faceMesh = new FaceMesh({
-                locateFile: (file) => \`https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/\${file}\`
+                locateFile: (file) => {
+                    return "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/" + file;
+                }
             });
             faceMesh.setOptions({
                 maxNumFaces: 1,
@@ -746,7 +748,7 @@ async function getpage(req, res, next) {
                     timeout: 120000,
                     onUploadProgress: (progressEvent) => {
                         const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                        showStatus(\`Uploading... \${percent}%\`, "warning");
+                        showStatus("Uploading... " + percent + "%", "warning");
                     }
                 }); 
                 const pred = res.data; 
@@ -772,7 +774,7 @@ async function getpage(req, res, next) {
                 if (error.code === 'ECONNABORTED') {
                     errorMessage = "Request timeout";
                 } else if (error.response) {
-                    errorMessage = \`Server error: \${error.response.data?.error || error.response.statusText}\`;
+                    errorMessage = "Server error: " + (error.response.data?.error || error.response.statusText);
                 } else if (error.request) {
                     errorMessage = "No response from server";
                 } else {
@@ -851,7 +853,6 @@ async function getpage(req, res, next) {
     });
   }
 }
-}}
 // Routes
 app.get('/', getpage);
 app.get('/scanner', getpage);
