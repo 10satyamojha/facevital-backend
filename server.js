@@ -1994,7 +1994,7 @@ async function getCameraPage(req, res, next) {
             position: absolute;
             left: 19%;
             top: 8%;
-            width: 86%;
+            width: 76%;
             height: 84%;
             border: 5px dashed rgba(255, 255, 255, 0.8);
             border-radius: 50%;
