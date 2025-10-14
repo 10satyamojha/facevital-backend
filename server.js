@@ -2046,7 +2046,7 @@ async function getCameraPage(req, res, next) {
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg,);
             min-height: 100vh;
             padding: 1rem;
             display: flex;
@@ -2057,28 +2057,28 @@ async function getCameraPage(req, res, next) {
             width: 100%;
             max-width: 500px;
         }
-        // .videoOverlay {
-        //     position: absolute;
-        //     inset: 0;
-        //     pointer-events: none;
-        //     z-index: 30;
-        //     backdrop-filter: blur(20px);
-        //     -webkit-backdrop-filter: blur(20px);
-        //     -webkit-mask-image: radial-gradient(ellipse 40% 60% at 50% 50%, transparent 69%, black 71%);
-        //     mask-image: radial-gradient(ellipse 40% 60% at 50% 50%, transparent 69%, black 71%);
-        //     background: rgba(255,255,255,0.10);
-        // }
-        // .videoOval {
-        //     position: absolute;
-        //     left: 19%;
-        //     top: 8%;
-        //     width: 76%;
-        //     height: 84%;
-        //     border: 5px dashed rgba(255, 255, 255, 0.8);
-        //     border-radius: 50%;
-        //     z-index: 31;
-        //     pointer-events: none;
-        // }
+        .videoOverlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 30;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            -webkit-mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
+            mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
+            background: rgba(255,255,255,0.10);
+        }
+        .videoOval {
+            position: absolute;
+            left: 6%;
+            top: 4%;
+            width: 88%;
+            height: 92%;
+            border: 5px dashed #fff;
+            border-radius: 50%;
+            z-index: 31;
+            pointer-events: none;
+        }
         .header { 
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -2089,11 +2089,11 @@ async function getCameraPage(req, res, next) {
         }
         .header h1 { 
             font-size: 1.5rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #000000);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            font-weight: 700; 
+            font-weight: 500; 
             margin-bottom: 0.5rem; 
         }
         .header p { 
@@ -2161,11 +2161,11 @@ async function getCameraPage(req, res, next) {
             font-weight: 600; 
         }
         .controlBtn { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #ffffff; 
+            background: linear-gradient(135deg);
+            color: #000000ff; 
             border: none; 
             padding: 1rem 2rem; 
-            margin-top: 15px;
+           margin-top: 15px;
             border-radius: 12px; 
             font-size: 1rem; 
             font-weight: 700; 
@@ -2352,6 +2352,7 @@ async function getCameraPage(req, res, next) {
                 border-radius: 16px 16px 0 0;
             }
             .header h1 {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);  
                 font-size: 1.25rem;
             }
             .cameraContainer { 
@@ -2367,10 +2368,6 @@ async function getCameraPage(req, res, next) {
             }
             #videoContainer {
                 aspect-ratio: 9/16;
-            }
-            .videoOverlay {
-                -webkit-mask-image: radial-gradient(ellipse 40% 60% at 50% 50%, transparent 69%, black 71%);
-                mask-image: radial-gradient(ellipse 40% 60% at 50% 50%, transparent 69%, black 71%);
             }
         }
     </style>
@@ -2444,6 +2441,8 @@ async function getCameraPage(req, res, next) {
         const CENTER_TOLERANCE = 0.15; 
         const MIN_BRIGHTNESS = 60; 
 
+
+
         const AI_API_URL = "https://anurudh-268064419384.asia-east1.run.app/analyze";
         const WIDTH = 1280, HEIGHT = 720;
         const ACTUAL_DURATION = 35;
@@ -2514,195 +2513,256 @@ async function getCameraPage(req, res, next) {
             console.log("FaceMesh initialized");
         }
 
-       function onFaceMeshResults(results) {
-    if (!canvasRef || scanCompleted) return;
-    
-    canvasRef.width = WIDTH;
-    canvasRef.height = HEIGHT;
-    
-    const ctx = canvasRef.getContext('2d');
-    ctx.save();
-    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+        function onFaceMeshResults(results) {
+            if (!canvasRef || scanCompleted) return;
+            
+            canvasRef.width = WIDTH;
+            canvasRef.height = HEIGHT;
+            
+            const ctx = canvasRef.getContext('2d');
+            ctx.save();
+            ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-    const hasFace = results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0;
+            const hasFace = results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0;
 
-    if (hasFace) {
-        const landmarks = results.multiFaceLandmarks[0];
-        
-        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-        landmarks.forEach(landmark => {
-            minX = Math.min(minX, landmark.x);
-            maxX = Math.max(maxX, landmark.x);
-            minY = Math.min(minY, landmark.y);
-            maxY = Math.max(maxY, landmark.y);
-        });
-        
-        const faceWidth = maxX - minX;
-        const faceHeight = maxY - minY;
-        const faceSize = Math.max(faceWidth, faceHeight);
-        lastFaceSize = faceSize;
-        
-        const facePercentage = (faceSize * 100).toFixed(1);
-        console.log("📏 Face size:", facePercentage + "% of frame");
-        
-        const faceCenterX = (minX + maxX) / 2;
-        const faceCenterY = (minY + maxY) / 2;
-        const frameCenterX = 0.5;
-        const frameCenterY = 0.5;
+            if (hasFace) {
+                const landmarks = results.multiFaceLandmarks[0];
+                
+                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+                landmarks.forEach(landmark => {
+                    minX = Math.min(minX, landmark.x);
+                    maxX = Math.max(maxX, landmark.x);
+                    minY = Math.min(minY, landmark.y);
+                    maxY = Math.max(maxY, landmark.y);
+                });
+                
+                const faceWidth = maxX - minX;
+                const faceHeight = maxY - minY;
+                const faceSize = Math.max(faceWidth, faceHeight);
+                lastFaceSize = faceSize;
+                
+                // Real-time distance feedback
+                const facePercentage = (faceSize * 100).toFixed(1);
+                console.log("📏 Face size:", facePercentage + "% of frame");
+                
+              // Calculate face center
+const faceCenterX = (minX + maxX) / 2;
+const faceCenterY = (minY + maxY) / 2;
+const frameCenterX = 0.5;
+const frameCenterY = 0.5;
 
-        const offsetX = Math.abs(faceCenterX - frameCenterX);
-        const offsetY = Math.abs(faceCenterY - frameCenterY);
-        const isOffCenter = offsetX > CENTER_TOLERANCE || offsetY > CENTER_TOLERANCE;
+// Check if face is centered
+const offsetX = Math.abs(faceCenterX - frameCenterX);
+const offsetY = Math.abs(faceCenterY - frameCenterY);
+const isOffCenter = offsetX > CENTER_TOLERANCE || offsetY > CENTER_TOLERANCE;
 
-        const tempCanvasBright = document.createElement('canvas');
-        tempCanvasBright.width = WIDTH;
-        tempCanvasBright.height = HEIGHT;
-        const tempCtxBright = tempCanvasBright.getContext('2d');
-        tempCtxBright.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
+// Calculate brightness
+const tempCanvasBright = document.createElement('canvas');
+tempCanvasBright.width = WIDTH;
+tempCanvasBright.height = HEIGHT;
+const tempCtxBright = tempCanvasBright.getContext('2d');
+tempCtxBright.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
 
-        const faceX = Math.floor(minX * WIDTH);
-        const faceY = Math.floor(minY * HEIGHT);
-        const faceW = Math.floor((maxX - minX) * WIDTH);
-        const faceH = Math.floor((maxY - minY) * HEIGHT);
-        const imageData = tempCtxBright.getImageData(faceX, faceY, faceW, faceH);
+const faceX = Math.floor(minX * WIDTH);
+const faceY = Math.floor(minY * HEIGHT);
+const faceW = Math.floor((maxX - minX) * WIDTH);
+const faceH = Math.floor((maxY - minY) * HEIGHT);
+const imageData = tempCtxBright.getImageData(faceX, faceY, faceW, faceH);
 
-        let totalBrightness = 0;
-        for (let i = 0; i < imageData.data.length; i += 4) {
-            totalBrightness += (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
+let totalBrightness = 0;
+for (let i = 0; i < imageData.data.length; i += 4) {
+    totalBrightness += (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
+}
+const avgBrightness = totalBrightness / (imageData.data.length / 4);
+const isLowLight = avgBrightness < MIN_BRIGHTNESS;
+
+console.log("📏 Face:", (faceSize * 100).toFixed(1) + "% | Center:", !isOffCenter ? "✅" : "❌", "| Light:", Math.round(avgBrightness));
+
+if (faceSize < MIN_FACE_SIZE) {
+    if (currentAlertType !== 'far') {
+        const alertDiv = document.getElementById("faceAlert");
+        alertDiv.innerHTML = '🚫 Too far! Move within 1 foot of camera';
+        alertDiv.classList.add("show");
+        alertDiv.classList.remove("warning");
+        currentAlertType = 'far';
+    }
+    if (isScanning && !scanningPaused && mediaRecorderRef && mediaRecorderRef.state === 'recording') {
+        mediaRecorderRef.pause();
+        scanningPaused = true;
+        if (scanningTimerRef) {
+            clearInterval(scanningTimerRef);
+            scanningTimerRef = null;
         }
-        const avgBrightness = totalBrightness / (imageData.data.length / 4);
-        const isLowLight = avgBrightness < MIN_BRIGHTNESS;
+    }
+} else if (isOffCenter) {
+    if (currentAlertType !== 'center') {
+        const alertDiv = document.getElementById("faceAlert");
+        let dir = offsetX > CENTER_TOLERANCE ? (faceCenterX < frameCenterX ? 'right' : 'left') : (faceCenterY < frameCenterY ? 'down' : 'up');
+        alertDiv.innerHTML = '⚠️ Move your face ' + dir + ' to center it';
+        alertDiv.classList.add("show", "warning");
+        currentAlertType = 'center';
+    }
+    handleFaceDetected();
+} else if (isLowLight) {
+    if (currentAlertType !== 'light') {
+        const alertDiv = document.getElementById("faceAlert");
+        alertDiv.innerHTML = '💡 More light needed! Move to brighter area';
+        alertDiv.classList.add("show", "warning");
+        currentAlertType = 'light';
+    }
+    handleFaceDetected();
+} else if (faceSize < IDEAL_FACE_SIZE) {
+    if (currentAlertType !== 'warning') {
+        const alertDiv = document.getElementById("faceAlert");
+        alertDiv.innerHTML = '⚠️ Move a bit closer for best scan quality';
+        alertDiv.classList.add("show", "warning");
+        currentAlertType = 'warning';
+    }
+    handleFaceDetected();
+} else {
+    if (currentAlertType !== null) {
+        const alertDiv = document.getElementById("faceAlert");
+        alertDiv.classList.remove("show", "warning");
+        currentAlertType = null;
+    }
+    handleFaceDetected();
+}
+                
+                const padding = 0.10;
+                minX = Math.max(0, minX - padding);
+                maxX = Math.min(1, maxX + padding);
+                minY = Math.max(0, minY - padding);
+                maxY = Math.min(1, maxY + padding);
+                
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = WIDTH;
+                tempCanvas.height = HEIGHT;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                tempCtx.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
+                tempCtx.filter = 'blur(25px) brightness(0.6)';
+                tempCtx.drawImage(tempCanvas, 0, 0);
+                
+                const centerX = ((minX + maxX) / 2) * WIDTH;
+                const centerY = ((minY + maxY) / 2) * HEIGHT;
+                const radiusX = ((maxX - minX) / 2) * WIDTH;
+                const radiusY = ((maxY - minY) / 2) * HEIGHT;
+                
+                ctx.save();
+                ctx.beginPath();
+                ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+                ctx.clip();
+                ctx.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
+                ctx.restore();
+                
+                ctx.save();
+                ctx.globalCompositeOperation = "destination-over";
+                ctx.drawImage(tempCanvas, 0, 0);
+                ctx.globalCompositeOperation = "source-over";
+                ctx.restore();
+                
+                if (typeof window.FACEMESH_TESSELATION !== 'undefined') {
+                    window.drawConnectors(ctx, landmarks, window.FACEMESH_TESSELATION, { color: '#FFFFFF', lineWidth: 0.5 });
+                    window.drawConnectors(ctx, landmarks, window.FACEMESH_FACE_OVAL, { color: '#FFFFFF', lineWidth: 2 });
+                    window.drawConnectors(ctx, landmarks, window.FACEMESH_LEFT_EYE, { color: '#FFFFFF', lineWidth: 1.5 });
+                    window.drawConnectors(ctx, landmarks, window.FACEMESH_RIGHT_EYE, { color: '#FFFFFF', lineWidth: 1.5 });
+                    window.drawConnectors(ctx, landmarks, window.FACEMESH_LEFT_EYEBROW, { color: '#FFFFFF', lineWidth: 1.5 });
+                    window.drawConnectors(ctx, landmarks, window.FACEMESH_RIGHT_EYEBROW, { color: '#FFFFFF', lineWidth: 1.5 });
+                    window.drawConnectors(ctx, landmarks, window.FACEMESH_LIPS, { color: '#FFFFFF', lineWidth: 1.5 });
+                    
+                    landmarks.forEach(lm => {
+                        ctx.beginPath();
+                        ctx.arc(lm.x * WIDTH, lm.y * HEIGHT, 1, 0, Math.PI * 2);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fill();
+                    });
+                }
+                
+            } else {
+                handleFaceLost();
+                
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = WIDTH;
+                tempCanvas.height = HEIGHT;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
+                tempCtx.filter = 'blur(10px) brightness(0.7)';
+                tempCtx.drawImage(tempCanvas, 0, 0);
+                ctx.drawImage(tempCanvas, 0, 0);
+                
+                const centerX = WIDTH / 2;
+                const centerY = HEIGHT / 2;
+                const radiusX = WIDTH * 0.35;
+                const radiusY = HEIGHT * 0.45;
+                
+                ctx.beginPath();
+               ctx.ellipse(centerX, centerY, radiusY, radiusX, Math.PI / 2, 0, 2 * Math.PI);
+               ctx.clip();
+ctx.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
+ctx.restore();
+               ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 4;
+                ctx.setLineDash([15, 15]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
 
-        console.log("📏 Face:", (faceSize * 100).toFixed(1) + "% | Center:", !isOffCenter ? "✅" : "❌", "| Light:", Math.round(avgBrightness));
+            ctx.restore();
+        }
 
-        if (faceSize < MIN_FACE_SIZE) {
-            if (currentAlertType !== 'far') {
-                const alertDiv = document.getElementById("faceAlert");
+      function handleFaceTooFar() {
+            const facePercentage = (lastFaceSize * 100).toFixed(1);
+            console.log("❌ TOO FAR! Face size:", facePercentage + "% (minimum: 40%)");
+            showDistanceAlert('far');
+            distanceWarningShown = false; // Reset warning flag
+            
+            if (isScanning && !scanningPaused && mediaRecorderRef) {
+                if (mediaRecorderRef.state === 'recording') {
+                    mediaRecorderRef.pause();
+                    scanningPaused = true;
+                    
+                    if (scanningTimerRef) {
+                        clearInterval(scanningTimerRef);
+                        scanningTimerRef = null;
+                    }
+                    console.log("⏸️ Scanning paused - face too far");
+                }
+            }
+        }
+
+        function handleFaceDistanceWarning() {
+            if (!distanceWarningShown) {
+                const facePercentage = (lastFaceSize * 100).toFixed(1);
+                console.log("⚠️ Warning! Face size:", facePercentage + "% (ideal: 50%+)");
+                showDistanceAlert('warning');
+                distanceWarningShown = true;
+            }
+        }
+      function handleFaceDistanceOk() {
+            const facePercentage = (lastFaceSize * 100).toFixed(1);
+            console.log("✅ Perfect distance! Face size:", facePercentage + "%");
+            hideDistanceAlert();
+            distanceWarningShown = false;
+        }
+
+        function showDistanceAlert(type) {
+            const alertDiv = document.getElementById("faceAlert");
+            if (type === 'far') {
                 alertDiv.innerHTML = '🚫 Too far! Move within 1 foot of camera';
                 alertDiv.classList.add("show");
                 alertDiv.classList.remove("warning");
-                currentAlertType = 'far';
-            }
-            if (isScanning && !scanningPaused && mediaRecorderRef && mediaRecorderRef.state === 'recording') {
-                mediaRecorderRef.pause();
-                scanningPaused = true;
-                if (scanningTimerRef) {
-                    clearInterval(scanningTimerRef);
-                    scanningTimerRef = null;
-                }
-            }
-        } else if (isOffCenter) {
-            if (currentAlertType !== 'center') {
-                const alertDiv = document.getElementById("faceAlert");
-                let dir = offsetX > CENTER_TOLERANCE ? (faceCenterX < frameCenterX ? 'right' : 'left') : (faceCenterY < frameCenterY ? 'down' : 'up');
-                alertDiv.innerHTML = '⚠️ Move your face ' + dir + ' to center it';
+            } else {
+               
                 alertDiv.classList.add("show", "warning");
-                currentAlertType = 'center';
             }
-            handleFaceDetected();
-        } else if (isLowLight) {
-            if (currentAlertType !== 'light') {
-                const alertDiv = document.getElementById("faceAlert");
-                alertDiv.innerHTML = '💡 More light needed! Move to brighter area';
-                alertDiv.classList.add("show", "warning");
-                currentAlertType = 'light';
-            }
-            handleFaceDetected();
-        } else if (faceSize < IDEAL_FACE_SIZE) {
-            if (currentAlertType !== 'warning') {
-                const alertDiv = document.getElementById("faceAlert");
-                alertDiv.innerHTML = '⚠️ Move a bit closer for best scan quality';
-                alertDiv.classList.add("show", "warning");
-                currentAlertType = 'warning';
-            }
-            handleFaceDetected();
-        } else {
-            if (currentAlertType !== null) {
-                const alertDiv = document.getElementById("faceAlert");
-                alertDiv.classList.remove("show", "warning");
-                currentAlertType = null;
-            }
-            handleFaceDetected();
         }
-        
-        const padding = 0.10;
-        minX = Math.max(0, minX - padding);
-        maxX = Math.min(1, maxX + padding);
-        minY = Math.max(0, minY - padding);
-        maxY = Math.min(1, maxY + padding);
-        
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = WIDTH;
-        tempCanvas.height = HEIGHT;
-        const tempCtx = tempCanvas.getContext('2d');
-        
-        tempCtx.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
-        tempCtx.filter = 'blur(25px) brightness(0.6)';
-        tempCtx.drawImage(tempCanvas, 0, 0);
-        
-        const centerX = ((minX + maxX) / 2) * WIDTH;
-        const centerY = ((minY + maxY) / 2) * HEIGHT;
-        const radiusX = ((maxX - minX) / 2) * WIDTH;
-        const radiusY = ((maxY - minY) / 2) * HEIGHT;
-        
-        ctx.save();
-        ctx.beginPath();
-        ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
-        ctx.clip();
-        ctx.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
-        ctx.restore();
-        
-        ctx.save();
-        ctx.globalCompositeOperation = "destination-over";
-        ctx.drawImage(tempCanvas, 0, 0);
-        ctx.globalCompositeOperation = "source-over";
-        ctx.restore();
-        
-        if (typeof window.FACEMESH_TESSELATION !== 'undefined') {
-            window.drawConnectors(ctx, landmarks, window.FACEMESH_TESSELATION, { color: 'rgba(255, 255, 255, 0.15)', lineWidth: 0.2 });
-            window.drawConnectors(ctx, landmarks, window.FACEMESH_FACE_OVAL, { color: 'rgba(255, 255, 255, 0.5)', lineWidth: 1 });
-            window.drawConnectors(ctx, landmarks, window.FACEMESH_LEFT_EYE, { color: 'rgba(255, 255, 255, 0.4)', lineWidth: 0.8 });
-            window.drawConnectors(ctx, landmarks, window.FACEMESH_RIGHT_EYE, { color: 'rgba(255, 255, 255, 0.4)', lineWidth: 0.8 });
-            window.drawConnectors(ctx, landmarks, window.FACEMESH_LEFT_EYEBROW, { color: 'rgba(255, 255, 255, 0.4)', lineWidth: 0.8 });
-            window.drawConnectors(ctx, landmarks, window.FACEMESH_RIGHT_EYEBROW, { color: 'rgba(255, 255, 255, 0.4)', lineWidth: 0.8 });
-            window.drawConnectors(ctx, landmarks, window.FACEMESH_LIPS, { color: 'rgba(255, 255, 255, 0.4)', lineWidth: 0.8 });
-        }
-        
-    } else {
-        handleFaceLost();
-        
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = WIDTH;
-        tempCanvas.height = HEIGHT;
-        const tempCtx = tempCanvas.getContext('2d');
-        tempCtx.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
-        tempCtx.filter = 'blur(10px) brightness(0.7)';
-        tempCtx.drawImage(tempCanvas, 0, 0);
-        ctx.drawImage(tempCanvas, 0, 0);
-        
-        const centerX = WIDTH / 2;
-        const centerY = HEIGHT / 2;
-        const radiusX = WIDTH * 0.30;
-        const radiusY = HEIGHT * 0.48;
-        
-        ctx.save();
-        ctx.beginPath();
-        ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
-        ctx.clip();
-        ctx.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
-        ctx.restore();
-        
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 4;
-        ctx.setLineDash([15, 15]);
-        ctx.beginPath();
-        ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
-        ctx.stroke();
-        ctx.setLineDash([]);
-    }
 
-    ctx.restore();
-}
+        function hideDistanceAlert() {
+            const alertDiv = document.getElementById("faceAlert");
+            if (alertDiv.textContent.includes('Move closer')) {
+                alertDiv.classList.remove("show", "warning");
+            }
+        }
 
         function handleFaceDetected() {
             if (faceDetectionTimeout) {
@@ -2713,6 +2773,7 @@ async function getCameraPage(req, res, next) {
             if (!faceDetected) {
                 faceDetected = true;
                 console.log("✅ Face detected!");
+                hideFaceAlert();
                 
                 if (isScanning && scanningPaused && mediaRecorderRef) {
                     if (mediaRecorderRef.state === 'paused') {
@@ -2732,7 +2793,6 @@ async function getCameraPage(req, res, next) {
                 }
             }
         }
-
 
         function handleFaceLost() {
             if (faceDetected && !faceDetectionTimeout) {
