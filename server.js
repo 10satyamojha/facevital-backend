@@ -2850,7 +2850,7 @@ async function getCameraPage(req, res, next) {
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background: linear-gradient(135deg);
+            background: linear-gradient(135deg,);
             min-height: 100vh;
             padding: 1rem;
             display: flex;
@@ -2861,13 +2861,13 @@ async function getCameraPage(req, res, next) {
             width: 100%;
             max-width: 500px;
         }
-             .videoOverlay {
+        .videoOverlay {
             position: absolute;
             inset: 0;
             pointer-events: none;
             z-index: 30;
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(20px);
             -webkit-mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
             mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
             background: rgba(255,255,255,0.10);
@@ -2893,11 +2893,11 @@ async function getCameraPage(req, res, next) {
         }
         .header h1 { 
             font-size: 1.5rem;
-            background: linear-gradient(135deg, #667eea 0%, );
+            background: linear-gradient(135deg, #000000);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            font-weight: 800; 
+            font-weight: 500; 
             margin-bottom: 0.5rem; 
         }
         .header p { 
@@ -2965,10 +2965,11 @@ async function getCameraPage(req, res, next) {
             font-weight: 600; 
         }
         .controlBtn { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #ffffff; 
+            background: linear-gradient(135deg);
+            color: #000000ff; 
             border: none; 
             padding: 1rem 2rem; 
+           margin-top: 15px;
             border-radius: 12px; 
             font-size: 1rem; 
             font-weight: 700; 
@@ -3012,23 +3013,6 @@ async function getCameraPage(req, res, next) {
             cursor: not-allowed;
             box-shadow: none;
         }
-        .controlBtn.danger { 
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
-        }
-        .controlBtn.danger:hover:not(:disabled) { 
-            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5);
-        }
-        .controlBtn.analyze {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            font-size: 1.125rem;
-            padding: 1.25rem 2.5rem;
-            min-width: 100%;
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-        }
-        .controlBtn.analyze:hover:not(:disabled) {
-            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.5);
-        }
         .controlBtn .spinner {
             display: none;
             width: 18px;
@@ -3051,9 +3035,9 @@ async function getCameraPage(req, res, next) {
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             background: #000;
         }
-        #videoContainer.recording {
-            border-color: #ef4444;
-            box-shadow: 0 10px 40px rgba(239, 68, 68, 0.5);
+        #videoContainer.scanning {
+            border-color: #10b981;
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.5);
         }
         #videoElement, #canvasElement {
             position: absolute;
@@ -3067,8 +3051,8 @@ async function getCameraPage(req, res, next) {
             pointer-events: none;
             z-index: 20;
         }
-        .recordingIndicator { 
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        .scanningIndicator { 
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: #ffffff; 
             padding: 0.75rem 1.25rem; 
             border-radius: 50px; 
@@ -3081,10 +3065,10 @@ async function getCameraPage(req, res, next) {
             top: 1rem; 
             left: 1rem; 
             z-index: 100; 
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
             backdrop-filter: blur(10px);
         }
-        .recordingDot { 
+        .scanningDot { 
             width: 10px; 
             height: 10px; 
             background: #ffffff; 
@@ -3120,6 +3104,11 @@ async function getCameraPage(req, res, next) {
             gap: 0.5rem;
             opacity: 1;
             transform: translateX(-50%) translateY(0);
+        }
+        .faceAlert.warning {
+            background: rgba(245, 158, 11, 0.95);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
         }
         .controlsGrid { 
             display: flex; 
@@ -3180,14 +3169,17 @@ async function getCameraPage(req, res, next) {
             .controlsGrid {
                 flex-direction: column;
             }
+            #videoContainer {
+                aspect-ratio: 9/16;
+            }
         }
     </style>
 </head>
 <body>
     <div class="mainContainer">
         <div class="header">
-            <h1> Health Vitals Scanner</h1>
-            <p>Position your face in frame • Record for 30 seconds</p>
+            <h1>🏥 Health Vitals Scanner</h1>
+            <p>Position your face in frame • Scan for 30 seconds</p>
         </div>
 
         <div class="cameraContainer">
@@ -3209,12 +3201,12 @@ async function getCameraPage(req, res, next) {
                     <canvas id="canvasElement"></canvas>
                     <div class="videoOverlay"></div>
                     <div class="videoOval"></div>
-                    <div id="recordingIndicator" class="recordingIndicator" style="display: none;">
-                        <div class="recordingDot"></div>
-                        <span id="recordingTime">REC 00:00</span>
+                    <div id="scanningIndicator" class="scanningIndicator" style="display: none;">
+                        <div class="scanningDot"></div>
+                        <span id="scanningTime">SCAN 00:00</span>
                     </div>
                     <div id="faceAlert" class="faceAlert">
-                        ⚠️ No face detected! Recording paused
+                        ⚠️ No face detected! Scanning paused
                     </div>
                 </div>
                 
@@ -3222,41 +3214,42 @@ async function getCameraPage(req, res, next) {
                     Ready to scan
                 </div>
                 
-                <div class="controlsGrid">
+                <div class="controlsGrid" id="controlsGrid">
                     <button id="startBtn" class="controlBtn">
-                         Start Scanning
-                    </button>
-                    <button id="stopBtn" class="controlBtn danger" style="display: none;">
-                         Stop Recording
-                    </button>
-                    <button id="recordAgainBtn" class="controlBtn" style="display: none;">
-                         Record Again
+                        🎯 Start Scanning
                     </button>
                 </div>
-
-                <button id="analyzeBtn" class="controlBtn analyze" style="display: none; margin-top: 0.5rem;" disabled>
-                    <span class="spinner"></span>
-                    <span class="btnText"> Analyze Results</span>
-                </button>
             </div>
         </div>
     </div>
 
     <script>
-        let videoRef, canvasRef, mediaRecorderRef, recordingTimerRef, stream = null;
+        let videoRef, canvasRef, mediaRecorderRef, scanningTimerRef, stream = null;
         let faceMesh = null;
         let camera = null;
-        let isRecording = false, recordingDuration = 0;
+        let isScanning = false, actualDuration = 0, displayDuration = 0;
         let recordedVideoUrl = null;
         let aiPrediction = null;
         
         let faceDetected = false;
         let faceDetectionTimeout = null;
-        let recordingPaused = false;
+        let scanningPaused = false;
         let recordedBlob = null;
-        
+        let scanCompleted = false;
+        let currentAlertType = null;
+        let lastFaceSize = 0;
+        let distanceWarningShown = false;
+        const MIN_FACE_SIZE = 0.40;
+        const IDEAL_FACE_SIZE = 0.42;
+        const CENTER_TOLERANCE = 0.15; 
+        const MIN_BRIGHTNESS = 60; 
+
+
+
         const AI_API_URL = "https://anurudh-268064419384.asia-east1.run.app/analyze";
         const WIDTH = 1280, HEIGHT = 720;
+        const ACTUAL_DURATION = 35;
+        const DISPLAY_DURATION = 30;
 
         function formatTime(s) { 
             const m = Math.floor(s / 60); 
@@ -3314,17 +3307,17 @@ async function getCameraPage(req, res, next) {
 
             faceMesh.setOptions({
                 maxNumFaces: 1,
-                refineLandmarks: true,
-                minDetectionConfidence: 0.7,  // Increased for better detection
-                minTrackingConfidence: 0.7    // Increased for better tracking
+                refineLandmarks: false,
+                minDetectionConfidence: 0.3,
+                minTrackingConfidence: 0.3
             });
 
             faceMesh.onResults(onFaceMeshResults);
-            console.log("FaceMesh initialized with high confidence settings");
+            console.log("FaceMesh initialized");
         }
 
-         function onFaceMeshResults(results) {
-            if (!canvasRef) return;
+        function onFaceMeshResults(results) {
+            if (!canvasRef || scanCompleted) return;
             
             canvasRef.width = WIDTH;
             canvasRef.height = HEIGHT;
@@ -3336,10 +3329,8 @@ async function getCameraPage(req, res, next) {
             const hasFace = results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0;
 
             if (hasFace) {
-                handleFaceDetected();
                 const landmarks = results.multiFaceLandmarks[0];
                 
-                // Get face bounding box for oval
                 let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
                 landmarks.forEach(landmark => {
                     minX = Math.min(minX, landmark.x);
@@ -3348,14 +3339,104 @@ async function getCameraPage(req, res, next) {
                     maxY = Math.max(maxY, landmark.y);
                 });
                 
-                // Add padding for oval
-                const padding = 0.15;
+                const faceWidth = maxX - minX;
+                const faceHeight = maxY - minY;
+                const faceSize = Math.max(faceWidth, faceHeight);
+                lastFaceSize = faceSize;
+                
+                // Real-time distance feedback
+                const facePercentage = (faceSize * 100).toFixed(1);
+                console.log("📏 Face size:", facePercentage + "% of frame");
+                
+              // Calculate face center
+const faceCenterX = (minX + maxX) / 2;
+const faceCenterY = (minY + maxY) / 2;
+const frameCenterX = 0.5;
+const frameCenterY = 0.5;
+
+// Check if face is centered
+const offsetX = Math.abs(faceCenterX - frameCenterX);
+const offsetY = Math.abs(faceCenterY - frameCenterY);
+const isOffCenter = offsetX > CENTER_TOLERANCE || offsetY > CENTER_TOLERANCE;
+
+// Calculate brightness
+const tempCanvasBright = document.createElement('canvas');
+tempCanvasBright.width = WIDTH;
+tempCanvasBright.height = HEIGHT;
+const tempCtxBright = tempCanvasBright.getContext('2d');
+tempCtxBright.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
+
+const faceX = Math.floor(minX * WIDTH);
+const faceY = Math.floor(minY * HEIGHT);
+const faceW = Math.floor((maxX - minX) * WIDTH);
+const faceH = Math.floor((maxY - minY) * HEIGHT);
+const imageData = tempCtxBright.getImageData(faceX, faceY, faceW, faceH);
+
+let totalBrightness = 0;
+for (let i = 0; i < imageData.data.length; i += 4) {
+    totalBrightness += (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
+}
+const avgBrightness = totalBrightness / (imageData.data.length / 4);
+const isLowLight = avgBrightness < MIN_BRIGHTNESS;
+
+console.log("📏 Face:", (faceSize * 100).toFixed(1) + "% | Center:", !isOffCenter ? "✅" : "❌", "| Light:", Math.round(avgBrightness));
+
+if (faceSize < MIN_FACE_SIZE) {
+    if (currentAlertType !== 'far') {
+        const alertDiv = document.getElementById("faceAlert");
+        alertDiv.innerHTML = '🚫 Too far! Move within 1 foot of camera';
+        alertDiv.classList.add("show");
+        alertDiv.classList.remove("warning");
+        currentAlertType = 'far';
+    }
+    if (isScanning && !scanningPaused && mediaRecorderRef && mediaRecorderRef.state === 'recording') {
+        mediaRecorderRef.pause();
+        scanningPaused = true;
+        if (scanningTimerRef) {
+            clearInterval(scanningTimerRef);
+            scanningTimerRef = null;
+        }
+    }
+} else if (isOffCenter) {
+    if (currentAlertType !== 'center') {
+        const alertDiv = document.getElementById("faceAlert");
+        let dir = offsetX > CENTER_TOLERANCE ? (faceCenterX < frameCenterX ? 'right' : 'left') : (faceCenterY < frameCenterY ? 'down' : 'up');
+        alertDiv.innerHTML = '⚠️ Move your face ' + dir + ' to center it';
+        alertDiv.classList.add("show", "warning");
+        currentAlertType = 'center';
+    }
+    handleFaceDetected();
+} else if (isLowLight) {
+    if (currentAlertType !== 'light') {
+        const alertDiv = document.getElementById("faceAlert");
+        alertDiv.innerHTML = '💡 More light needed! Move to brighter area';
+        alertDiv.classList.add("show", "warning");
+        currentAlertType = 'light';
+    }
+    handleFaceDetected();
+} else if (faceSize < IDEAL_FACE_SIZE) {
+    if (currentAlertType !== 'warning') {
+        const alertDiv = document.getElementById("faceAlert");
+        alertDiv.innerHTML = '⚠️ Move a bit closer for best scan quality';
+        alertDiv.classList.add("show", "warning");
+        currentAlertType = 'warning';
+    }
+    handleFaceDetected();
+} else {
+    if (currentAlertType !== null) {
+        const alertDiv = document.getElementById("faceAlert");
+        alertDiv.classList.remove("show", "warning");
+        currentAlertType = null;
+    }
+    handleFaceDetected();
+}
+                
+                const padding = 0.10;
                 minX = Math.max(0, minX - padding);
                 maxX = Math.min(1, maxX + padding);
                 minY = Math.max(0, minY - padding);
                 maxY = Math.min(1, maxY + padding);
                 
-                // Draw full blurred background first
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = WIDTH;
                 tempCanvas.height = HEIGHT;
@@ -3365,13 +3446,11 @@ async function getCameraPage(req, res, next) {
                 tempCtx.filter = 'blur(25px) brightness(0.6)';
                 tempCtx.drawImage(tempCanvas, 0, 0);
                 
-                // Calculate oval center and radius
                 const centerX = ((minX + maxX) / 2) * WIDTH;
                 const centerY = ((minY + maxY) / 2) * HEIGHT;
                 const radiusX = ((maxX - minX) / 2) * WIDTH;
                 const radiusY = ((maxY - minY) / 2) * HEIGHT;
                 
-                // Draw clear face inside oval mask
                 ctx.save();
                 ctx.beginPath();
                 ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
@@ -3379,14 +3458,12 @@ async function getCameraPage(req, res, next) {
                 ctx.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
                 ctx.restore();
                 
-                // Draw blurred background outside face
                 ctx.save();
                 ctx.globalCompositeOperation = "destination-over";
                 ctx.drawImage(tempCanvas, 0, 0);
                 ctx.globalCompositeOperation = "source-over";
                 ctx.restore();
                 
-                // Draw FaceMesh (tesselation, features)
                 if (typeof window.FACEMESH_TESSELATION !== 'undefined') {
                     window.drawConnectors(ctx, landmarks, window.FACEMESH_TESSELATION, { color: '#FFFFFF', lineWidth: 0.5 });
                     window.drawConnectors(ctx, landmarks, window.FACEMESH_FACE_OVAL, { color: '#FFFFFF', lineWidth: 2 });
@@ -3396,7 +3473,6 @@ async function getCameraPage(req, res, next) {
                     window.drawConnectors(ctx, landmarks, window.FACEMESH_RIGHT_EYEBROW, { color: '#FFFFFF', lineWidth: 1.5 });
                     window.drawConnectors(ctx, landmarks, window.FACEMESH_LIPS, { color: '#FFFFFF', lineWidth: 1.5 });
                     
-                    // Draw landmark points
                     landmarks.forEach(lm => {
                         ctx.beginPath();
                         ctx.arc(lm.x * WIDTH, lm.y * HEIGHT, 1, 0, Math.PI * 2);
@@ -3408,25 +3484,26 @@ async function getCameraPage(req, res, next) {
             } else {
                 handleFaceLost();
                 
-                // Draw video with blur when no face
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = WIDTH;
                 tempCanvas.height = HEIGHT;
                 const tempCtx = tempCanvas.getContext('2d');
                 tempCtx.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
-                tempCtx.filter = 'blur(15px) brightness(0.7)';
+                tempCtx.filter = 'blur(10px) brightness(0.7)';
                 tempCtx.drawImage(tempCanvas, 0, 0);
                 ctx.drawImage(tempCanvas, 0, 0);
                 
-                // Draw fixed oval in center (red) when no face
                 const centerX = WIDTH / 2;
                 const centerY = HEIGHT / 2;
                 const radiusX = WIDTH * 0.35;
                 const radiusY = HEIGHT * 0.45;
                 
                 ctx.beginPath();
-                ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
-                ctx.strokeStyle = '#ef4444';
+               ctx.ellipse(centerX, centerY, radiusY, radiusX, Math.PI / 2, 0, 2 * Math.PI);
+               ctx.clip();
+ctx.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
+ctx.restore();
+               ctx.strokeStyle = '#ef4444';
                 ctx.lineWidth = 4;
                 ctx.setLineDash([15, 15]);
                 ctx.stroke();
@@ -3434,6 +3511,60 @@ async function getCameraPage(req, res, next) {
             }
 
             ctx.restore();
+        }
+
+      function handleFaceTooFar() {
+            const facePercentage = (lastFaceSize * 100).toFixed(1);
+            console.log("❌ TOO FAR! Face size:", facePercentage + "% (minimum: 40%)");
+            showDistanceAlert('far');
+            distanceWarningShown = false; // Reset warning flag
+            
+            if (isScanning && !scanningPaused && mediaRecorderRef) {
+                if (mediaRecorderRef.state === 'recording') {
+                    mediaRecorderRef.pause();
+                    scanningPaused = true;
+                    
+                    if (scanningTimerRef) {
+                        clearInterval(scanningTimerRef);
+                        scanningTimerRef = null;
+                    }
+                    console.log("⏸️ Scanning paused - face too far");
+                }
+            }
+        }
+
+        function handleFaceDistanceWarning() {
+            if (!distanceWarningShown) {
+                const facePercentage = (lastFaceSize * 100).toFixed(1);
+                console.log("⚠️ Warning! Face size:", facePercentage + "% (ideal: 50%+)");
+                showDistanceAlert('warning');
+                distanceWarningShown = true;
+            }
+        }
+      function handleFaceDistanceOk() {
+            const facePercentage = (lastFaceSize * 100).toFixed(1);
+            console.log("✅ Perfect distance! Face size:", facePercentage + "%");
+            hideDistanceAlert();
+            distanceWarningShown = false;
+        }
+
+        function showDistanceAlert(type) {
+            const alertDiv = document.getElementById("faceAlert");
+            if (type === 'far') {
+                alertDiv.innerHTML = '🚫 Too far! Move within 1 foot of camera';
+                alertDiv.classList.add("show");
+                alertDiv.classList.remove("warning");
+            } else {
+               
+                alertDiv.classList.add("show", "warning");
+            }
+        }
+
+        function hideDistanceAlert() {
+            const alertDiv = document.getElementById("faceAlert");
+            if (alertDiv.textContent.includes('Move closer')) {
+                alertDiv.classList.remove("show", "warning");
+            }
         }
 
         function handleFaceDetected() {
@@ -3447,22 +3578,20 @@ async function getCameraPage(req, res, next) {
                 console.log("✅ Face detected!");
                 hideFaceAlert();
                 
-                // Resume recording timer and mediaRecorder
-                if (isRecording && recordingPaused && mediaRecorderRef) {
+                if (isScanning && scanningPaused && mediaRecorderRef) {
                     if (mediaRecorderRef.state === 'paused') {
                         mediaRecorderRef.resume();
-                        recordingPaused = false;
+                        scanningPaused = false;
                         
-                        // Resume timer
-                        if (!recordingTimerRef) {
-                            recordingTimerRef = setInterval(() => { 
-                                recordingDuration++; 
-                                document.getElementById("recordingTime").textContent = "REC " + formatTime(recordingDuration); 
-                                if (recordingDuration >= 30) stopRecording(); 
+                        if (!scanningTimerRef) {
+                            scanningTimerRef = setInterval(() => { 
+                                actualDuration++;
+                                displayDuration = Math.floor(actualDuration * (DISPLAY_DURATION / ACTUAL_DURATION));
+                                document.getElementById("scanningTime").textContent = "SCAN " + formatTime(displayDuration); 
+                                if (actualDuration >= ACTUAL_DURATION) stopScanning(); 
                             }, 1000);
                         }
-                        
-                        console.log("▶️ Recording resumed");
+                        console.log("▶️ Scanning resumed");
                     }
                 }
             }
@@ -3475,33 +3604,32 @@ async function getCameraPage(req, res, next) {
                     console.log("❌ Face lost!");
                     showFaceAlert();
                     
-                    // Pause recording timer and mediaRecorder
-                    if (isRecording && !recordingPaused && mediaRecorderRef) {
+                    if (isScanning && !scanningPaused && mediaRecorderRef) {
                         if (mediaRecorderRef.state === 'recording') {
                             mediaRecorderRef.pause();
-                            recordingPaused = true;
+                            scanningPaused = true;
                             
-                            // Pause timer
-                            if (recordingTimerRef) {
-                                clearInterval(recordingTimerRef);
-                                recordingTimerRef = null;
+                            if (scanningTimerRef) {
+                                clearInterval(scanningTimerRef);
+                                scanningTimerRef = null;
                             }
-                            
-                            console.log("⏸️ Recording paused");
+                            console.log("⏸️ Scanning paused");
                         }
                     }
-                }, 500); // 500ms delay
+                }, 500);
             }
         }
 
         function showFaceAlert() {
             const alertDiv = document.getElementById("faceAlert");
+            alertDiv.innerHTML = '⚠️ No face detected! Scanning paused';
+            alertDiv.classList.remove("warning");
             alertDiv.classList.add("show");
         }
 
         function hideFaceAlert() {
             const alertDiv = document.getElementById("faceAlert");
-            alertDiv.classList.remove("show");
+            alertDiv.classList.remove("show", "warning");
         }
 
         async function initializeScanner() { 
@@ -3541,7 +3669,9 @@ async function getCameraPage(req, res, next) {
                 if (typeof Camera !== 'undefined' && faceMesh) {
                     camera = new Camera(videoRef, {
                         onFrame: async () => {
-                            await faceMesh.send({image: videoRef});
+                            if (!scanCompleted) {
+                                await faceMesh.send({image: videoRef});
+                            }
                         },
                         width: WIDTH,
                         height: HEIGHT
@@ -3554,35 +3684,27 @@ async function getCameraPage(req, res, next) {
         }
 
         function setupEventListeners() { 
-            document.getElementById("startBtn").addEventListener("click", startRecording); 
-            document.getElementById("stopBtn").addEventListener("click", stopRecording); 
-            document.getElementById("recordAgainBtn").addEventListener("click", startRecording);
+            document.getElementById("startBtn").addEventListener("click", startScanning); 
             document.getElementById("retryBtn").addEventListener("click", () => window.location.reload());
-            document.getElementById("analyzeBtn").addEventListener("click", analyzeVideo);
         }
 
-        function startRecording() { 
-            if (!stream) return; 
+        function startScanning() { 
+            if (!stream || scanCompleted) return; 
             
-            resetAll();
-            isRecording = true; 
-            recordingDuration = 0;
-            recordingPaused = false;
+            isScanning = true; 
+            actualDuration = 0;
+            displayDuration = 0;
+            scanningPaused = false;
+            scanCompleted = false;
             
-            const startBtn = document.getElementById("startBtn");
-            const stopBtn = document.getElementById("stopBtn");
-            const recordAgainBtn = document.getElementById("recordAgainBtn");
-            const analyzeBtn = document.getElementById("analyzeBtn");
             const videoContainer = document.getElementById("videoContainer");
+            const controlsGrid = document.getElementById("controlsGrid");
 
-            startBtn.style.display = "none";
-            stopBtn.style.display = "block";
-            recordAgainBtn.style.display = "none";
-            analyzeBtn.style.display = "none";
+            controlsGrid.style.display = "none";
             
-            videoContainer.classList.add("recording");
-            document.getElementById("recordingIndicator").style.display = "flex"; 
-            showStatus("🔴 Recording... Keep your face in frame", "warning");
+            videoContainer.classList.add("scanning");
+            document.getElementById("scanningIndicator").style.display = "flex"; 
+            showStatus("🔬 Scanning in progress... Keep your face in frame", "warning");
 
             const chunks = []; 
             const options = {
@@ -3601,44 +3723,62 @@ async function getCameraPage(req, res, next) {
             }; 
             
             mediaRecorderRef.onstop = async () => { 
-                if (recordingTimerRef) { 
-                    clearInterval(recordingTimerRef); 
-                    recordingTimerRef = null; 
+                if (scanningTimerRef) { 
+                    clearInterval(scanningTimerRef); 
+                    scanningTimerRef = null; 
                 } 
-                isRecording = false;
-                recordingPaused = false;
-                faceDetected = false;  // Reset face detection
+                isScanning = false;
+                scanningPaused = false;
+                faceDetected = false;
+                scanCompleted = true;
+                
                 if (faceDetectionTimeout) {
                     clearTimeout(faceDetectionTimeout);
                     faceDetectionTimeout = null;
                 }
-                videoContainer.classList.remove("recording");
-                document.getElementById("recordingIndicator").style.display = "none"; 
-                stopBtn.style.display = "none"; 
-                recordAgainBtn.style.display = "block";
+                distanceWarningShown = false;
+                
+                videoContainer.classList.remove("scanning");
+                document.getElementById("scanningIndicator").style.display = "none"; 
                 hideFaceAlert();
+                
+                if (camera) {
+                    camera.stop();
+                    camera = null;
+                }
+                if (stream) {
+                    stream.getTracks().forEach(t => t.stop());
+                    stream = null;
+                }
+                
+                if (canvasRef) {
+                    const ctx = canvasRef.getContext('2d');
+                    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+                }
                 
                 recordedBlob = new Blob(chunks, { type: "video/webm" });
                 recordedVideoUrl = URL.createObjectURL(recordedBlob);
                 
-                showStatus("✅ Recording complete! Click 'Analyze Results' to continue", "success");
+                showStatus("✅ Scan complete! Analyzing results...", "success");
                 
-                analyzeBtn.style.display = "block";
-                analyzeBtn.disabled = false;
+                setTimeout(() => {
+                    analyzeVideo();
+                }, 1000);
             }; 
             
             mediaRecorderRef.start(); 
             
-            recordingTimerRef = setInterval(() => { 
-                if (!recordingPaused) {  // Only increment if not paused
-                    recordingDuration++; 
-                    document.getElementById("recordingTime").textContent = "REC " + formatTime(recordingDuration); 
-                    if (recordingDuration >= 30) stopRecording(); 
+            scanningTimerRef = setInterval(() => { 
+                if (!scanningPaused) {
+                    actualDuration++;
+                    displayDuration = Math.floor(actualDuration * (DISPLAY_DURATION / ACTUAL_DURATION));
+                    document.getElementById("scanningTime").textContent = "SCAN " + formatTime(displayDuration); 
+                    if (actualDuration >= ACTUAL_DURATION) stopScanning(); 
                 }
             }, 1000); 
         }
 
-        function stopRecording() { 
+        function stopScanning() { 
             if (mediaRecorderRef && mediaRecorderRef.state !== "inactive") {
                 if (mediaRecorderRef.state === "paused") {
                     mediaRecorderRef.resume();
@@ -3653,10 +3793,6 @@ async function getCameraPage(req, res, next) {
                 return;
             }
 
-            const analyzeBtn = document.getElementById("analyzeBtn");
-            analyzeBtn.disabled = true;
-            analyzeBtn.classList.add("loading");
-            analyzeBtn.querySelector(".btnText").textContent = "Analyzing...";
             showStatus("🔄 Analyzing video... This may take a moment", "warning");
 
             try {
@@ -3668,7 +3804,7 @@ async function getCameraPage(req, res, next) {
                     timeout: 120000,
                     onUploadProgress: (progressEvent) => {
                         const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                        showStatus("📤 Uploading... " + percentCompleted + "%", "warning");
+                        
                     }
                 });
                 
@@ -3696,33 +3832,13 @@ async function getCameraPage(req, res, next) {
                     errorMsg = error.message;
                 }
                 showStatus("❌ " + errorMsg, "error");
-                analyzeBtn.disabled = false;
-                analyzeBtn.classList.remove("loading");
-                analyzeBtn.querySelector(".btnText").textContent = "🔄 Retry Analysis";
+                
+                setTimeout(() => {
+                    const controlsGrid = document.getElementById("controlsGrid");
+                    controlsGrid.style.display = "flex";
+                    controlsGrid.innerHTML = '<button class="controlBtn" onclick="window.location.reload()">🔄 Scan Again</button>';
+                }, 2000);
             }
-        }
-
-        function resetAll() {
-            isRecording = false;
-            recordingDuration = 0;
-            recordingPaused = false;
-            recordedBlob = null;
-            recordedVideoUrl = null;
-            aiPrediction = null;
-            
-            if (recordingTimerRef) {
-                clearInterval(recordingTimerRef);
-                recordingTimerRef = null;
-            }
-            
-            hideFaceAlert();
-            hideStatus();
-            
-            const analyzeBtn = document.getElementById("analyzeBtn");
-            analyzeBtn.style.display = "none";
-            analyzeBtn.disabled = true;
-            analyzeBtn.classList.remove("loading");
-            analyzeBtn.querySelector(".btnText").textContent = "📊 Analyze Results";
         }
 
         function showError(msg) { 
@@ -3743,7 +3859,6 @@ async function getCameraPage(req, res, next) {
     res.status(500).json({ success: false, error: error.message });
   }
 }
-
 async function getResultsPage(req, res, next) {
   try {
     const html = `<!DOCTYPE html>
