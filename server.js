@@ -418,31 +418,31 @@ async function getpage(req, res, next) {
             pointer-events: none;
             z-index: 20;
         }
-        .videoOverlay {
-             backdrop-filter: blur(10px);  /* 20px → 25px */
-             background: rgba(0,0,0,0.70);  /* rgba(255,255,255,0.10) → rgba(0,0,0,0.70) */
-            -webkit-mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 68%, black 72%);
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 30;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(16px);
-            mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
+        // .videoOverlay {
+        //      backdrop-filter: blur(10px);  /* 20px → 25px */
+        //      background: rgba(0,0,0,0.70);  /* rgba(255,255,255,0.10) → rgba(0,0,0,0.70) */
+        //     -webkit-mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 68%, black 72%);
+        //     position: absolute;
+        //     inset: 0;
+        //     pointer-events: none;
+        //     z-index: 30;
+        //     backdrop-filter: blur(20px);
+        //     -webkit-backdrop-filter: blur(16px);
+        //     mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
          
-        }
-        .videoOval {
-            border: 4px dashed rgba(255, 255, 255, 0.95);
-            position: absolute;
-            left: 6%;
-            top: 4%;
-            width: 88%;
-            height: 92%;
-            border: 5px dashed #fff;
-            border-radius: 50%;
-            z-index: 31;
-            pointer-events: none;
-        }
+        // }
+        // .videoOval {
+        //     border: 4px dashed rgba(255, 255, 255, 0.95);
+        //     position: absolute;
+        //     left: 6%;
+        //     top: 4%;
+        //     width: 88%;
+        //     height: 92%;
+        //     border: 5px dashed #fff;
+        //     border-radius: 50%;
+        //     z-index: 31;
+        //     pointer-events: none;
+        // }
       .controlsGrid {
   display: flex;
   justify-content: center;
