@@ -702,8 +702,8 @@ async function getpage(req, res, next) {
                 maxY = Math.max(maxY, landmark.y);
             });
             
-            const paddingX = 0.15;
-            const paddingTop = 0.15;
+            const paddingX = 0.05;
+            const paddingTop = 0.25;
             const paddingBottom = 0.15;
             
             minX = Math.max(0, minX - paddingX);
@@ -2604,8 +2604,8 @@ async function getCameraPage(req, res, next) {
         
         const centerX = WIDTH / 2;
         const centerY = HEIGHT / 2;
-        const radiusX = WIDTH * 0.38;
-        const radiusY = HEIGHT * 0.42;
+        const radiusX = WIDTH * 0.30;
+        const radiusY = HEIGHT * 0.48;
         
         ctx.save();
         ctx.beginPath();
