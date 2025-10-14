@@ -2469,8 +2469,8 @@ async function getCameraPage(req, res, next) {
                 
                 const faceCenterX = (minX + maxX) / 2;
                 const faceCenterY = (minY + maxY) / 2;
-                const frameCenterX = 0.5;
-                const frameCenterY = 0.5;
+                const frameCenterX = 0.1;
+                const frameCenterY = 0.1;
 
                 const offsetX = Math.abs(faceCenterX - frameCenterX);
                 const offsetY = Math.abs(faceCenterY - frameCenterY);
