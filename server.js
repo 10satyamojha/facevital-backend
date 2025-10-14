@@ -1311,17 +1311,20 @@ async function getpage(req, res, next) {
             z-index: 20;
         }
         .videoOverlay {
+             backdrop-filter: blur(25px);  /* 20px → 25px */
+             background: rgba(0,0,0,0.70);  /* rgba(255,255,255,0.10) → rgba(0,0,0,0.70) */
+            -webkit-mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 68%, black 72%);
             position: absolute;
             inset: 0;
             pointer-events: none;
             z-index: 30;
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(16px);
-            -webkit-mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
             mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
-            background: rgba(255,255,255,0.10);
+         
         }
         .videoOval {
+            border: 4px dashed rgba(255, 255, 255, 0.95);
             position: absolute;
             left: 6%;
             top: 4%;
@@ -1358,6 +1361,13 @@ async function getpage(req, res, next) {
             }
         }
         @media screen and (max-width: 479px) { 
+
+         #videoContainer {
+        aspect-ratio: 3/4;  /* 9/16 → 3/4 (better for face) */
+    }
+    .videoOval {
+        border-width: 3px;  /* NEW: thinner border on mobile */
+    }
             .cameraSection { 
                 padding: 0.75rem; 
             } 
@@ -3156,6 +3166,7 @@ async function getCameraPage(req, res, next) {
                 border-radius: 16px 16px 0 0;
             }
             .header h1 {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);  
                 font-size: 1.25rem;
             }
             .cameraContainer { 
