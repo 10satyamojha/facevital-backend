@@ -2057,28 +2057,28 @@ async function getCameraPage(req, res, next) {
             width: 100%;
             max-width: 500px;
         }
-        .videoOverlay {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 30;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            -webkit-mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
-            mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
-            background: rgba(255,255,255,0.10);
-        }
-        .videoOval {
-            position: absolute;
-            left: 6%;
-            top: 4%;
-            width: 88%;
-            height: 92%;
-            border: 5px dashed #fff;
-            border-radius: 50%;
-            z-index: 31;
-            pointer-events: none;
-        }
+        // .videoOverlay {
+        //     position: absolute;
+        //     inset: 0;
+        //     pointer-events: none;
+        //     z-index: 30;
+        //     backdrop-filter: blur(20px);
+        //     -webkit-backdrop-filter: blur(20px);
+        //     -webkit-mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
+        //     mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
+        //     background: rgba(255,255,255,0.10);
+        // }
+        // .videoOval {
+        //     position: absolute;
+        //     left: 6%;
+        //     top: 4%;
+        //     width: 88%;
+        //     height: 92%;
+        //     border: 5px dashed #fff;
+        //     border-radius: 50%;
+        //     z-index: 31;
+        //     pointer-events: none;
+        // }
         .header { 
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
