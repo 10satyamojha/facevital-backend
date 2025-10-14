@@ -419,7 +419,7 @@ async function getpage(req, res, next) {
             z-index: 20;
         }
         .videoOverlay {
-             backdrop-filter: blur(50px);  /* 20px → 25px */
+             backdrop-filter: blur(10px);  /* 20px → 25px */
              background: rgba(0,0,0,0.70);  /* rgba(255,255,255,0.10) → rgba(0,0,0,0.70) */
             -webkit-mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 68%, black 72%);
             position: absolute;
