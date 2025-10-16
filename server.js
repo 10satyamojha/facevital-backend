@@ -3343,7 +3343,10 @@ async function getResultsPage(req, res, next) {
             const diaProgress = diastolic !== '--' ? Math.min((diastolic / 90) * 100, 100) : 0;
             const o2Progress = o2 !== '--' ? Math.min((o2 / 100) * 100, 100) : 0;
             const stressProgress = stress !== null ? (stress / 5) * 100 : 0;
-            
+            const stressScaled = (stressValue / 100) * 5;
+
+// Round karna ho toh (optional)
+const stressDisplay = stressScaled.toFixed(1);
             let html = '';
             
             // if (videoUrl) {
@@ -3382,11 +3385,12 @@ async function getResultsPage(req, res, next) {
                             '<td class="vital-status"><span class="status-badge" style="background: #d1fae5; color: #065f46;">Excellent</span></td>' +
                         '</tr>' +
                         '<tr>' +
-                            '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, ' + stressColor + ', ' + stressColor + ');">🧠</span>Stress Level</div></td>' +
-                            '<td><div class="vital-value" style="color: ' + stressColor + ';">' + stressValue + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, ' + stressColor + ', ' + stressColor + 'dd); width: ' + stressProgress + '%;"></div></div></div></td>' +
-                            '<td class="vital-unit">0-5 Scale</td>' +
-                            '<td class="vital-status"><span class="status-badge" style="background: ' + stressColor + '20; color: ' + stressColor + ';">' + stressLabel + '</span></td>' +
-                        '</tr>' +
+    '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, ' + stressColor + ', ' + stressColor + ');">🧠</span>Stress Level</div></td>' +
+    '<td><div class="vital-value" style="color: ' + stressColor + ';">' + stressDisplay + 
+        '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, ' + stressColor + ', ' + stressColor + 'dd); width: ' + stressProgress + '%;"></div></div></div></td>' +
+    '<td class="vital-unit">0–5 Scale</td>' +
+    '<td class="vital-status"><span class="status-badge" style="background: ' + stressColor + '20; color: ' + stressColor + ';">' + stressLabel + '</span></td>' +
+'</tr>' +
                     '</tbody>' +
                 '</table>' +
             '</div>';
