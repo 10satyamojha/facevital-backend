@@ -577,7 +577,7 @@ async function getpage(req, res, next) {
     let faceDetectionTimeout = null;
     let recordingPaused = false;
     
-    const AI_API_URL = "https://anurudh-268064419384.asia-east1.run.app/analyze";
+    const AI_API_URL = "http://34.68.58.99:8080/analyze";
     const WIDTH = 1280, HEIGHT = 720;  // High quality resolution
 
     function formatTime(s) { 
@@ -1642,7 +1642,7 @@ async function getpage(req, res, next) {
 //         let recordingPaused = false;
 //         let recordedBlob = null;
         
-//         const AI_API_URL = "https://anurudh-268064419384.asia-east1.run.app/analyze";
+//         const AI_API_URL = "http://34.68.58.99:8080/analyze";
 //         const WIDTH = 1280, HEIGHT = 720;
 
 //         function formatTime(s) { 
@@ -2443,7 +2443,7 @@ async function getCameraPage(req, res, next) {
 
 
 
-        const AI_API_URL = "https://anurudh-268064419384.asia-east1.run.app/analyze";
+        const AI_API_URL = "http://34.68.58.99:8080/analyze";
         const WIDTH = 1280, HEIGHT = 720;
         const ACTUAL_DURATION = 35;
         const DISPLAY_DURATION = 30;
