@@ -1088,7 +1088,7 @@ async function getpage(req, res, next) {
                 headers: { 
                     "Content-Type": "multipart/form-data" 
                 }, 
-                timeout: 120000,
+                timeout: 0,
                 onUploadProgress: (progressEvent) => {
                     const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                     showStatus("Uploading... " + percentCompleted + "%", "warning");
@@ -2998,7 +2998,7 @@ ctx.restore();
                 
                 const res = await axios.post(AI_API_URL, fd, {
                     headers: { "Content-Type": "multipart/form-data" },
-                    timeout: 120000,
+                    timeout: 0,
                     onUploadProgress: (progressEvent) => {
                         const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                         
