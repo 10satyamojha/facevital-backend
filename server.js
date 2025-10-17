@@ -577,7 +577,7 @@ async function getpage(req, res, next) {
     let faceDetectionTimeout = null;
     let recordingPaused = false;
     
-    const AI_API_URL = "https://facescan.duckdns.org/analyze";
+    const AI_API_URL = "https://facescan.duckdns.org";
     const WIDTH = 1280, HEIGHT = 720;  // High quality resolution
 
     function formatTime(s) { 
@@ -2985,152 +2985,56 @@ ctx.restore();
         }
 
 async function analyzeVideo() {
-    if (!recordedBlob) {
-        showStatus("❌ No video recorded!", "error");
-        return;
-    }
-    
-    showStatus("🔄 Uploading video...", "warning");
-    
-    try {
-        // STEP 1: Upload video and get job_id
-        const fd = new FormData();
-        fd.append("file", recordedBlob, "scan.webm");
-        
-        const uploadRes = await axios.post(AI_API_URL + '/analyze', fd, {
-            headers: { "Content-Type": "multipart/form-data" },
-            timeout: 60000, // 60 second upload timeout
-            onUploadProgress: (progressEvent) => {
-                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            if (!recordedBlob) {
+                showStatus("❌ No video recorded!", "error");
+                return;
+            }
+            showStatus("🔄 Analyzing video... This may take a moment", "warning");
+            try {
+                const fd = new FormData();
+                fd.append("file", recordedBlob, "scan.webm");
+
+                const res = await axios.post(AI_API_URL, fd, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                    timeout: 0,
+                    onUploadProgress: (progressEvent) => {
+                        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+
+                    }
+                });
+
+                aiPrediction = res.data;
               
-            }
-        });
-        
-        // Check if upload was successful
-        if (!uploadRes.data.success || !uploadRes.data.job_id) {
-            throw new Error(uploadRes.data.error || "Upload failed");
-        }
-        
-        const jobId = uploadRes.data.job_id;
-        const estimatedTime = uploadRes.data.estimated_time || "30-60 seconds";
-        
-        console.log("✓ Upload complete. Job ID:", jobId);
-        console.log("Estimated processing time:", estimatedTime);
-        
-        
-        
-        // STEP 2: Poll for results
-        const result = await pollForResult(jobId);
-        
-        // STEP 3: Handle successful result
-        aiPrediction = result;
-        console.log("✓ Analysis complete:", result);
-        
-        if (!aiPrediction || !aiPrediction.success) {
-            throw new Error(aiPrediction.error || "Analysis failed");
-        }
-        
-        showStatus("✅ Analysis complete! Redirecting...", "success");
-        
-        setTimeout(() => {
-            window.location.href = '/results?data=' + encodeURIComponent(JSON.stringify(aiPrediction)) + 
-                                  '&video=' + encodeURIComponent(recordedVideoUrl);
-        }, 1500);
-        
-    } catch (error) {
-        console.error("Analysis error:", error);
-        
-        let errorMsg = "Analysis failed";
-        
-        if (error.response) {
-            // Server responded with error
-          
-        } else if (error.code === 'ECONNABORTED') {
-            // Timeout
-            errorMsg = "Request timeout - please try again with a shorter video";
-        } else if (error.code === 'ERR_NETWORK') {
-            // Network error
-            errorMsg = "Cannot reach server. Please check your internet connection and try again.";
-        } else {
-            // Other errors
-            errorMsg = error.message || "Unknown error occurred";
-        }
-        
-        showStatus("❌ " + errorMsg, "error");
-        
-        setTimeout(() => {
-            const controlsGrid = document.getElementById("controlsGrid");
-            if (controlsGrid) {
-                controlsGrid.style.display = "flex";
-                controlsGrid.innerHTML = '<button class="controlBtn" onclick="window.location.reload()">🔄 Scan Again</button>';
-            }
-        }, 2000);
-    }
-}
+                if (!aiPrediction || aiPrediction.error) {
+                    throw new Error(aiPrediction.error || "Analysis failed");
+                }
 
-/**
- * Poll the /result/<job_id> endpoint until processing is complete
- */
-async function pollForResult(jobId, maxAttempts = 120) {
-    let attempts = 0;
-    const pollInterval = 2000; // Poll every 2 seconds
-    
-    while (attempts < maxAttempts) {
-        attempts++;
-        
-        try {
-            const res = await axios.get(`${AI_API_URL}/result/${jobId}`, {
-                timeout: 10000 // 10 second timeout per poll
-            });
-            
-            const data = res.data;
-            
-            // Check if still processing
-            if (data.status === 'pending' || data.status === 'processing') {
-                const progress = data.progress || 0;
-                showStatus(`⏳ Processing: ${progress}%`, "warning");
-                
-                // Wait before next poll
-                await new Promise(resolve => setTimeout(resolve, pollInterval));
-                continue;
-            }
-            
-            // Check if completed
-            if (data.status === 'completed' && data.success) {
-                return data; // Success!
-            }
-            
-            // Check if failed
-            if (data.status === 'failed' || !data.success) {
-                throw new Error(data.error || 'Processing failed');
-            }
-            
-            // Unknown status
-            throw new Error('Unknown processing status: ' + data.status);
-            
-        } catch (error) {
-            // If it's a 202 (Accepted - still processing), continue polling
-            if (error.response && error.response.status === 202) {
-                const data = error.response.data;
-                const progress = data.progress || 0;
+                showStatus("✅ Analysis complete! Redirecting...", "success");
 
-                await new Promise(resolve => setTimeout(resolve, pollInterval));
-                continue;
+                setTimeout(() => {
+                    window.location.href = '/results?data=' + encodeURIComponent(JSON.stringify(aiPrediction)) + 
+                                          '&video=' + encodeURIComponent(recordedVideoUrl);
+                }, 1500);
+
+            } catch (error) {
+                console.error("Analysis error:", error);
+                let errorMsg = "Analysis failed";
+                if (error.response) {
+                    errorMsg = error.response.data?.error || "Server error: " + error.response.status;
+                } else if (error.code === 'ECONNABORTED') {
+                    errorMsg = "Request timeout - please try again";
+                } else {
+                    errorMsg = error.message;
+                }
+                showStatus("❌ " + errorMsg, "error");
+
+                setTimeout(() => {
+                    const controlsGrid = document.getElementById("controlsGrid");
+                    controlsGrid.style.display = "flex";
+                    controlsGrid.innerHTML = '<button class="controlBtn" onclick="window.location.reload()">🔄 Scan Again</button>';
+                }, 2000);
             }
-            
-            // If it's a 404, job might have expired
-            if (error.response && error.response.status === 404) {
-                throw new Error('Job expired or not found. Please try again.');
-            }
-            
-            // Other errors, rethrow
-            throw error;
         }
-    }
-    
-    // Timeout after max attempts
-    
-}
         function showError(msg) { 
             document.getElementById("loadingState").style.display = "none"; 
             document.getElementById("cameraInterface").style.display = "none"; 
