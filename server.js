@@ -3002,7 +3002,7 @@ async function analyzeVideo() {
             timeout: 60000, // 60 second upload timeout
             onUploadProgress: (progressEvent) => {
                 const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                showStatus(`📤 Uploading: ${percentCompleted}%`, "warning");
+              
             }
         });
         
