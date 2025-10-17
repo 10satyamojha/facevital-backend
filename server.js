@@ -3017,7 +3017,7 @@ async function analyzeVideo() {
         console.log("✓ Upload complete. Job ID:", jobId);
         console.log("Estimated processing time:", estimatedTime);
         
-        showStatus(`⏳ Processing video... (${estimatedTime})`, "warning");
+        
         
         // STEP 2: Poll for results
         const result = await pollForResult(jobId);
