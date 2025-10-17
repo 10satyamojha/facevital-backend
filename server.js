@@ -1121,7 +1121,7 @@ async function getpage(req, res, next) {
                 stressLevel: pred.stress_indicator ? (pred.stress_indicator * 100).toFixed(1) : null,
                 respiratoryRate: pred.respiratory_rate_bpm ? Math.round(pred.respiratory_rate_bpm) : null,
                 age: pred.age || null,
-                gender: pred.gender || null,
+              
                 healthRisk: pred.health_risk_indicator ? (pred.health_risk_indicator * 100).toFixed(1) : null
             }; 
             
@@ -3350,7 +3350,7 @@ async function getResultsPage(req, res, next) {
             health_risk: 0.3,
             demographics: {
                 age: 'Unknown',
-                gender: 'Unknown',
+               
                 emotion: 'Neutral',
                 age_confidence: 0.0,
                 gender_confidence: 0.0,
@@ -3448,7 +3448,7 @@ async function getResultsPage(req, res, next) {
             }
             
             // Demographics Section
-            if (demographics.age !== 'Unknown' || demographics.gender !== 'Unknown' || demographics.emotion !== 'Not Available') {
+            if (demographics.age !== 'Unknown' || demographics.emotion !== 'Not Available') {
                 html += '<div class="demographicsContainer">' +
                     '<div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">👤 Demographics & Emotion</div>' +
                     '<div class="demographicsGrid">' +
