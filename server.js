@@ -2984,7 +2984,7 @@ ctx.restore();
             }
         }
 
-       async function analyzeVideo() {
+     async function analyzeVideo() {
 
             if (!recordedBlob) {
 
@@ -3024,7 +3024,7 @@ ctx.restore();
 
                 aiPrediction = res.data;
 
-                console.log("ai data",res.data)
+                
 
                 if (!aiPrediction || aiPrediction.error) {
 
