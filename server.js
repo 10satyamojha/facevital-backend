@@ -3044,7 +3044,7 @@ async function analyzeVideo() {
         
         if (error.response) {
             // Server responded with error
-            errorMsg = error.response.data?.error || `Server error: ${error.response.status}`;
+          
         } else if (error.code === 'ECONNABORTED') {
             // Timeout
             errorMsg = "Request timeout - please try again with a shorter video";
@@ -3113,7 +3113,7 @@ async function pollForResult(jobId, maxAttempts = 120) {
             if (error.response && error.response.status === 202) {
                 const data = error.response.data;
                 const progress = data.progress || 0;
-                showStatus(`⏳ Processing: ${progress}%`, "warning");
+
                 await new Promise(resolve => setTimeout(resolve, pollInterval));
                 continue;
             }
@@ -3129,7 +3129,7 @@ async function pollForResult(jobId, maxAttempts = 120) {
     }
     
     // Timeout after max attempts
-    throw new Error(`Processing timeout after ${(maxAttempts * pollInterval) / 1000} seconds. Please try with a shorter video.`);
+    
 }
         function showError(msg) { 
             document.getElementById("loadingState").style.display = "none"; 
