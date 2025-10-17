@@ -3006,7 +3006,7 @@ ctx.restore();
                 });
                 
                 aiPrediction = res.data;
-                
+                console.log("ai data",res.data)
                 if (!aiPrediction || aiPrediction.error) {
                     throw new Error(aiPrediction.error || "Analysis failed");
                 }
@@ -3019,22 +3019,33 @@ ctx.restore();
                 }, 1500);
                 
             } catch (error) {
-                console.error("Analysis error:", error);
-                let errorMsg = "Analysis failed";
-                if (error.response) {
-                    errorMsg = error.response.data?.error || "Server error: " + error.response.status;
-                } else if (error.code === 'ECONNABORTED') {
-                    errorMsg = "Request timeout - please try again";
-                } else {
-                    errorMsg = error.message;
-                }
-                showStatus("❌ " + errorMsg, "error");
-                
-                setTimeout(() => {
-                    const controlsGrid = document.getElementById("controlsGrid");
-                    controlsGrid.style.display = "flex";
-                    controlsGrid.innerHTML = '<button class="controlBtn" onclick="window.location.reload()">🔄 Scan Again</button>';
-                }, 2000);
+        console.error("Analysis error:", error);
+        
+        let errorMsg = "Analysis failed";
+        
+        if (error.response) {
+            // Server responded with error
+            errorMsg = error.response.data?.error || `Server error: ${error.response.status}`;
+        } else if (error.code === 'ECONNABORTED') {
+            // Timeout
+            errorMsg = "Request timeout - please try again with a shorter video";
+        } else if (error.code === 'ERR_NETWORK') {
+            // Network error
+            errorMsg = "Cannot reach server. Please check your internet connection and try again.";
+        } else {
+            // Other errors
+            errorMsg = error.message || "Unknown error occurred";
+        }
+        
+        showStatus("❌ " + errorMsg, "error");
+        
+        setTimeout(() => {
+            const controlsGrid = document.getElementById("controlsGrid");
+            if (controlsGrid) {
+                controlsGrid.style.display = "flex";
+                controlsGrid.innerHTML = '<button class="controlBtn" onclick="window.location.reload()">🔄 Scan Again</button>';
+            }
+        }, 2000);
             }
         }
 
