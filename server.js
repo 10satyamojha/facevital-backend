@@ -2444,6 +2444,7 @@ async function getCameraPage(req, res, next) {
 
 
         const AI_API_URL = "https://facescan.duckdns.org/analyze";
+        const AI_API_URL = API_BASE_URL + "/analyze";
         const WIDTH = 1280, HEIGHT = 720;
         const ACTUAL_DURATION = 35;
         const DISPLAY_DURATION = 30;
@@ -2984,7 +2985,7 @@ ctx.restore();
             }
         }
 
- async function pollForResults(jobId) {
+          async function pollForResults(jobId) {
             const maxAttempts = 120; // 10 minutes
             const pollInterval = 5000; // 5 seconds
             let attempts = 0;
