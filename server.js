@@ -4074,7 +4074,6 @@ async function getCameraPage(req, res, next) {
                     timeout: 60000,
                     onUploadProgress: (progressEvent) => {
                         const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                        showStatus(\`📤 Uploading: \${percent}%\`, "warning");
                         console.log(\`📤 Upload: \${percent}%\`);
                     }
                 });
@@ -4168,7 +4167,7 @@ async function getResultsPage(req, res, next) {
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background: #f8fafc; 
+            background: #FFFFFF; 
             min-height: 100vh;
             padding: 1rem;
         }
@@ -4227,7 +4226,7 @@ async function getResultsPage(req, res, next) {
             font-weight: 700; 
         }
         .demographicsContainer {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, 0%,  100%);
             border-radius: 12px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
@@ -4263,7 +4262,7 @@ async function getResultsPage(req, res, next) {
         }
         .vitals-table-wrapper { 
             overflow-x: auto; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            background: linear-gradient(135deg,  0%,  100%); 
             padding: 24px; 
             border-radius: 20px; 
             box-shadow: 0 20px 50px rgba(102, 126, 234, 0.4); 
@@ -4278,7 +4277,7 @@ async function getResultsPage(req, res, next) {
             box-shadow: 0 8px 24px rgba(0,0,0,0.12); 
         }
         .vitals-table thead tr { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            background: linear-gradient(135deg,  0%,  100%); 
         }
         .vitals-table th { 
             padding: 20px 16px; 
@@ -4541,13 +4540,6 @@ async function getResultsPage(req, res, next) {
                     '</div>';
                 }
                 
-                if (demographics.gender) {
-                    html += '<div class="demoCard">' +
-                        '<div class="demoLabel">Gender</div>' +
-                        '<div class="demoValue">' + demographics.gender + '</div>' +
-                        (demographics.gender_confidence > 0 ? '<div style="font-size: 0.75rem; margin-top: 0.25rem;">Confidence: ' + (demographics.gender_confidence * 100).toFixed(0) + '%</div>' : '') +
-                    '</div>';
-                }
                 
                 if (demographics.emotion && demographics.emotion !== 'Not Available') {
                     html += '<div class="demoCard">' +
