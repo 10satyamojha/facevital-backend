@@ -4770,7 +4770,7 @@ async function getResultsPage(req, res, next) {
         }
         .demographics {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
         }
         .demo-item {
@@ -4926,6 +4926,9 @@ async function getResultsPage(req, res, next) {
             .card-header {
                 font-size: 1.125rem;
             }
+            .demographics {
+                grid-template-columns: 1fr;
+            }
             .demo-item {
                 padding: 1rem;
             }
@@ -5044,28 +5047,9 @@ async function getResultsPage(req, res, next) {
                     '</div>' +
                 '</div>';
             }
-
-       const hasEmotion = demographics.emotion && 
-                              demographics.emotion !== 'Not Available' && 
-                              demographics.emotion !== 'Unknown';
             
-            const isNeutralOnly = hasEmotion && demographics.emotion === 'Neutral' && demographics.emotion_confidence === 0;
-       
-
-
-
-
-
-
-
-
-            
-            // Parse metabolic age from range - FIXED VERSION
-          let metabolicAge = null;
-
-
-
-
+            // Parse metabolic age from range
+         let metabolicAge = null;
 
 if (demographics.age) {
     // Force string and clean all weird Unicode chars
@@ -5095,38 +5079,38 @@ if (demographics.age) {
 
 console.log('Final Metabolic Age:', metabolicAge);
 
-
-
+            // Check emotion validity
+            const hasEmotion = demographics.emotion && 
+                              demographics.emotion !== 'Not Available' && 
+                              demographics.emotion !== 'Unknown';
             
-            // Demographics Section - ONLY AGE
-            if (metabolicAge) {
+            const isNeutralOnly = hasEmotion && demographics.emotion === 'Neutral' && demographics.emotion_confidence === 0;
+            
+            console.log('=== DEMOGRAPHICS DEBUG ===');
+            console.log('Raw age:', demographics.age);
+            console.log('Parsed Metabolic Age:', metabolicAge);
+            console.log('Raw emotion:', demographics.emotion);
+            console.log('Emotion confidence:', demographics.emotion_confidence);
+            console.log('Has valid data:', metabolicAge || hasEmotion);
+            
+            // Demographics Section - Show if we have age OR emotion
+            const showDemographics = metabolicAge || hasEmotion;
+            
+            if (showDemographics) {
                 html += '<div class="card">' +
                     '<div class="card-header">👤 Analysis Details</div>' +
-                    '<div class="demographics">' +
-                    '<div class="demo-item">' +
+                    '<div class="demographics">';
+                
+                if (metabolicAge) {
+                    html += '<div class="demo-item">' +
                         '<div class="demo-label">Metabolic Age</div>' +
                         '<div class="demo-value">' + metabolicAge + '</div>' +
                         '<div class="vital-unit">Years</div>' +
                         (demographics.age_confidence > 0 ? '<div class="demo-confidence">' + (demographics.age_confidence * 100).toFixed(0) + '% confident</div>' : '') +
-                    '</div>' +
-                    '</div></div>';
-            } else {
-                html += '<div class="card">' +
-                    '<div class="card-header">👤 Analysis Details</div>' +
-                    '<div class="warningBanner" style="margin: 0;">' +
-                        '<span class="icon">⚠️</span>' +
-                        '<div class="text">' +
-                            '<strong>Age analysis not available.</strong> For better results, ensure good lighting and face the camera directly during the scan.' +
-                        '</div>' +
-                    '</div>' +
-                '</div>';
-            }
-
-
-
-
- if (hasEmotion) {
-                    // Show emotion with appropriate styling
+                    '</div>';
+                }
+                
+                if (hasEmotion) {
                     const emotionStyle = isNeutralOnly ? 'font-size: 1.25rem; color: #999;' : 'font-size: 1.5rem;';
                     const borderStyle = isNeutralOnly ? 'border: 2px dashed #e5e5e5;' : '';
                     
@@ -5154,7 +5138,6 @@ console.log('Final Metabolic Age:', metabolicAge);
                 
                 html += '</div></div>';
             } else {
-                // Show fallback only if absolutely no data
                 html += '<div class="card">' +
                     '<div class="card-header">👤 Analysis Details</div>' +
                     '<div class="warningBanner" style="margin: 0;">' +
@@ -5165,11 +5148,6 @@ console.log('Final Metabolic Age:', metabolicAge);
                     '</div>' +
                 '</div>';
             }
-
-
-
-
-
             
             // Vitals Section
             html += '<div class="card">' +
