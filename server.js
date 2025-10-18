@@ -3936,8 +3936,8 @@ async function getCameraPage(req, res, next) {
         }
 
         async function pollForResults(jobId) {
-            const maxAttempts = 120;
-            const pollInterval = 5000;
+            const maxAttempts = 120; // 10 minutes max
+            const pollInterval = 5000; // 5 seconds
             let attempts = 0;
 
             return new Promise((resolve, reject) => {
@@ -3945,46 +3945,104 @@ async function getCameraPage(req, res, next) {
                     attempts++;
                     
                     try {
-                        console.log(\`📊 Poll \${attempts}/\${maxAttempts}...\`);
+                        console.log(\`📊 Poll attempt \${attempts}/\${maxAttempts}\`);
                         
+                        // Step 1: Check status first
                         const statusUrl = \`\${API_BASE_URL}/status/\${jobId}\`;
                         const statusRes = await axios.get(statusUrl, { timeout: 10000 });
+                        
+                        if (!statusRes.data || !statusRes.data.success) {
+                            reject(new Error(statusRes.data?.error || 'Status check failed'));
+                            return;
+                        }
                         
                         const { status, progress, is_complete } = statusRes.data;
                         
                         console.log(\`   Status: \${status}, Progress: \${progress}%\`);
-                        showStatus(\`⚙️ \${status}: \${progress}%\`, "warning");
+                        showStatus(\`⚙️ Processing: \${progress}%\`, "warning");
                         
+                        // Step 2: If complete, fetch result
                         if (is_complete) {
-                            console.log("✅ Analysis complete!");
+                            console.log("✅ Job complete! Fetching result...");
                             
                             const resultUrl = \`\${API_BASE_URL}/result/\${jobId}\`;
-                            const resultRes = await axios.get(resultUrl, { timeout: 10000 });
+                            const resultRes = await axios.get(resultUrl, { timeout: 15000 });
                             
+                            // Success (200)
                             if (resultRes.status === 200) {
-                                resolve(resultRes.data);
-                            } else if (resultRes.status === 202) {
+                                if (resultRes.data && resultRes.data.success) {
+                                    console.log("✅ Result received successfully!");
+                                    resolve(resultRes.data);
+                                } else {
+                                    reject(new Error(resultRes.data?.error || 'Invalid result data'));
+                                }
+                                return;
+                            }
+                            
+                            // Still processing (202) - should not happen if is_complete=true
+                            if (resultRes.status === 202) {
+                                console.log("⚠️  Status says complete but result not ready, retrying...");
                                 if (attempts < maxAttempts) {
                                     setTimeout(checkStatus, pollInterval);
                                 } else {
-                                    reject(new Error("Timeout"));
+                                    reject(new Error("Timeout waiting for result"));
                                 }
-                            } else {
-                                reject(new Error(resultRes.data?.error || "Failed"));
+                                return;
                             }
-                        } else {
-                            if (attempts < maxAttempts) {
-                                setTimeout(checkStatus, pollInterval);
-                            } else {
-                                reject(new Error("Analysis timeout"));
+                            
+                            // Timeout (408)
+                            if (resultRes.status === 408) {
+                                reject(new Error(resultRes.data?.error || 'Processing timeout'));
+                                return;
                             }
+                            
+                            // Other error
+                            reject(new Error(resultRes.data?.error || \`Server error: \${resultRes.status}\`));
+                            return;
                         }
                         
-                    } catch (error) {
-                        console.error(\`❌ Poll error:\`, error);
+                        // Step 3: Not complete yet, keep polling
+                        if (status === 'pending' || status === 'processing') {
+                            if (attempts < maxAttempts) {
+                                console.log(\`   Still \${status}... waiting \${pollInterval/1000}s\`);
+                                setTimeout(checkStatus, pollInterval);
+                            } else {
+                                reject(new Error('Analysis timeout - taking too long'));
+                            }
+                            return;
+                        }
                         
-                        if (attempts < maxAttempts) {
-                            console.log("   Retrying...");
+                        // Step 4: Failed or timeout status
+                        if (status === 'failed') {
+                            reject(new Error(statusRes.data.error || 'Analysis failed'));
+                            return;
+                        }
+                        
+                        if (status === 'timeout') {
+                            reject(new Error('Analysis timeout on server'));
+                            return;
+                        }
+                        
+                        // Unknown status
+                        reject(new Error(\`Unknown status: \${status}\`));
+                        
+                    } catch (error) {
+                        console.error(\`❌ Poll error:\`, error.message);
+                        
+                        // Network errors - retry
+                        if (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK') {
+                            if (attempts < maxAttempts) {
+                                console.log("   Network issue, retrying...");
+                                setTimeout(checkStatus, pollInterval);
+                            } else {
+                                reject(new Error('Network timeout - please check connection'));
+                            }
+                            return;
+                        }
+                        
+                        // Other errors - retry a few times
+                        if (attempts < 3) {
+                            console.log("   Error occurred, retrying...");
                             setTimeout(checkStatus, pollInterval);
                         } else {
                             reject(error);
@@ -3992,6 +4050,7 @@ async function getCameraPage(req, res, next) {
                     }
                 };
                 
+                // Start polling
                 checkStatus();
             });
         }
@@ -4095,6 +4154,7 @@ async function getCameraPage(req, res, next) {
     res.status(500).json({ success: false, error: error.message });
   }
 }
+
 
 async function getResultsPage(req, res, next) {
   try {
