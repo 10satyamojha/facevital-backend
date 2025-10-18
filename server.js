@@ -64,7 +64,7 @@ async function getpage(req, res, next) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Health Vitals Scanner</title>
+   
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
     <style>
         :root {
@@ -504,7 +504,7 @@ async function getpage(req, res, next) {
 <body>
     <div class="cameraSection">
         <div class="cameraHeader">
-            <h1>Health Vitals Scanner</h1>
+
             <p>Position your face in the oval and record for 30 seconds.</p>
         </div>
         <div class="cameraContainer">
@@ -3151,7 +3151,7 @@ async function getCameraPage(req, res, next) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Health Vitals Scanner</title>
+  
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -3407,7 +3407,7 @@ async function getCameraPage(req, res, next) {
 <body>
     <div class="mainContainer">
         <div class="header">
-            <h1>🏥 Health Vitals Scanner</h1>
+           
             <p>Position your face in frame • Scan for 30 seconds</p>
         </div>
 
@@ -4155,6 +4155,526 @@ async function getCameraPage(req, res, next) {
 }
 
 
+// async function getResultsPage(req, res, next) {
+//   try {
+//     const html = `<!DOCTYPE html>
+// <html lang="en">
+// <head>
+//     <meta charset="UTF-8">
+//     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+//     <title>Analysis Results</title>
+//     <style>
+//         * { box-sizing: border-box; margin: 0; padding: 0; }
+//         body { 
+//             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+//             background: #FFFFFF; 
+//             min-height: 100vh;
+//             padding: 1rem;
+//         }
+//         .mainContainer {
+//             max-width: 900px;
+//             margin: 0 auto;
+//         }
+//         .header { 
+//             background: #22CCEE; 
+//             padding: 1.5rem; 
+//             border-radius: 16px; 
+//             margin-bottom: 1.5rem; 
+//             box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+//             text-align: center;
+//         }
+//         .header h1 { 
+//             font-size: clamp(1.5rem, 5vw, 2rem);
+//             color: #2c3e50; 
+//             font-weight: 700; 
+//             margin-bottom: 0.5rem; 
+//         }
+//         .backBtn {
+//             display: inline-flex;
+//             align-items: center;
+//             gap: 0.5rem;
+//             background: #5eaa3c;
+//             color: white;
+//             padding: 0.75rem 1.5rem;
+//             border-radius: 8px;
+//             text-decoration: none;
+//             font-weight: 600;
+//             transition: all 0.3s ease;
+//             margin-top: 1rem;
+//         }
+//         .backBtn:hover {
+//             background: #4a8530;
+//             transform: translateY(-2px);
+//             box-shadow: 0 4px 12px rgba(94, 170, 60, 0.3);
+//         }
+//         .resultsContainer { 
+//             background: #ffffff; 
+//             border-radius: 16px; 
+//             padding: 1.5rem; 
+//             box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+//             margin-bottom: 1.5rem;
+//         }
+//         .sectionHeader { 
+//             display: flex; 
+//             align-items: center; 
+//             gap: 0.5rem; 
+//             margin-bottom: 1.5rem; 
+//             color: #2c3e50; 
+//         }
+//         .sectionHeader h3 { 
+//             font-size: 1.5rem;
+//             font-weight: 700; 
+//         }
+//         .demographicsContainer {
+//             background: linear-gradient(135deg, 0%,  100%);
+//             border-radius: 12px;
+//             padding: 1.5rem;
+//             margin-bottom: 1.5rem;
+//             color: white;
+//         }
+//         .demographicsGrid {
+//             display: grid;
+//             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+//             gap: 1rem;
+//             margin-top: 1rem;
+//         }
+//         .demoCard {
+//             background: rgba(255,255,255,0.2);
+//             backdrop-filter: blur(10px);
+//             border-radius: 8px;
+//             padding: 1rem;
+//             text-align: center;
+//         }
+//         .demoLabel {
+//             font-size: 0.875rem;
+//             opacity: 0.9;
+//             margin-bottom: 0.5rem;
+//         }
+//         .demoValue {
+//             font-size: 1.5rem;
+//             font-weight: 700;
+//         }
+//         .waitingMessage {
+//             text-align: center;
+//             padding: 3rem 1rem;
+//             color: #64748b;
+//             font-size: 1.125rem;
+//         }
+//         .vitals-table-wrapper { 
+//             overflow-x: auto; 
+//             background: linear-gradient(135deg,  0%,  100%); 
+//             padding: 24px; 
+//             border-radius: 20px; 
+//             box-shadow: 0 20px 50px rgba(102, 126, 234, 0.4); 
+//         }
+//         .vitals-table { 
+//             width: 100%; 
+//             border-collapse: separate; 
+//             border-spacing: 0; 
+//             background: white; 
+//             border-radius: 16px; 
+//             overflow: hidden; 
+//             box-shadow: 0 8px 24px rgba(0,0,0,0.12); 
+//         }
+//         .vitals-table thead tr { 
+//             background: linear-gradient(135deg,  0%,  100%); 
+//         }
+//         .vitals-table th { 
+//             padding: 20px 16px; 
+//             text-align: left; 
+//             color: white; 
+//             font-weight: 700; 
+//             font-size: 15px; 
+//             text-transform: uppercase; 
+//             letter-spacing: 0.5px; 
+//         }
+//         .vitals-table th:nth-child(2), .vitals-table th:nth-child(3), .vitals-table th:nth-child(4) { 
+//             text-align: center; 
+//         }
+//         .vitals-table tbody tr { 
+//             transition: all 0.3s ease; 
+//             border-bottom: 1px solid #f3f4f6; 
+//         }
+//         .vitals-table tbody tr:hover { 
+//             background: linear-gradient(90deg, #f9fafb 0%, #f3f4f6 100%); 
+//             transform: scale(1.01); 
+//         }
+//         .vitals-table tbody tr:last-child { 
+//             border-bottom: none; 
+//         }
+//         .vitals-table td { 
+//             padding: 20px 16px; 
+//             font-weight: 500; 
+//             color: #374151; 
+//         }
+//         .vital-label { 
+//             display: flex; 
+//             align-items: center; 
+//             gap: 12px; 
+//             font-weight: 600; 
+//             font-size: 15px; 
+//         }
+//         .vital-icon { 
+//             width: 40px; 
+//             height: 40px; 
+//             border-radius: 10px; 
+//             display: inline-flex; 
+//             align-items: center; 
+//             justify-content: center; 
+//             font-size: 20px; 
+//         }
+//         .vital-value { 
+//             text-align: center; 
+//             font-size: 32px; 
+//             font-weight: 800; 
+//         }
+//         .vital-progress { 
+//             width: 100%; 
+//             height: 6px; 
+//             background: #e5e7eb; 
+//             border-radius: 3px; 
+//             overflow: hidden; 
+//             margin-top: 8px; 
+//         }
+//         .vital-progress-bar { 
+//             height: 100%; 
+//             border-radius: 3px; 
+//             transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); 
+//         }
+//         .vital-unit { 
+//             text-align: center; 
+//             color: #6b7280; 
+//             font-size: 13px; 
+//             font-weight: 600; 
+//             text-transform: uppercase; 
+//         }
+//         .vital-status { 
+//             text-align: center; 
+//         }
+//         .status-badge { 
+//             background: #dbeafe; 
+//             color: #1e40af; 
+//             padding: 8px 16px; 
+//             border-radius: 25px; 
+//             font-size: 13px; 
+//             font-weight: 700; 
+//             display: inline-block; 
+//             text-transform: uppercase; 
+//         }
+//         .warningBanner {
+//             background: #fef3c7;
+//             border: 2px solid #fbbf24;
+//             border-radius: 8px;
+//             padding: 1rem;
+//             margin-bottom: 1rem;
+//             display: flex;
+//             align-items: center;
+//             gap: 0.75rem;
+//         }
+//         .warningBanner .icon {
+//             font-size: 1.5rem;
+//         }
+//         .warningBanner .text {
+//             flex: 1;
+//             color: #92400e;
+//             font-size: 0.9rem;
+//         }
+//         @keyframes slideIn { 
+//             from { opacity: 0; transform: translateY(20px); } 
+//             to { opacity: 1; transform: translateY(0); } 
+//         }
+//         .vitals-table tbody tr { 
+//             animation: slideIn 0.5s ease forwards; 
+//         }
+//         .vitals-table tbody tr:nth-child(1) { animation-delay: 0.1s; opacity: 0; }
+//         .vitals-table tbody tr:nth-child(2) { animation-delay: 0.2s; opacity: 0; }
+//         .vitals-table tbody tr:nth-child(3) { animation-delay: 0.3s; opacity: 0; }
+//         .vitals-table tbody tr:nth-child(4) { animation-delay: 0.4s; opacity: 0; }
+//         .vitals-table tbody tr:nth-child(5) { animation-delay: 0.5s; opacity: 0; }
+//         .vitals-table tbody tr:nth-child(6) { animation-delay: 0.6s; opacity: 0; }
+//         .errorMessage {
+//             text-align: center;
+//             padding: 2rem;
+//             color: #ef4444;
+//         }
+//         .errorMessage .icon {
+//             font-size: 3rem;
+//             margin-bottom: 1rem;
+//         }
+//         @media screen and (max-width: 479px) {
+//             .vitals-table th, .vitals-table td {
+//                 padding: 12px 8px;
+//                 font-size: 13px;
+//             }
+//             .vital-value {
+//                 font-size: 24px;
+//             }
+//             .vital-icon {
+//                 width: 32px;
+//                 height: 32px;
+//                 font-size: 16px;
+//             }
+//         }
+//     </style>
+// </head>
+// <body>
+//     <div class="mainContainer">
+//         <div class="header">
+//             <h1>🩺 Analysis Results</h1>
+//             <a href="/camera" class="backBtn">← Back to Scanner</a>
+//         </div>
+
+//         <div class="resultsContainer">
+//             <div class="sectionHeader">
+//                 <span style="font-size: 1.5rem;">📊</span>
+//                 <h3>Your Health Vitals</h3>
+//             </div>
+//             <div id="resultsContent">
+//                 <div class="waitingMessage">
+//                     <p>⏳ Loading results...</p>
+//                 </div>
+//             </div>
+//         </div>
+//     </div>
+
+//     <script>
+//         function getStressColor(stress) {
+//             if (stress <= 1) return '#10b981';
+//             if (stress <= 2) return '#fbbf24';
+//             if (stress <= 3) return '#3b82f6';
+//             if (stress <= 4) return '#f97316';
+//             return '#ef4444';
+//         }
+
+//         function getStressLevel(stress) {
+//             if (stress <= 1) return 'Low';
+//             if (stress <= 2) return 'Mild';
+//             if (stress <= 3) return 'Moderate';
+//             if (stress <= 4) return 'High';
+//             return 'Very High';
+//         }
+
+//         function getHRStatus(hr) {
+//             if (hr >= 60 && hr <= 100) return { label: 'Normal', color: '#10b981' };
+//             if (hr > 100 && hr <= 120) return { label: 'Elevated', color: '#fbbf24' };
+//             if (hr > 120) return { label: 'High', color: '#ef4444' };
+//             return { label: 'Low', color: '#3b82f6' };
+//         }
+
+//         function getBPStatus(systolic, diastolic) {
+//             if (systolic < 120 && diastolic < 80) return { label: 'Normal', color: '#10b981' };
+//             if (systolic <= 139 || diastolic <= 89) return { label: 'Elevated', color: '#fbbf24' };
+//             return { label: 'High', color: '#ef4444' };
+//         }
+
+//         function getSPO2Status(spo2) {
+//             if (spo2 >= 95) return { label: 'Excellent', color: '#10b981' };
+//             if (spo2 >= 90) return { label: 'Good', color: '#fbbf24' };
+//             return { label: 'Low', color: '#ef4444' };
+//         }
+
+//         function getRRStatus(rr) {
+//             if (rr >= 12 && rr <= 20) return { label: 'Normal', color: '#10b981' };
+//             if (rr > 20 && rr <= 25) return { label: 'Elevated', color: '#fbbf24' };
+//             return { label: 'Abnormal', color: '#ef4444' };
+//         }
+
+//         function displayResults(data, videoUrl) {
+//             const vitals = data.vitals || {};
+//             const demographics = data.demographics || {};
+//             const indicators = data.indicators || {};
+//             const warning = data.warning || null;
+//             const quality = data.quality || 'unknown';
+            
+//             // Extract values - NO DEFAULTS
+//             const hr = vitals.heart_rate_bpm;
+//             const rr = vitals.respiratory_rate_bpm;
+//             const o2 = vitals.spo2_percent;
+//             const systolic = vitals.blood_pressure?.systolic;
+//             const diastolic = vitals.blood_pressure?.diastolic;
+//             const stressRaw = indicators.stress_indicator;
+//             const healthRisk = indicators.health_risk;
+            
+//             // Scale stress to 0-5
+//             const stress = stressRaw !== undefined ? (stressRaw * 5).toFixed(1) : null;
+//             const stressColor = stress ? getStressColor(parseFloat(stress)) : '#6b7280';
+//             const stressLabel = stress ? getStressLevel(parseFloat(stress)) : 'Unknown';
+            
+//             // Get statuses
+//             const hrStatus = hr ? getHRStatus(hr) : { label: 'N/A', color: '#6b7280' };
+//             const bpStatus = (systolic && diastolic) ? getBPStatus(systolic, diastolic) : { label: 'N/A', color: '#6b7280' };
+//             const spo2Status = o2 ? getSPO2Status(o2) : { label: 'N/A', color: '#6b7280' };
+//             const rrStatus = rr ? getRRStatus(rr) : { label: 'N/A', color: '#6b7280' };
+            
+//             // Calculate progress bars
+//             const hrProgress = hr ? Math.min((hr / 120) * 100, 100) : 0;
+//             const sysProgress = systolic ? Math.min((systolic / 140) * 100, 100) : 0;
+//             const diaProgress = diastolic ? Math.min((diastolic / 90) * 100, 100) : 0;
+//             const o2Progress = o2 ? Math.min((o2 / 100) * 100, 100) : 0;
+//             const rrProgress = rr ? Math.min((rr / 25) * 100, 100) : 0;
+//             const stressProgress = stress ? (parseFloat(stress) / 5) * 100 : 0;
+            
+//             let html = '';
+            
+//             // Quality Warning
+//             if (warning || quality === 'low' || quality === 'medium' || quality === 'estimated') {
+//                 html += '<div class="warningBanner">' +
+//                     '<span class="icon">⚠️</span>' +
+//                     '<div class="text">' +
+//                         '<strong>Note:</strong> ' + (warning || 'Some values may be estimated. Quality: ' + quality) +
+//                     '</div>' +
+//                 '</div>';
+//             }
+            
+//             // Demographics Section
+//             if (demographics.age || demographics.gender || demographics.emotion) {
+//                 html += '<div class="demographicsContainer">' +
+//                     '<div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">👤 Demographics & Emotion</div>' +
+//                     '<div class="demographicsGrid">';
+                
+//                 if (demographics.age) {
+//                     html += '<div class="demoCard">' +
+//                         '<div class="demoLabel">Age Group</div>' +
+//                         '<div class="demoValue">' + demographics.age + '</div>' +
+//                         (demographics.age_confidence > 0 ? '<div style="font-size: 0.75rem; margin-top: 0.25rem;">Confidence: ' + (demographics.age_confidence * 100).toFixed(0) + '%</div>' : '') +
+//                     '</div>';
+//                 }
+                
+                
+//                 if (demographics.emotion && demographics.emotion !== 'Not Available') {
+//                     html += '<div class="demoCard">' +
+//                         '<div class="demoLabel">Emotion</div>' +
+//                         '<div class="demoValue">' + demographics.emotion + '</div>' +
+//                         (demographics.emotion_confidence > 0 ? '<div style="font-size: 0.75rem; margin-top: 0.25rem;">Confidence: ' + (demographics.emotion_confidence * 100).toFixed(0) + '%</div>' : '') +
+//                     '</div>';
+//                 }
+                
+//                 html += '</div></div>';
+//             }
+            
+//             // Vitals Table
+//             html += '<div class="vitals-table-wrapper">' +
+//                 '<table class="vitals-table">' +
+//                     '<thead><tr><th>Vital Sign</th><th>Result</th><th>Unit</th><th>Status</th></tr></thead>' +
+//                     '<tbody>';
+            
+//             // Heart Rate
+//             if (hr) {
+//                 html += '<tr>' +
+//                     '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">❤️</span>Heart Rate</div></td>' +
+//                     '<td><div class="vital-value" style="color: #ef4444;">' + Math.round(hr) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #ef4444, #dc2626); width: ' + hrProgress + '%;"></div></div></div></td>' +
+//                     '<td class="vital-unit">BPM</td>' +
+//                     '<td class="vital-status"><span class="status-badge" style="background: ' + hrStatus.color + '20; color: ' + hrStatus.color + ';">' + hrStatus.label + '</span></td>' +
+//                 '</tr>';
+//             }
+            
+//             // Respiratory Rate
+//             if (rr) {
+//                 html += '<tr>' +
+//                     '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">🫁</span>Respiratory Rate</div></td>' +
+//                     '<td><div class="vital-value" style="color: #06b6d4;">' + Math.round(rr) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #06b6d4, #0891b2); width: ' + rrProgress + '%;"></div></div></div></td>' +
+//                     '<td class="vital-unit">BPM</td>' +
+//                     '<td class="vital-status"><span class="status-badge" style="background: ' + rrStatus.color + '20; color: ' + rrStatus.color + ';">' + rrStatus.label + '</span></td>' +
+//                 '</tr>';
+//             }
+            
+//             // Systolic BP
+//             if (systolic) {
+//                 html += '<tr>' +
+//                     '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">💓</span>Systolic BP</div></td>' +
+//                     '<td><div class="vital-value" style="color: #ec4899;">' + Math.round(systolic) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #ec4899, #db2777); width: ' + sysProgress + '%;"></div></div></div></td>' +
+//                     '<td class="vital-unit">mmHg</td>' +
+//                     '<td class="vital-status"><span class="status-badge" style="background: ' + bpStatus.color + '20; color: ' + bpStatus.color + ';">' + bpStatus.label + '</span></td>' +
+//                 '</tr>';
+//             }
+            
+//             // Diastolic BP
+//             if (diastolic) {
+//                 html += '<tr>' +
+//                     '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">🩸</span>Diastolic BP</div></td>' +
+//                     '<td><div class="vital-value" style="color: #8b5cf6;">' + Math.round(diastolic) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #8b5cf6, #7c3aed); width: ' + diaProgress + '%;"></div></div></div></td>' +
+//                     '<td class="vital-unit">mmHg</td>' +
+//                     '<td class="vital-status"><span class="status-badge" style="background: ' + bpStatus.color + '20; color: ' + bpStatus.color + ';">' + bpStatus.label + '</span></td>' +
+//                 '</tr>';
+//             }
+            
+//             // Oxygen Saturation
+//             if (o2) {
+//                 html += '<tr>' +
+//                     '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #10b981, #059669);">🫀</span>Oxygen Saturation</div></td>' +
+//                     '<td><div class="vital-value" style="color: #10b981;">' + Math.round(o2) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #10b981, #059669); width: ' + o2Progress + '%;"></div></div></div></td>' +
+//                     '<td class="vital-unit">% SpO2</td>' +
+//                     '<td class="vital-status"><span class="status-badge" style="background: ' + spo2Status.color + '20; color: ' + spo2Status.color + ';">' + spo2Status.label + '</span></td>' +
+//                 '</tr>';
+//             }
+            
+//             // Stress Level
+//             if (stress) {
+//                 html += '<tr>' +
+//                     '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, ' + stressColor + ', ' + stressColor + ');">🧠</span>Stress Level</div></td>' +
+//                     '<td><div class="vital-value" style="color: ' + stressColor + ';">' + stress + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, ' + stressColor + ', ' + stressColor + 'dd); width: ' + stressProgress + '%;"></div></div></div></td>' +
+//                     '<td class="vital-unit">0–5 Scale</td>' +
+//                     '<td class="vital-status"><span class="status-badge" style="background: ' + stressColor + '20; color: ' + stressColor + ';">' + stressLabel + '</span></td>' +
+//                 '</tr>';
+//             }
+            
+//             html += '</tbody></table></div>';
+            
+//             document.getElementById("resultsContent").innerHTML = html;
+//         }
+
+//         function showError(errorMsg) {
+//             document.getElementById("resultsContent").innerHTML = 
+//                 '<div class="errorMessage">' +
+//                     '<div class="icon">❌</div>' +
+//                     '<h3 style="margin-bottom: 0.5rem; color: #ef4444;">Analysis Failed</h3>' +
+//                     '<p>' + errorMsg + '</p>' +
+//                     '<p style="margin-top: 1rem;"><a href="/camera" style="color: #5eaa3c; text-decoration: none; font-weight: 600;">← Try Again</a></p>' +
+//                 '</div>';
+//         }
+
+//         // Get data from URL parameters
+//         function loadResults() {
+//             try {
+//                 const urlParams = new URLSearchParams(window.location.search);
+//                 const dataParam = urlParams.get('data');
+//                 const videoParam = urlParams.get('video');
+                
+//                 if (!dataParam) {
+//                     console.warn("No data parameter found");
+//                     showError("No analysis data found.");
+//                     return;
+//                 }
+                
+//                 const data = JSON.parse(decodeURIComponent(dataParam));
+//                 const videoUrl = videoParam ? decodeURIComponent(videoParam) : null;
+                
+//                 // Check if analysis was successful
+//                 if (!data.success && data.error) {
+//                     showError(data.error);
+//                     return;
+//                 }
+                
+//                 displayResults(data, videoUrl);
+//             } catch (error) {
+//                 console.error("Error loading results:", error);
+//                 showError("Failed to load results: " + error.message);
+//             }
+//         }
+
+//         // Load results on page load
+//         document.addEventListener("DOMContentLoaded", loadResults);
+//     </script>
+// </body>
+// </html>`;  
+//     res.setHeader('Content-Type', 'text/html; charset=utf-8');
+//     res.send(html);
+//   } catch (error) {
+//     res.status(500).json({ success: false, error: error.message });
+//   }
+// }
+
+
 async function getResultsPage(req, res, next) {
   try {
     const html = `<!DOCTYPE html>
@@ -4167,272 +4687,264 @@ async function getResultsPage(req, res, next) {
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background: #FFFFFF; 
+            background: #f5f5f5; 
             min-height: 100vh;
             padding: 1rem;
         }
-        .mainContainer {
-            max-width: 900px;
+        .container {
+            max-width: 1200px;
             margin: 0 auto;
         }
         .header { 
-            background: #22CCEE; 
+            background: white; 
             padding: 1.5rem; 
-            border-radius: 16px; 
+            border-radius: 12px; 
             margin-bottom: 1.5rem; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
             text-align: center;
         }
         .header h1 { 
-            font-size: clamp(1.5rem, 5vw, 2rem);
-            color: #2c3e50; 
-            font-weight: 700; 
-            margin-bottom: 0.5rem; 
+            font-size: 1.75rem;
+            color: #000; 
+            font-weight: 600; 
+            margin-bottom: 0.75rem; 
         }
         .backBtn {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            background: #5eaa3c;
+            background: #000;
             color: white;
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
             text-decoration: none;
             font-weight: 600;
             transition: all 0.3s ease;
-            margin-top: 1rem;
         }
         .backBtn:hover {
-            background: #4a8530;
+            background: #333;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(94, 170, 60, 0.3);
         }
-        .resultsContainer { 
-            background: #ffffff; 
-            border-radius: 16px; 
-            padding: 1.5rem; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
-            margin-bottom: 1.5rem;
+        .row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
         }
-        .sectionHeader { 
-            display: flex; 
-            align-items: center; 
-            gap: 0.5rem; 
-            margin-bottom: 1.5rem; 
-            color: #2c3e50; 
-        }
-        .sectionHeader h3 { 
-            font-size: 1.5rem;
-            font-weight: 700; 
-        }
-        .demographicsContainer {
-            background: linear-gradient(135deg, 0%,  100%);
+        .card {
+            background: white;
             border-radius: 12px;
             padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .demographicsGrid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        .demoCard {
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-        }
-        .demoLabel {
-            font-size: 0.875rem;
-            opacity: 0.9;
-            margin-bottom: 0.5rem;
-        }
-        .demoValue {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-        .waitingMessage {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: #64748b;
-            font-size: 1.125rem;
-        }
-        .vitals-table-wrapper { 
-            overflow-x: auto; 
-            background: linear-gradient(135deg,  0%,  100%); 
-            padding: 24px; 
-            border-radius: 20px; 
-            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.4); 
-        }
-        .vitals-table { 
-            width: 100%; 
-            border-collapse: separate; 
-            border-spacing: 0; 
-            background: white; 
-            border-radius: 16px; 
-            overflow: hidden; 
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12); 
-        }
-        .vitals-table thead tr { 
-            background: linear-gradient(135deg,  0%,  100%); 
-        }
-        .vitals-table th { 
-            padding: 20px 16px; 
-            text-align: left; 
-            color: white; 
-            font-weight: 700; 
-            font-size: 15px; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px; 
-        }
-        .vitals-table th:nth-child(2), .vitals-table th:nth-child(3), .vitals-table th:nth-child(4) { 
-            text-align: center; 
-        }
-        .vitals-table tbody tr { 
-            transition: all 0.3s ease; 
-            border-bottom: 1px solid #f3f4f6; 
-        }
-        .vitals-table tbody tr:hover { 
-            background: linear-gradient(90deg, #f9fafb 0%, #f3f4f6 100%); 
-            transform: scale(1.01); 
-        }
-        .vitals-table tbody tr:last-child { 
-            border-bottom: none; 
-        }
-        .vitals-table td { 
-            padding: 20px 16px; 
-            font-weight: 500; 
-            color: #374151; 
-        }
-        .vital-label { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            font-weight: 600; 
-            font-size: 15px; 
-        }
-        .vital-icon { 
-            width: 40px; 
-            height: 40px; 
-            border-radius: 10px; 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 20px; 
-        }
-        .vital-value { 
-            text-align: center; 
-            font-size: 32px; 
-            font-weight: 800; 
-        }
-        .vital-progress { 
-            width: 100%; 
-            height: 6px; 
-            background: #e5e7eb; 
-            border-radius: 3px; 
-            overflow: hidden; 
-            margin-top: 8px; 
-        }
-        .vital-progress-bar { 
-            height: 100%; 
-            border-radius: 3px; 
-            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
-        .vital-unit { 
-            text-align: center; 
-            color: #6b7280; 
-            font-size: 13px; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-        }
-        .vital-status { 
-            text-align: center; 
-        }
-        .status-badge { 
-            background: #dbeafe; 
-            color: #1e40af; 
-            padding: 8px 16px; 
-            border-radius: 25px; 
-            font-size: 13px; 
-            font-weight: 700; 
-            display: inline-block; 
-            text-transform: uppercase; 
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #000;
         }
         .warningBanner {
-            background: #fef3c7;
-            border: 2px solid #fbbf24;
+            background: #fff4e5;
+            border: 2px solid #ff9800;
             border-radius: 8px;
             padding: 1rem;
             margin-bottom: 1rem;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 0.75rem;
         }
         .warningBanner .icon {
             font-size: 1.5rem;
+            flex-shrink: 0;
         }
         .warningBanner .text {
             flex: 1;
-            color: #92400e;
+            color: #663c00;
             font-size: 0.9rem;
         }
-        @keyframes slideIn { 
-            from { opacity: 0; transform: translateY(20px); } 
-            to { opacity: 1; transform: translateY(0); } 
+        .demographics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
         }
-        .vitals-table tbody tr { 
-            animation: slideIn 0.5s ease forwards; 
+        .demo-item {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
         }
-        .vitals-table tbody tr:nth-child(1) { animation-delay: 0.1s; opacity: 0; }
-        .vitals-table tbody tr:nth-child(2) { animation-delay: 0.2s; opacity: 0; }
-        .vitals-table tbody tr:nth-child(3) { animation-delay: 0.3s; opacity: 0; }
-        .vitals-table tbody tr:nth-child(4) { animation-delay: 0.4s; opacity: 0; }
-        .vitals-table tbody tr:nth-child(5) { animation-delay: 0.5s; opacity: 0; }
-        .vitals-table tbody tr:nth-child(6) { animation-delay: 0.6s; opacity: 0; }
+        .demo-label {
+            font-size: 0.875rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        .demo-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #000;
+        }
+        .demo-confidence {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 0.25rem;
+        }
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        .vital-card {
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+        .vital-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .vital-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        .vital-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .vital-name {
+            font-size: 0.875rem;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+        .vital-value {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        .vital-progress {
+            width: 100%;
+            height: 6px;
+            background: #e5e5e5;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .vital-progress-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1s ease;
+        }
+        .vital-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+        .vital-unit {
+            font-size: 0.875rem;
+            color: #999;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .status-badge {
+            background: #e5e5e5;
+            color: #666;
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .waitingMessage {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #666;
+            font-size: 1.125rem;
+        }
         .errorMessage {
             text-align: center;
             padding: 2rem;
-            color: #ef4444;
+            color: #f00;
         }
         .errorMessage .icon {
             font-size: 3rem;
             margin-bottom: 1rem;
         }
-        @media screen and (max-width: 479px) {
-            .vitals-table th, .vitals-table td {
-                padding: 12px 8px;
-                font-size: 13px;
+        
+        /* Desktop: 2 columns for vitals */
+        @media screen and (min-width: 768px) {
+            .row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .vitals-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* Large Desktop: 3 columns */
+        @media screen and (min-width: 1024px) {
+            .vitals-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        /* Mobile optimizations */
+        @media screen and (max-width: 767px) {
+            body {
+                padding: 0.5rem;
+            }
+            .header {
+                padding: 1rem;
+            }
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            .card {
+                padding: 1rem;
+            }
+            .demographics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .vital-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            .vital-info {
+                width: 100%;
+            }
+            .vital-meta {
+                flex-direction: column;
+                gap: 0.5rem;
             }
             .vital-value {
-                font-size: 24px;
-            }
-            .vital-icon {
-                width: 32px;
-                height: 32px;
-                font-size: 16px;
+                font-size: 1.75rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="mainContainer">
+    <div class="container">
         <div class="header">
             <h1>🩺 Analysis Results</h1>
             <a href="/camera" class="backBtn">← Back to Scanner</a>
         </div>
 
-        <div class="resultsContainer">
-            <div class="sectionHeader">
-                <span style="font-size: 1.5rem;">📊</span>
-                <h3>Your Health Vitals</h3>
-            </div>
-            <div id="resultsContent">
-                <div class="waitingMessage">
-                    <p>⏳ Loading results...</p>
-                </div>
+        <div id="resultsContent">
+            <div class="waitingMessage">
+                <p>⏳ Loading results...</p>
             </div>
         </div>
     </div>
@@ -4484,29 +4996,24 @@ async function getResultsPage(req, res, next) {
             const demographics = data.demographics || {};
             const indicators = data.indicators || {};
             const warning = data.warning || null;
-            const quality = data.quality || 'unknown';
+            const quality = data.overall_quality || data.quality || 'unknown';
             
-            // Extract values - NO DEFAULTS
             const hr = vitals.heart_rate_bpm;
             const rr = vitals.respiratory_rate_bpm;
             const o2 = vitals.spo2_percent;
             const systolic = vitals.blood_pressure?.systolic;
             const diastolic = vitals.blood_pressure?.diastolic;
             const stressRaw = indicators.stress_indicator;
-            const healthRisk = indicators.health_risk;
             
-            // Scale stress to 0-5
             const stress = stressRaw !== undefined ? (stressRaw * 5).toFixed(1) : null;
             const stressColor = stress ? getStressColor(parseFloat(stress)) : '#6b7280';
             const stressLabel = stress ? getStressLevel(parseFloat(stress)) : 'Unknown';
             
-            // Get statuses
             const hrStatus = hr ? getHRStatus(hr) : { label: 'N/A', color: '#6b7280' };
             const bpStatus = (systolic && diastolic) ? getBPStatus(systolic, diastolic) : { label: 'N/A', color: '#6b7280' };
             const spo2Status = o2 ? getSPO2Status(o2) : { label: 'N/A', color: '#6b7280' };
             const rrStatus = rr ? getRRStatus(rr) : { label: 'N/A', color: '#6b7280' };
             
-            // Calculate progress bars
             const hrProgress = hr ? Math.min((hr / 120) * 100, 100) : 0;
             const sysProgress = systolic ? Math.min((systolic / 140) * 100, 100) : 0;
             const diaProgress = diastolic ? Math.min((diastolic / 90) * 100, 100) : 0;
@@ -4516,8 +5023,8 @@ async function getResultsPage(req, res, next) {
             
             let html = '';
             
-            // Quality Warning
-            if (warning || quality === 'low' || quality === 'medium' || quality === 'estimated') {
+            // Warning Banner
+            if (warning || quality === 'low' || quality === 'medium') {
                 html += '<div class="warningBanner">' +
                     '<span class="icon">⚠️</span>' +
                     '<div class="text">' +
@@ -4526,114 +5033,158 @@ async function getResultsPage(req, res, next) {
                 '</div>';
             }
             
+            // Parse metabolic age from range
+            let metabolicAge = null;
+            if (demographics.age) {
+                const ageStr = String(demographics.age);
+                // Extract first number from range like "(45-50)" or "45-50"
+                const match = ageStr.match(/(\d+)/);
+                if (match) {
+                    metabolicAge = match[1];
+                }
+            }
+            
             // Demographics Section
-            if (demographics.age || demographics.gender || demographics.emotion) {
-                html += '<div class="demographicsContainer">' +
-                    '<div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">👤 Demographics & Emotion</div>' +
-                    '<div class="demographicsGrid">';
+            if (metabolicAge || demographics.emotion) {
+                html += '<div class="card">' +
+                    '<div class="card-header">👤 Analysis Details</div>' +
+                    '<div class="demographics">';
                 
-                if (demographics.age) {
-                    html += '<div class="demoCard">' +
-                        '<div class="demoLabel">Age Group</div>' +
-                        '<div class="demoValue">' + demographics.age + '</div>' +
-                        (demographics.age_confidence > 0 ? '<div style="font-size: 0.75rem; margin-top: 0.25rem;">Confidence: ' + (demographics.age_confidence * 100).toFixed(0) + '%</div>' : '') +
+                if (metabolicAge) {
+                    html += '<div class="demo-item">' +
+                        '<div class="demo-label">Metabolic Age</div>' +
+                        '<div class="demo-value">' + metabolicAge + ' years</div>' +
+                        (demographics.age_confidence > 0 ? '<div class="demo-confidence">' + (demographics.age_confidence * 100).toFixed(0) + '% confident</div>' : '') +
                     '</div>';
                 }
                 
-                
                 if (demographics.emotion && demographics.emotion !== 'Not Available') {
-                    html += '<div class="demoCard">' +
-                        '<div class="demoLabel">Emotion</div>' +
-                        '<div class="demoValue">' + demographics.emotion + '</div>' +
-                        (demographics.emotion_confidence > 0 ? '<div style="font-size: 0.75rem; margin-top: 0.25rem;">Confidence: ' + (demographics.emotion_confidence * 100).toFixed(0) + '%</div>' : '') +
+                    html += '<div class="demo-item">' +
+                        '<div class="demo-label">Emotion</div>' +
+                        '<div class="demo-value">' + demographics.emotion + '</div>' +
+                        (demographics.emotion_confidence > 0 ? '<div class="demo-confidence">' + (demographics.emotion_confidence * 100).toFixed(0) + '% confident</div>' : '') +
                     '</div>';
                 }
                 
                 html += '</div></div>';
             }
             
-            // Vitals Table
-            html += '<div class="vitals-table-wrapper">' +
-                '<table class="vitals-table">' +
-                    '<thead><tr><th>Vital Sign</th><th>Result</th><th>Unit</th><th>Status</th></tr></thead>' +
-                    '<tbody>';
+            // Vitals Section
+            html += '<div class="card">' +
+                '<div class="card-header">📊 Health Vitals</div>' +
+                '<div class="vitals-grid">';
             
             // Heart Rate
             if (hr) {
-                html += '<tr>' +
-                    '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">❤️</span>Heart Rate</div></td>' +
-                    '<td><div class="vital-value" style="color: #ef4444;">' + Math.round(hr) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #ef4444, #dc2626); width: ' + hrProgress + '%;"></div></div></div></td>' +
-                    '<td class="vital-unit">BPM</td>' +
-                    '<td class="vital-status"><span class="status-badge" style="background: ' + hrStatus.color + '20; color: ' + hrStatus.color + ';">' + hrStatus.label + '</span></td>' +
-                '</tr>';
+                html += '<div class="vital-card">' +
+                    '<div class="vital-icon" style="background: #fee;">❤️</div>' +
+                    '<div class="vital-info">' +
+                        '<div class="vital-name">Heart Rate</div>' +
+                        '<div class="vital-value" style="color: #ef4444;">' + Math.round(hr) + '</div>' +
+                        '<div class="vital-progress"><div class="vital-progress-bar" style="background: #ef4444; width: ' + hrProgress + '%;"></div></div>' +
+                    '</div>' +
+                    '<div class="vital-meta">' +
+                        '<div class="vital-unit">BPM</div>' +
+                        '<span class="status-badge" style="background: ' + hrStatus.color + '20; color: ' + hrStatus.color + ';">' + hrStatus.label + '</span>' +
+                    '</div>' +
+                '</div>';
             }
             
             // Respiratory Rate
             if (rr) {
-                html += '<tr>' +
-                    '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">🫁</span>Respiratory Rate</div></td>' +
-                    '<td><div class="vital-value" style="color: #06b6d4;">' + Math.round(rr) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #06b6d4, #0891b2); width: ' + rrProgress + '%;"></div></div></div></td>' +
-                    '<td class="vital-unit">BPM</td>' +
-                    '<td class="vital-status"><span class="status-badge" style="background: ' + rrStatus.color + '20; color: ' + rrStatus.color + ';">' + rrStatus.label + '</span></td>' +
-                '</tr>';
+                html += '<div class="vital-card">' +
+                    '<div class="vital-icon" style="background: #e0f7ff;">🫁</div>' +
+                    '<div class="vital-info">' +
+                        '<div class="vital-name">Respiratory Rate</div>' +
+                        '<div class="vital-value" style="color: #06b6d4;">' + Math.round(rr) + '</div>' +
+                        '<div class="vital-progress"><div class="vital-progress-bar" style="background: #06b6d4; width: ' + rrProgress + '%;"></div></div>' +
+                    '</div>' +
+                    '<div class="vital-meta">' +
+                        '<div class="vital-unit">BPM</div>' +
+                        '<span class="status-badge" style="background: ' + rrStatus.color + '20; color: ' + rrStatus.color + ';">' + rrStatus.label + '</span>' +
+                    '</div>' +
+                '</div>';
             }
             
             // Systolic BP
             if (systolic) {
-                html += '<tr>' +
-                    '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">💓</span>Systolic BP</div></td>' +
-                    '<td><div class="vital-value" style="color: #ec4899;">' + Math.round(systolic) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #ec4899, #db2777); width: ' + sysProgress + '%;"></div></div></div></td>' +
-                    '<td class="vital-unit">mmHg</td>' +
-                    '<td class="vital-status"><span class="status-badge" style="background: ' + bpStatus.color + '20; color: ' + bpStatus.color + ';">' + bpStatus.label + '</span></td>' +
-                '</tr>';
+                html += '<div class="vital-card">' +
+                    '<div class="vital-icon" style="background: #fce7f3;">💓</div>' +
+                    '<div class="vital-info">' +
+                        '<div class="vital-name">Systolic BP</div>' +
+                        '<div class="vital-value" style="color: #ec4899;">' + Math.round(systolic) + '</div>' +
+                        '<div class="vital-progress"><div class="vital-progress-bar" style="background: #ec4899; width: ' + sysProgress + '%;"></div></div>' +
+                    '</div>' +
+                    '<div class="vital-meta">' +
+                        '<div class="vital-unit">mmHg</div>' +
+                        '<span class="status-badge" style="background: ' + bpStatus.color + '20; color: ' + bpStatus.color + ';">' + bpStatus.label + '</span>' +
+                    '</div>' +
+                '</div>';
             }
             
             // Diastolic BP
             if (diastolic) {
-                html += '<tr>' +
-                    '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">🩸</span>Diastolic BP</div></td>' +
-                    '<td><div class="vital-value" style="color: #8b5cf6;">' + Math.round(diastolic) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #8b5cf6, #7c3aed); width: ' + diaProgress + '%;"></div></div></div></td>' +
-                    '<td class="vital-unit">mmHg</td>' +
-                    '<td class="vital-status"><span class="status-badge" style="background: ' + bpStatus.color + '20; color: ' + bpStatus.color + ';">' + bpStatus.label + '</span></td>' +
-                '</tr>';
+                html += '<div class="vital-card">' +
+                    '<div class="vital-icon" style="background: #ede9fe;">🩸</div>' +
+                    '<div class="vital-info">' +
+                        '<div class="vital-name">Diastolic BP</div>' +
+                        '<div class="vital-value" style="color: #8b5cf6;">' + Math.round(diastolic) + '</div>' +
+                        '<div class="vital-progress"><div class="vital-progress-bar" style="background: #8b5cf6; width: ' + diaProgress + '%;"></div></div>' +
+                    '</div>' +
+                    '<div class="vital-meta">' +
+                        '<div class="vital-unit">mmHg</div>' +
+                        '<span class="status-badge" style="background: ' + bpStatus.color + '20; color: ' + bpStatus.color + ';">' + bpStatus.label + '</span>' +
+                    '</div>' +
+                '</div>';
             }
             
             // Oxygen Saturation
             if (o2) {
-                html += '<tr>' +
-                    '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #10b981, #059669);">🫀</span>Oxygen Saturation</div></td>' +
-                    '<td><div class="vital-value" style="color: #10b981;">' + Math.round(o2) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #10b981, #059669); width: ' + o2Progress + '%;"></div></div></div></td>' +
-                    '<td class="vital-unit">% SpO2</td>' +
-                    '<td class="vital-status"><span class="status-badge" style="background: ' + spo2Status.color + '20; color: ' + spo2Status.color + ';">' + spo2Status.label + '</span></td>' +
-                '</tr>';
+                html += '<div class="vital-card">' +
+                    '<div class="vital-icon" style="background: #d1fae5;">🫀</div>' +
+                    '<div class="vital-info">' +
+                        '<div class="vital-name">Oxygen Saturation</div>' +
+                        '<div class="vital-value" style="color: #10b981;">' + Math.round(o2) + '</div>' +
+                        '<div class="vital-progress"><div class="vital-progress-bar" style="background: #10b981; width: ' + o2Progress + '%;"></div></div>' +
+                    '</div>' +
+                    '<div class="vital-meta">' +
+                        '<div class="vital-unit">% SpO2</div>' +
+                        '<span class="status-badge" style="background: ' + spo2Status.color + '20; color: ' + spo2Status.color + ';">' + spo2Status.label + '</span>' +
+                    '</div>' +
+                '</div>';
             }
             
             // Stress Level
             if (stress) {
-                html += '<tr>' +
-                    '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, ' + stressColor + ', ' + stressColor + ');">🧠</span>Stress Level</div></td>' +
-                    '<td><div class="vital-value" style="color: ' + stressColor + ';">' + stress + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, ' + stressColor + ', ' + stressColor + 'dd); width: ' + stressProgress + '%;"></div></div></div></td>' +
-                    '<td class="vital-unit">0–5 Scale</td>' +
-                    '<td class="vital-status"><span class="status-badge" style="background: ' + stressColor + '20; color: ' + stressColor + ';">' + stressLabel + '</span></td>' +
-                '</tr>';
+                html += '<div class="vital-card">' +
+                    '<div class="vital-icon" style="background: ' + stressColor + '20;">🧠</div>' +
+                    '<div class="vital-info">' +
+                        '<div class="vital-name">Stress Level</div>' +
+                        '<div class="vital-value" style="color: ' + stressColor + ';">' + stress + '</div>' +
+                        '<div class="vital-progress"><div class="vital-progress-bar" style="background: ' + stressColor + '; width: ' + stressProgress + '%;"></div></div>' +
+                    '</div>' +
+                    '<div class="vital-meta">' +
+                        '<div class="vital-unit">0-5</div>' +
+                        '<span class="status-badge" style="background: ' + stressColor + '20; color: ' + stressColor + ';">' + stressLabel + '</span>' +
+                    '</div>' +
+                '</div>';
             }
             
-            html += '</tbody></table></div>';
+            html += '</div></div>';
             
             document.getElementById("resultsContent").innerHTML = html;
         }
 
         function showError(errorMsg) {
             document.getElementById("resultsContent").innerHTML = 
-                '<div class="errorMessage">' +
+                '<div class="card errorMessage">' +
                     '<div class="icon">❌</div>' +
-                    '<h3 style="margin-bottom: 0.5rem; color: #ef4444;">Analysis Failed</h3>' +
+                    '<h3 style="margin-bottom: 0.5rem;">Analysis Failed</h3>' +
                     '<p>' + errorMsg + '</p>' +
-                    '<p style="margin-top: 1rem;"><a href="/camera" style="color: #5eaa3c; text-decoration: none; font-weight: 600;">← Try Again</a></p>' +
+                    '<p style="margin-top: 1rem;"><a href="/camera" style="color: #000; text-decoration: none; font-weight: 600;">← Try Again</a></p>' +
                 '</div>';
         }
 
-        // Get data from URL parameters
         function loadResults() {
             try {
                 const urlParams = new URLSearchParams(window.location.search);
@@ -4641,7 +5192,6 @@ async function getResultsPage(req, res, next) {
                 const videoParam = urlParams.get('video');
                 
                 if (!dataParam) {
-                    console.warn("No data parameter found");
                     showError("No analysis data found.");
                     return;
                 }
@@ -4649,7 +5199,6 @@ async function getResultsPage(req, res, next) {
                 const data = JSON.parse(decodeURIComponent(dataParam));
                 const videoUrl = videoParam ? decodeURIComponent(videoParam) : null;
                 
-                // Check if analysis was successful
                 if (!data.success && data.error) {
                     showError(data.error);
                     return;
@@ -4657,12 +5206,11 @@ async function getResultsPage(req, res, next) {
                 
                 displayResults(data, videoUrl);
             } catch (error) {
-                console.error("Error loading results:", error);
+                console.error("Error:", error);
                 showError("Failed to load results: " + error.message);
             }
         }
 
-        // Load results on page load
         document.addEventListener("DOMContentLoaded", loadResults);
     </script>
 </body>
@@ -4673,6 +5221,8 @@ async function getResultsPage(req, res, next) {
     res.status(500).json({ success: false, error: error.message });
   }
 }
+
+
 // Routes
 app.get('/', getpage);
 app.get('/getCameraPage', getCameraPage);
