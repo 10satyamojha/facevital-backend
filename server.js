@@ -2443,7 +2443,7 @@ async function getCameraPage(req, res, next) {
 
 
 
-        const AI_API_URL = "https://facescan.duckdns.org/analyze";
+        const AI_API_URL = "https://facescan.duckdns.org";
         const AI_API_URL = API_BASE_URL + "/analyze";
         const WIDTH = 1280, HEIGHT = 720;
         const ACTUAL_DURATION = 35;
