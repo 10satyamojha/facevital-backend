@@ -5044,6 +5044,21 @@ async function getResultsPage(req, res, next) {
                     '</div>' +
                 '</div>';
             }
+
+       const hasEmotion = demographics.emotion && 
+                              demographics.emotion !== 'Not Available' && 
+                              demographics.emotion !== 'Unknown';
+            
+            const isNeutralOnly = hasEmotion && demographics.emotion === 'Neutral' && demographics.emotion_confidence === 0;
+       
+
+
+
+
+
+
+
+
             
             // Parse metabolic age from range - FIXED VERSION
           let metabolicAge = null;
@@ -5106,6 +5121,55 @@ console.log('Final Metabolic Age:', metabolicAge);
                     '</div>' +
                 '</div>';
             }
+
+
+
+
+ if (hasEmotion) {
+                    // Show emotion with appropriate styling
+                    const emotionStyle = isNeutralOnly ? 'font-size: 1.25rem; color: #999;' : 'font-size: 1.5rem;';
+                    const borderStyle = isNeutralOnly ? 'border: 2px dashed #e5e5e5;' : '';
+                    
+                    html += '<div class="demo-item" style="' + borderStyle + '">' +
+                        '<div class="demo-label">Emotion</div>' +
+                        '<div class="demo-value" style="' + emotionStyle + '">';
+                    
+                    if (isNeutralOnly) {
+                        html += '😐 ' + demographics.emotion;
+                    } else {
+                        html += demographics.emotion;
+                    }
+                    
+                    html += '</div>';
+                    
+                    if (demographics.emotion_confidence > 0) {
+                        html += '<div class="demo-confidence" style="margin-top: 0.75rem;">' + 
+                               (demographics.emotion_confidence * 100).toFixed(0) + '% confident</div>';
+                    } else if (isNeutralOnly) {
+                        html += '<div class="vital-unit" style="color: #999; margin-top: 0.5rem;">No strong emotion</div>';
+                    }
+                    
+                    html += '</div>';
+                }
+                
+                html += '</div></div>';
+            } else {
+                // Show fallback only if absolutely no data
+                html += '<div class="card">' +
+                    '<div class="card-header">👤 Analysis Details</div>' +
+                    '<div class="warningBanner" style="margin: 0;">' +
+                        '<span class="icon">⚠️</span>' +
+                        '<div class="text">' +
+                            '<strong>Demographics not detected.</strong> For better results, ensure good lighting and face the camera directly during the scan.' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+            }
+
+
+
+
+
             
             // Vitals Section
             html += '<div class="card">' +
