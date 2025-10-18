@@ -4736,6 +4736,10 @@ async function getResultsPage(req, res, next) {
             border-radius: 12px;
             padding: 1.5rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        .card:last-child {
+            margin-bottom: 0;
         }
         .card-header {
             display: flex;
@@ -5054,13 +5058,13 @@ async function getResultsPage(req, res, next) {
             // Parse metabolic age from range
             let metabolicAge = null;
             if (demographics.age) {
-                const ageStr = String(demographics.age);
+                const ageStr = String(demographics.age).trim();
                 
                 // Skip if "Unknown"
-                if (ageStr.toLowerCase() === 'unknown') {
+                if (ageStr.toLowerCase() === 'unknown' || ageStr === '') {
                     metabolicAge = null;
                 } else {
-                    // Extract first number from range like "(45-50)" or "45-50"
+                    // Extract first number from range like "(25-32)" or "45-50"
                     const match = ageStr.match(/(\d+)/);
                     if (match) {
                         metabolicAge = match[1];
@@ -5068,18 +5072,24 @@ async function getResultsPage(req, res, next) {
                 }
             }
             
-            // Check emotion validity
-            const validEmotion = demographics.emotion && 
-                                demographics.emotion !== 'Not Available' && 
-                                demographics.emotion !== 'Unknown' &&
-                                demographics.emotion !== 'Neutral';
+            // Check emotion validity - Show emotion even if confidence is 0
+            const hasEmotion = demographics.emotion && 
+                              demographics.emotion !== 'Not Available' && 
+                              demographics.emotion !== 'Unknown';
             
-            console.log('Raw Demographics:', demographics);
+            const isNeutralOnly = hasEmotion && demographics.emotion === 'Neutral' && demographics.emotion_confidence === 0;
+            
+            console.log('=== DEMOGRAPHICS DEBUG ===');
+            console.log('Raw age:', demographics.age);
             console.log('Parsed Metabolic Age:', metabolicAge);
-            console.log('Valid Emotion:', validEmotion ? demographics.emotion : 'None');
+            console.log('Raw emotion:', demographics.emotion);
+            console.log('Emotion confidence:', demographics.emotion_confidence);
+            console.log('Has valid data:', metabolicAge || hasEmotion);
             
-            // Demographics Section - Only show if we have valid data
-            if (metabolicAge || validEmotion) {
+            // Demographics Section - Show if we have age OR emotion
+            const showDemographics = metabolicAge || hasEmotion;
+            
+            if (showDemographics) {
                 html += '<div class="card">' +
                     '<div class="card-header">👤 Analysis Details</div>' +
                     '<div class="demographics">';
@@ -5091,33 +5101,38 @@ async function getResultsPage(req, res, next) {
                         '<div class="vital-unit">Years</div>' +
                         (demographics.age_confidence > 0 ? '<div class="demo-confidence">' + (demographics.age_confidence * 100).toFixed(0) + '% confident</div>' : '') +
                     '</div>';
-                } else {
-                    // Show message if age not detected
-                    html += '<div class="demo-item" style="border: 2px dashed #e5e5e5;">' +
-                        '<div class="demo-label">Metabolic Age</div>' +
-                        '<div class="demo-value" style="font-size: 1rem; color: #999;">Not Detected</div>' +
-                        '<div class="vital-unit" style="color: #999;">Move closer to camera</div>' +
-                    '</div>';
                 }
                 
-                if (validEmotion) {
-                    html += '<div class="demo-item">' +
+                if (hasEmotion) {
+                    // Show emotion with appropriate styling
+                    const emotionStyle = isNeutralOnly ? 'font-size: 1.25rem; color: #999;' : 'font-size: 1.5rem;';
+                    const borderStyle = isNeutralOnly ? 'border: 2px dashed #e5e5e5;' : '';
+                    
+                    html += '<div class="demo-item" style="' + borderStyle + '">' +
                         '<div class="demo-label">Emotion</div>' +
-                        '<div class="demo-value" style="font-size: 1.5rem;">' + demographics.emotion + '</div>' +
-                        (demographics.emotion_confidence > 0 ? '<div class="demo-confidence" style="margin-top: 0.75rem;">' + (demographics.emotion_confidence * 100).toFixed(0) + '% confident</div>' : '') +
-                    '</div>';
-                } else {
-                    // Show neutral state
-                    html += '<div class="demo-item" style="border: 2px dashed #e5e5e5;">' +
-                        '<div class="demo-label">Emotion</div>' +
-                        '<div class="demo-value" style="font-size: 1.5rem; color: #999;">😐 Neutral</div>' +
-                        '<div class="vital-unit" style="color: #999;">No strong emotion detected</div>' +
-                    '</div>';
+                        '<div class="demo-value" style="' + emotionStyle + '">';
+                    
+                    if (isNeutralOnly) {
+                        html += '😐 ' + demographics.emotion;
+                    } else {
+                        html += demographics.emotion;
+                    }
+                    
+                    html += '</div>';
+                    
+                    if (demographics.emotion_confidence > 0) {
+                        html += '<div class="demo-confidence" style="margin-top: 0.75rem;">' + 
+                               (demographics.emotion_confidence * 100).toFixed(0) + '% confident</div>';
+                    } else if (isNeutralOnly) {
+                        html += '<div class="vital-unit" style="color: #999; margin-top: 0.5rem;">No strong emotion</div>';
+                    }
+                    
+                    html += '</div>';
                 }
                 
                 html += '</div></div>';
             } else {
-                // Show fallback if no demographics detected at all
+                // Show fallback only if absolutely no data
                 html += '<div class="card">' +
                     '<div class="card-header">👤 Analysis Details</div>' +
                     '<div class="warningBanner" style="margin: 0;">' +
@@ -5281,6 +5296,7 @@ async function getResultsPage(req, res, next) {
     res.status(500).json({ success: false, error: error.message });
   }
 }
+
 
 
 // Routes
