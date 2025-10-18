@@ -5050,32 +5050,36 @@ async function getResultsPage(req, res, next) {
 
 
 
+
+
 if (demographics.age) {
-    // Convert and sanitize string
+    // Force string and clean all weird Unicode chars
     let ageStr = String(demographics.age)
         .trim()
-        .replace(/[^\x20-\x7E]/g, '')           // Remove non-ASCII hidden chars
-        .replace(/[（）]/g, '()')                // Replace full‑width parentheses if present
-        .replace(/[–—−]/g, '-');                // Normalize dash characters
+        .normalize('NFKC')                       // Normalize unicode (important!)
+        .replace(/[^0-9()\\-]/g, '')             // Remove non-numeric stuff except () and -
+        .replace(/[﹙﹚]/g, '')                   // Strip any special brackets
+        .replace(/[–—−]/g, '-');                 // Convert weird dashes to plain hyphen
 
     console.log('=== AGE DEBUG ===');
     console.log('Raw age string:', demographics.age);
     console.log('Sanitized ageStr:', JSON.stringify(ageStr));
 
-    // Extract numeric parts
-    const numbers = ageStr.match(/\d+/g);
+    // Extract numbers after normalization
+    const numbers = ageStr.match(/[0-9]+/g);
     console.log('Extracted numbers:', numbers);
 
     if (numbers && numbers.length > 0) {
-        const parsed = numbers.map(n => parseInt(n, 10));
-        const avg = Math.round(parsed.reduce((a, b) => a + b, 0) / parsed.length);
-        metabolicAge = avg;
-        console.log('Parsed numbers:', parsed);
-        console.log('Average age:', avg);
+        const parsedNumbers = numbers.map(n => parseInt(n, 10));
+        const avgAge = Math.round(parsedNumbers.reduce((a, b) => a + b) / parsedNumbers.length);
+        metabolicAge = avgAge;
+        console.log('Parsed numbers:', parsedNumbers);
+        console.log('Average age:', avgAge);
     }
 }
 
 console.log('Final Metabolic Age:', metabolicAge);
+
 
 
             
