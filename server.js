@@ -4767,38 +4767,42 @@ async function getResultsPage(req, res, next) {
         }
         .demographics {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
         }
         .demo-item {
             background: #f5f5f5;
             border-radius: 8px;
-            padding: 1rem;
+            padding: 1.25rem 1rem;
             text-align: center;
+            border: 2px solid #e5e5e5;
         }
         .demo-label {
             font-size: 0.875rem;
             color: #666;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
         }
         .demo-value {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 700;
             color: #000;
+            margin-bottom: 0.25rem;
         }
         .demo-confidence {
             font-size: 0.75rem;
             color: #999;
-            margin-top: 0.25rem;
+            margin-top: 0.5rem;
         }
         .vitals-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 1rem;
+            gap: 0.75rem;
         }
         .vital-card {
-            background: #fafafa;
-            border-radius: 8px;
+            background: white;
+            border: 2px solid #f5f5f5;
+            border-radius: 12px;
             padding: 1rem;
             display: flex;
             align-items: center;
@@ -4807,12 +4811,13 @@ async function getResultsPage(req, res, next) {
         }
         .vital-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-color: #e5e5e5;
         }
         .vital-icon {
             width: 50px;
             height: 50px;
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -4826,7 +4831,8 @@ async function getResultsPage(req, res, next) {
         .vital-name {
             font-size: 0.875rem;
             color: #666;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
         }
         .vital-value {
             font-size: 2rem;
@@ -4837,7 +4843,7 @@ async function getResultsPage(req, res, next) {
         .vital-progress {
             width: 100%;
             height: 6px;
-            background: #e5e5e5;
+            background: #f5f5f5;
             border-radius: 3px;
             overflow: hidden;
         }
@@ -4848,19 +4854,21 @@ async function getResultsPage(req, res, next) {
         }
         .vital-meta {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 0.5rem;
             flex-shrink: 0;
+            text-align: right;
         }
         .vital-unit {
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             color: #999;
             font-weight: 600;
             white-space: nowrap;
         }
         .status-badge {
-            background: #e5e5e5;
+            background: #f5f5f5;
             color: #666;
             padding: 0.375rem 0.75rem;
             border-radius: 20px;
@@ -4915,22 +4923,32 @@ async function getResultsPage(req, res, next) {
             .card {
                 padding: 1rem;
             }
+            .card-header {
+                font-size: 1.125rem;
+            }
             .demographics {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: 1fr;
+            }
+            .demo-item {
+                padding: 1rem;
+            }
+            .demo-value {
+                font-size: 1.5rem;
             }
             .vital-card {
-                flex-direction: column;
-                text-align: center;
+                padding: 0.875rem;
+                gap: 0.75rem;
             }
-            .vital-info {
-                width: 100%;
-            }
-            .vital-meta {
-                flex-direction: column;
-                gap: 0.5rem;
+            .vital-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 1.25rem;
             }
             .vital-value {
-                font-size: 1.75rem;
+                font-size: 1.5rem;
+            }
+            .vital-meta {
+                align-items: flex-end;
             }
         }
     </style>
@@ -5044,6 +5062,9 @@ async function getResultsPage(req, res, next) {
                 }
             }
             
+            console.log('Demographics:', demographics);
+            console.log('Metabolic Age:', metabolicAge);
+            
             // Demographics Section
             if (metabolicAge || demographics.emotion) {
                 html += '<div class="card">' +
@@ -5053,7 +5074,8 @@ async function getResultsPage(req, res, next) {
                 if (metabolicAge) {
                     html += '<div class="demo-item">' +
                         '<div class="demo-label">Metabolic Age</div>' +
-                        '<div class="demo-value">' + metabolicAge + ' years</div>' +
+                        '<div class="demo-value">' + metabolicAge + '</div>' +
+                        '<div class="vital-unit">Years</div>' +
                         (demographics.age_confidence > 0 ? '<div class="demo-confidence">' + (demographics.age_confidence * 100).toFixed(0) + '% confident</div>' : '') +
                     '</div>';
                 }
@@ -5061,8 +5083,8 @@ async function getResultsPage(req, res, next) {
                 if (demographics.emotion && demographics.emotion !== 'Not Available') {
                     html += '<div class="demo-item">' +
                         '<div class="demo-label">Emotion</div>' +
-                        '<div class="demo-value">' + demographics.emotion + '</div>' +
-                        (demographics.emotion_confidence > 0 ? '<div class="demo-confidence">' + (demographics.emotion_confidence * 100).toFixed(0) + '% confident</div>' : '') +
+                        '<div class="demo-value" style="font-size: 1.5rem;">' + demographics.emotion + '</div>' +
+                        (demographics.emotion_confidence > 0 ? '<div class="demo-confidence" style="margin-top: 0.75rem;">' + (demographics.emotion_confidence * 100).toFixed(0) + '% confident</div>' : '') +
                     '</div>';
                 }
                 
