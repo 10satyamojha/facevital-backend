@@ -5048,28 +5048,35 @@ async function getResultsPage(req, res, next) {
             // Parse metabolic age from range - FIXED VERSION
           let metabolicAge = null;
 
-if (demographics.age) {
-    // Ensure ageStr is always a string
-    const ageStr = String(demographics.age).trim();
-    console.log('=== AGE DEBUG ===');
-    console.log('Raw age string:', ageStr);
-    console.log('Type of ageStr:', typeof ageStr, '| Value:', JSON.stringify(ageStr));
+let metabolicAge = null;
 
-    // Robust number extraction
+if (demographics.age) {
+    // Convert and sanitize string
+    let ageStr = String(demographics.age)
+        .trim()
+        .replace(/[^\x20-\x7E]/g, '')           // Remove non-ASCII hidden chars
+        .replace(/[（）]/g, '()')                // Replace full‑width parentheses if present
+        .replace(/[–—−]/g, '-');                // Normalize dash characters
+
+    console.log('=== AGE DEBUG ===');
+    console.log('Raw age string:', demographics.age);
+    console.log('Sanitized ageStr:', JSON.stringify(ageStr));
+
+    // Extract numeric parts
     const numbers = ageStr.match(/\d+/g);
     console.log('Extracted numbers:', numbers);
 
     if (numbers && numbers.length > 0) {
-        // Convert all to integers
-        const parsedNumbers = numbers.map(n => parseInt(n, 10));
-        const sum = parsedNumbers.reduce((acc, num) => acc + num, 0);
-        metabolicAge = Math.round(sum / parsedNumbers.length);
-        console.log('Parsed numbers:', parsedNumbers);
-        console.log('Average age:', metabolicAge);
+        const parsed = numbers.map(n => parseInt(n, 10));
+        const avg = Math.round(parsed.reduce((a, b) => a + b, 0) / parsed.length);
+        metabolicAge = avg;
+        console.log('Parsed numbers:', parsed);
+        console.log('Average age:', avg);
     }
 }
 
 console.log('Final Metabolic Age:', metabolicAge);
+
 
             
             // Demographics Section - ONLY AGE
