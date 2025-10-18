@@ -4061,7 +4061,7 @@ async function getCameraPage(req, res, next) {
                 return;
             }
             
-            showStatus("📤 Uploading video...", "warning");
+            
             
             try {
                 const fd = new FormData();
@@ -4176,7 +4176,7 @@ async function getResultsPage(req, res, next) {
             margin: 0 auto;
         }
         .header { 
-            background: #ffffff; 
+            background: #22CCEE; 
             padding: 1.5rem; 
             border-radius: 16px; 
             margin-bottom: 1.5rem; 
