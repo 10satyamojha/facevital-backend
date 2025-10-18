@@ -5048,7 +5048,7 @@ async function getResultsPage(req, res, next) {
             // Parse metabolic age from range - FIXED VERSION
           let metabolicAge = null;
 
-let metabolicAge = null;
+
 
 if (demographics.age) {
     // Convert and sanitize string
