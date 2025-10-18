@@ -3337,27 +3337,6 @@ async function getResultsPage(req, res, next) {
     </div>
 
     <script>
-        // Default values if data missing
-        const DEFAULT_VALUES = {
-            heart_rate_bpm: 75,
-            respiratory_rate_bpm: 15,
-            spo2_percent: 97,
-            blood_pressure: {
-                systolic: 120,
-                diastolic: 80
-            },
-            stress_indicator: 0.25,
-            health_risk: 0.3,
-            demographics: {
-                age: 'Unknown',
-               
-                emotion: 'Neutral',
-                age_confidence: 0.0,
-                gender_confidence: 0.0,
-                emotion_confidence: 0.0
-            }
-        };
-
         function getStressColor(stress) {
             if (stress <= 1) return '#10b981';
             if (stress <= 2) return '#fbbf24';
@@ -3400,127 +3379,152 @@ async function getResultsPage(req, res, next) {
         }
 
         function displayResults(data, videoUrl) {
-            // Merge with defaults
             const vitals = data.vitals || {};
-            const demographics = data.demographics || DEFAULT_VALUES.demographics;
+            const demographics = data.demographics || {};
             const indicators = data.indicators || {};
             const warning = data.warning || null;
             const quality = data.quality || 'unknown';
             
-            // Extract values with fallbacks
-            const hr = vitals.heart_rate_bpm || DEFAULT_VALUES.heart_rate_bpm;
-            const rr = vitals.respiratory_rate_bpm || DEFAULT_VALUES.respiratory_rate_bpm;
-            const o2 = vitals.spo2_percent || DEFAULT_VALUES.spo2_percent;
-            const systolic = vitals.blood_pressure?.systolic || DEFAULT_VALUES.blood_pressure.systolic;
-            const diastolic = vitals.blood_pressure?.diastolic || DEFAULT_VALUES.blood_pressure.diastolic;
-            const stressRaw = indicators.stress_indicator !== undefined ? indicators.stress_indicator : DEFAULT_VALUES.stress_indicator;
-            const healthRisk = indicators.health_risk !== undefined ? indicators.health_risk : DEFAULT_VALUES.health_risk;
+            // Extract values - NO DEFAULTS
+            const hr = vitals.heart_rate_bpm;
+            const rr = vitals.respiratory_rate_bpm;
+            const o2 = vitals.spo2_percent;
+            const systolic = vitals.blood_pressure?.systolic;
+            const diastolic = vitals.blood_pressure?.diastolic;
+            const stressRaw = indicators.stress_indicator;
+            const healthRisk = indicators.health_risk;
             
             // Scale stress to 0-5
-            const stress = (stressRaw * 5).toFixed(1);
-            const stressColor = getStressColor(parseFloat(stress));
-            const stressLabel = getStressLevel(parseFloat(stress));
+            const stress = stressRaw !== undefined ? (stressRaw * 5).toFixed(1) : null;
+            const stressColor = stress ? getStressColor(parseFloat(stress)) : '#6b7280';
+            const stressLabel = stress ? getStressLevel(parseFloat(stress)) : 'Unknown';
             
             // Get statuses
-            const hrStatus = getHRStatus(hr);
-            const bpStatus = getBPStatus(systolic, diastolic);
-            const spo2Status = getSPO2Status(o2);
-            const rrStatus = getRRStatus(rr);
+            const hrStatus = hr ? getHRStatus(hr) : { label: 'N/A', color: '#6b7280' };
+            const bpStatus = (systolic && diastolic) ? getBPStatus(systolic, diastolic) : { label: 'N/A', color: '#6b7280' };
+            const spo2Status = o2 ? getSPO2Status(o2) : { label: 'N/A', color: '#6b7280' };
+            const rrStatus = rr ? getRRStatus(rr) : { label: 'N/A', color: '#6b7280' };
             
             // Calculate progress bars
-            const hrProgress = Math.min((hr / 120) * 100, 100);
-            const sysProgress = Math.min((systolic / 140) * 100, 100);
-            const diaProgress = Math.min((diastolic / 90) * 100, 100);
-            const o2Progress = Math.min((o2 / 100) * 100, 100);
-            const rrProgress = Math.min((rr / 25) * 100, 100);
-            const stressProgress = (parseFloat(stress) / 5) * 100;
+            const hrProgress = hr ? Math.min((hr / 120) * 100, 100) : 0;
+            const sysProgress = systolic ? Math.min((systolic / 140) * 100, 100) : 0;
+            const diaProgress = diastolic ? Math.min((diastolic / 90) * 100, 100) : 0;
+            const o2Progress = o2 ? Math.min((o2 / 100) * 100, 100) : 0;
+            const rrProgress = rr ? Math.min((rr / 25) * 100, 100) : 0;
+            const stressProgress = stress ? (parseFloat(stress) / 5) * 100 : 0;
             
             let html = '';
             
             // Quality Warning
-            if (warning || quality === 'low' || quality === 'medium') {
+            if (warning || quality === 'low' || quality === 'medium' || quality === 'estimated') {
                 html += '<div class="warningBanner">' +
                     '<span class="icon">⚠️</span>' +
                     '<div class="text">' +
-                        '<strong>Note:</strong> ' + (warning || 'Video quality was ' + quality + '. Results may be less accurate. For best results, use a 10+ second video with clear face visibility.') +
+                        '<strong>Note:</strong> ' + (warning || 'Some values may be estimated. Quality: ' + quality) +
                     '</div>' +
                 '</div>';
             }
             
             // Demographics Section
-            if (demographics.age !== 'Unknown' || demographics.emotion !== 'Not Available') {
+            if (demographics.age || demographics.gender || demographics.emotion) {
                 html += '<div class="demographicsContainer">' +
                     '<div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">👤 Demographics & Emotion</div>' +
-                    '<div class="demographicsGrid">' +
-                        '<div class="demoCard">' +
-                            '<div class="demoLabel">Age Group</div>' +
-                            '<div class="demoValue">' + (demographics.age || 'Unknown') + '</div>' +
-                            (demographics.age_confidence > 0 ? '<div style="font-size: 0.75rem; margin-top: 0.25rem;">Confidence: ' + (demographics.age_confidence * 100).toFixed(0) + '%</div>' : '') +
-                        '</div>' +
-                        '<div class="demoCard">' +
-                            '<div class="demoLabel">Gender</div>' +
-                            '<div class="demoValue">' + (demographics.gender || 'Unknown') + '</div>' +
-                            (demographics.gender_confidence > 0 ? '<div style="font-size: 0.75rem; margin-top: 0.25rem;">Confidence: ' + (demographics.gender_confidence * 100).toFixed(0) + '%</div>' : '') +
-                        '</div>' +
-                        '<div class="demoCard">' +
-                            '<div class="demoLabel">Emotion</div>' +
-                            '<div class="demoValue">' + (demographics.emotion !== 'Not Available' ? demographics.emotion : 'Neutral') + '</div>' +
-                            (demographics.emotion_confidence > 0 ? '<div style="font-size: 0.75rem; margin-top: 0.25rem;">Confidence: ' + (demographics.emotion_confidence * 100).toFixed(0) + '%</div>' : '') +
-                        '</div>' +
-                    '</div>' +
-                '</div>';
+                    '<div class="demographicsGrid">';
+                
+                if (demographics.age) {
+                    html += '<div class="demoCard">' +
+                        '<div class="demoLabel">Age Group</div>' +
+                        '<div class="demoValue">' + demographics.age + '</div>' +
+                        (demographics.age_confidence > 0 ? '<div style="font-size: 0.75rem; margin-top: 0.25rem;">Confidence: ' + (demographics.age_confidence * 100).toFixed(0) + '%</div>' : '') +
+                    '</div>';
+                }
+                
+                if (demographics.gender) {
+                    html += '<div class="demoCard">' +
+                        '<div class="demoLabel">Gender</div>' +
+                        '<div class="demoValue">' + demographics.gender + '</div>' +
+                        (demographics.gender_confidence > 0 ? '<div style="font-size: 0.75rem; margin-top: 0.25rem;">Confidence: ' + (demographics.gender_confidence * 100).toFixed(0) + '%</div>' : '') +
+                    '</div>';
+                }
+                
+                if (demographics.emotion && demographics.emotion !== 'Not Available') {
+                    html += '<div class="demoCard">' +
+                        '<div class="demoLabel">Emotion</div>' +
+                        '<div class="demoValue">' + demographics.emotion + '</div>' +
+                        (demographics.emotion_confidence > 0 ? '<div style="font-size: 0.75rem; margin-top: 0.25rem;">Confidence: ' + (demographics.emotion_confidence * 100).toFixed(0) + '%</div>' : '') +
+                    '</div>';
+                }
+                
+                html += '</div></div>';
             }
             
             // Vitals Table
             html += '<div class="vitals-table-wrapper">' +
                 '<table class="vitals-table">' +
                     '<thead><tr><th>Vital Sign</th><th>Result</th><th>Unit</th><th>Status</th></tr></thead>' +
-                    '<tbody>' +
-                        // Heart Rate
-                        '<tr>' +
-                            '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">❤️</span>Heart Rate</div></td>' +
-                            '<td><div class="vital-value" style="color: #ef4444;">' + Math.round(hr) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #ef4444, #dc2626); width: ' + hrProgress + '%;"></div></div></div></td>' +
-                            '<td class="vital-unit">BPM</td>' +
-                            '<td class="vital-status"><span class="status-badge" style="background: ' + hrStatus.color + '20; color: ' + hrStatus.color + ';">' + hrStatus.label + '</span></td>' +
-                        '</tr>' +
-                        // Respiratory Rate
-                        '<tr>' +
-                            '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">🫁</span>Respiratory Rate</div></td>' +
-                            '<td><div class="vital-value" style="color: #06b6d4;">' + Math.round(rr) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #06b6d4, #0891b2); width: ' + rrProgress + '%;"></div></div></div></td>' +
-                            '<td class="vital-unit">BPM</td>' +
-                            '<td class="vital-status"><span class="status-badge" style="background: ' + rrStatus.color + '20; color: ' + rrStatus.color + ';">' + rrStatus.label + '</span></td>' +
-                        '</tr>' +
-                        // Systolic BP
-                        '<tr>' +
-                            '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">💓</span>Systolic BP</div></td>' +
-                            '<td><div class="vital-value" style="color: #ec4899;">' + Math.round(systolic) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #ec4899, #db2777); width: ' + sysProgress + '%;"></div></div></div></td>' +
-                            '<td class="vital-unit">mmHg</td>' +
-                            '<td class="vital-status"><span class="status-badge" style="background: ' + bpStatus.color + '20; color: ' + bpStatus.color + ';">' + bpStatus.label + '</span></td>' +
-                        '</tr>' +
-                        // Diastolic BP
-                        '<tr>' +
-                            '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">🩸</span>Diastolic BP</div></td>' +
-                            '<td><div class="vital-value" style="color: #8b5cf6;">' + Math.round(diastolic) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #8b5cf6, #7c3aed); width: ' + diaProgress + '%;"></div></div></div></td>' +
-                            '<td class="vital-unit">mmHg</td>' +
-                            '<td class="vital-status"><span class="status-badge" style="background: ' + bpStatus.color + '20; color: ' + bpStatus.color + ';">' + bpStatus.label + '</span></td>' +
-                        '</tr>' +
-                        // Oxygen Saturation
-                        '<tr>' +
-                            '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #10b981, #059669);">🫀</span>Oxygen Saturation</div></td>' +
-                            '<td><div class="vital-value" style="color: #10b981;">' + Math.round(o2) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #10b981, #059669); width: ' + o2Progress + '%;"></div></div></div></td>' +
-                            '<td class="vital-unit">% SpO2</td>' +
-                            '<td class="vital-status"><span class="status-badge" style="background: ' + spo2Status.color + '20; color: ' + spo2Status.color + ';">' + spo2Status.label + '</span></td>' +
-                        '</tr>' +
-                        // Stress Level
-                        '<tr>' +
-                            '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, ' + stressColor + ', ' + stressColor + ');">🧠</span>Stress Level</div></td>' +
-                            '<td><div class="vital-value" style="color: ' + stressColor + ';">' + stress + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, ' + stressColor + ', ' + stressColor + 'dd); width: ' + stressProgress + '%;"></div></div></div></td>' +
-                            '<td class="vital-unit">0–5 Scale</td>' +
-                            '<td class="vital-status"><span class="status-badge" style="background: ' + stressColor + '20; color: ' + stressColor + ';">' + stressLabel + '</span></td>' +
-                        '</tr>' +
-                    '</tbody>' +
-                '</table>' +
-            '</div>';
+                    '<tbody>';
+            
+            // Heart Rate
+            if (hr) {
+                html += '<tr>' +
+                    '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">❤️</span>Heart Rate</div></td>' +
+                    '<td><div class="vital-value" style="color: #ef4444;">' + Math.round(hr) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #ef4444, #dc2626); width: ' + hrProgress + '%;"></div></div></div></td>' +
+                    '<td class="vital-unit">BPM</td>' +
+                    '<td class="vital-status"><span class="status-badge" style="background: ' + hrStatus.color + '20; color: ' + hrStatus.color + ';">' + hrStatus.label + '</span></td>' +
+                '</tr>';
+            }
+            
+            // Respiratory Rate
+            if (rr) {
+                html += '<tr>' +
+                    '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">🫁</span>Respiratory Rate</div></td>' +
+                    '<td><div class="vital-value" style="color: #06b6d4;">' + Math.round(rr) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #06b6d4, #0891b2); width: ' + rrProgress + '%;"></div></div></div></td>' +
+                    '<td class="vital-unit">BPM</td>' +
+                    '<td class="vital-status"><span class="status-badge" style="background: ' + rrStatus.color + '20; color: ' + rrStatus.color + ';">' + rrStatus.label + '</span></td>' +
+                '</tr>';
+            }
+            
+            // Systolic BP
+            if (systolic) {
+                html += '<tr>' +
+                    '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">💓</span>Systolic BP</div></td>' +
+                    '<td><div class="vital-value" style="color: #ec4899;">' + Math.round(systolic) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #ec4899, #db2777); width: ' + sysProgress + '%;"></div></div></div></td>' +
+                    '<td class="vital-unit">mmHg</td>' +
+                    '<td class="vital-status"><span class="status-badge" style="background: ' + bpStatus.color + '20; color: ' + bpStatus.color + ';">' + bpStatus.label + '</span></td>' +
+                '</tr>';
+            }
+            
+            // Diastolic BP
+            if (diastolic) {
+                html += '<tr>' +
+                    '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">🩸</span>Diastolic BP</div></td>' +
+                    '<td><div class="vital-value" style="color: #8b5cf6;">' + Math.round(diastolic) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #8b5cf6, #7c3aed); width: ' + diaProgress + '%;"></div></div></div></td>' +
+                    '<td class="vital-unit">mmHg</td>' +
+                    '<td class="vital-status"><span class="status-badge" style="background: ' + bpStatus.color + '20; color: ' + bpStatus.color + ';">' + bpStatus.label + '</span></td>' +
+                '</tr>';
+            }
+            
+            // Oxygen Saturation
+            if (o2) {
+                html += '<tr>' +
+                    '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, #10b981, #059669);">🫀</span>Oxygen Saturation</div></td>' +
+                    '<td><div class="vital-value" style="color: #10b981;">' + Math.round(o2) + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, #10b981, #059669); width: ' + o2Progress + '%;"></div></div></div></td>' +
+                    '<td class="vital-unit">% SpO2</td>' +
+                    '<td class="vital-status"><span class="status-badge" style="background: ' + spo2Status.color + '20; color: ' + spo2Status.color + ';">' + spo2Status.label + '</span></td>' +
+                '</tr>';
+            }
+            
+            // Stress Level
+            if (stress) {
+                html += '<tr>' +
+                    '<td><div class="vital-label"><span class="vital-icon" style="background: linear-gradient(135deg, ' + stressColor + ', ' + stressColor + ');">🧠</span>Stress Level</div></td>' +
+                    '<td><div class="vital-value" style="color: ' + stressColor + ';">' + stress + '<div class="vital-progress"><div class="vital-progress-bar" style="background: linear-gradient(90deg, ' + stressColor + ', ' + stressColor + 'dd); width: ' + stressProgress + '%;"></div></div></div></td>' +
+                    '<td class="vital-unit">0–5 Scale</td>' +
+                    '<td class="vital-status"><span class="status-badge" style="background: ' + stressColor + '20; color: ' + stressColor + ';">' + stressLabel + '</span></td>' +
+                '</tr>';
+            }
+            
+            html += '</tbody></table></div>';
             
             document.getElementById("resultsContent").innerHTML = html;
         }
@@ -3531,13 +3535,8 @@ async function getResultsPage(req, res, next) {
                     '<div class="icon">❌</div>' +
                     '<h3 style="margin-bottom: 0.5rem; color: #ef4444;">Analysis Failed</h3>' +
                     '<p>' + errorMsg + '</p>' +
-                    '<p style="margin-top: 1rem; font-size: 0.9rem; color: #64748b;">Using default values for demonstration.</p>' +
+                    '<p style="margin-top: 1rem;"><a href="/camera" style="color: #5eaa3c; text-decoration: none; font-weight: 600;">← Try Again</a></p>' +
                 '</div>';
-            
-            // Show default values even on error
-            setTimeout(() => {
-                displayResults(DEFAULT_VALUES, null);
-            }, 2000);
         }
 
         // Get data from URL parameters
@@ -3548,8 +3547,8 @@ async function getResultsPage(req, res, next) {
                 const videoParam = urlParams.get('video');
                 
                 if (!dataParam) {
-                    console.warn("No data parameter found, using defaults");
-                    showError("No analysis data found. Showing default values.");
+                    console.warn("No data parameter found");
+                    showError("No analysis data found.");
                     return;
                 }
                 
@@ -3574,7 +3573,7 @@ async function getResultsPage(req, res, next) {
     </script>
 </body>
 </html>`;  
- res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(html);
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
