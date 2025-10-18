@@ -5049,21 +5049,26 @@ async function getResultsPage(req, res, next) {
             let metabolicAge = null;
             if (demographics.age) {
                 const ageStr = String(demographics.age).trim();
+                console.log('=== AGE DEBUG ===');
+                console.log('Raw age string:', ageStr);
                 
                 if (ageStr.toLowerCase() !== 'unknown' && ageStr !== '') {
                     // Extract all numbers from formats like "(48-53)" or "45-50"
                     const numbers = ageStr.match(/\d+/g);
-                    if (numbers && numbers.length >= 1) {
+                    console.log('Extracted numbers:', numbers);
+                    
+                    if (numbers && numbers.length > 0) {
                         // Calculate average of range
-                        const sum = numbers.reduce((acc, num) => acc + parseInt(num), 0);
-                        metabolicAge = Math.round(sum / numbers.length);
+                        const parsedNumbers = numbers.map(n => parseInt(n, 10));
+                        const sum = parsedNumbers.reduce((acc, num) => acc + num, 0);
+                        metabolicAge = Math.round(sum / parsedNumbers.length);
+                        console.log('Parsed numbers:', parsedNumbers);
+                        console.log('Average age:', metabolicAge);
                     }
                 }
             }
             
-            console.log('=== AGE DEBUG ===');
-            console.log('Raw age:', demographics.age);
-            console.log('Parsed Metabolic Age:', metabolicAge);
+            console.log('Final Metabolic Age:', metabolicAge);
             
             // Demographics Section - ONLY AGE
             if (metabolicAge) {
@@ -5241,7 +5246,6 @@ async function getResultsPage(req, res, next) {
     res.status(500).json({ success: false, error: error.message });
   }
 }
-
 
 // Routes
 app.get('/', getpage);
