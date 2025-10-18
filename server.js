@@ -3004,7 +3004,7 @@ async function analyzeVideo() {
                 timeout: 60000,
                 onUploadProgress: (progressEvent) => {
                     const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    showStatus(`📤 Uploading: ${percent}%`, "warning");
+                
                 }
             });
 
@@ -3077,7 +3077,7 @@ async function analyzeVideo() {
                 attempts++;
                 
                 try {
-                    console.log(`📊 Poll ${attempts}/${maxAttempts}...`);
+                 
                     
                     // Check status endpoint
                     const statusUrl = `${API_BASE_URL}/status/${jobId}`;
