@@ -5055,18 +5055,31 @@ async function getResultsPage(req, res, next) {
             let metabolicAge = null;
             if (demographics.age) {
                 const ageStr = String(demographics.age);
-                // Extract first number from range like "(45-50)" or "45-50"
-                const match = ageStr.match(/(\d+)/);
-                if (match) {
-                    metabolicAge = match[1];
+                
+                // Skip if "Unknown"
+                if (ageStr.toLowerCase() === 'unknown') {
+                    metabolicAge = null;
+                } else {
+                    // Extract first number from range like "(45-50)" or "45-50"
+                    const match = ageStr.match(/(\d+)/);
+                    if (match) {
+                        metabolicAge = match[1];
+                    }
                 }
             }
             
-            console.log('Demographics:', demographics);
-            console.log('Metabolic Age:', metabolicAge);
+            // Check emotion validity
+            const validEmotion = demographics.emotion && 
+                                demographics.emotion !== 'Not Available' && 
+                                demographics.emotion !== 'Unknown' &&
+                                demographics.emotion !== 'Neutral';
             
-            // Demographics Section
-            if (metabolicAge || demographics.emotion) {
+            console.log('Raw Demographics:', demographics);
+            console.log('Parsed Metabolic Age:', metabolicAge);
+            console.log('Valid Emotion:', validEmotion ? demographics.emotion : 'None');
+            
+            // Demographics Section - Only show if we have valid data
+            if (metabolicAge || validEmotion) {
                 html += '<div class="card">' +
                     '<div class="card-header">👤 Analysis Details</div>' +
                     '<div class="demographics">';
@@ -5078,17 +5091,42 @@ async function getResultsPage(req, res, next) {
                         '<div class="vital-unit">Years</div>' +
                         (demographics.age_confidence > 0 ? '<div class="demo-confidence">' + (demographics.age_confidence * 100).toFixed(0) + '% confident</div>' : '') +
                     '</div>';
+                } else {
+                    // Show message if age not detected
+                    html += '<div class="demo-item" style="border: 2px dashed #e5e5e5;">' +
+                        '<div class="demo-label">Metabolic Age</div>' +
+                        '<div class="demo-value" style="font-size: 1rem; color: #999;">Not Detected</div>' +
+                        '<div class="vital-unit" style="color: #999;">Move closer to camera</div>' +
+                    '</div>';
                 }
                 
-                if (demographics.emotion && demographics.emotion !== 'Not Available') {
+                if (validEmotion) {
                     html += '<div class="demo-item">' +
                         '<div class="demo-label">Emotion</div>' +
                         '<div class="demo-value" style="font-size: 1.5rem;">' + demographics.emotion + '</div>' +
                         (demographics.emotion_confidence > 0 ? '<div class="demo-confidence" style="margin-top: 0.75rem;">' + (demographics.emotion_confidence * 100).toFixed(0) + '% confident</div>' : '') +
                     '</div>';
+                } else {
+                    // Show neutral state
+                    html += '<div class="demo-item" style="border: 2px dashed #e5e5e5;">' +
+                        '<div class="demo-label">Emotion</div>' +
+                        '<div class="demo-value" style="font-size: 1.5rem; color: #999;">😐 Neutral</div>' +
+                        '<div class="vital-unit" style="color: #999;">No strong emotion detected</div>' +
+                    '</div>';
                 }
                 
                 html += '</div></div>';
+            } else {
+                // Show fallback if no demographics detected at all
+                html += '<div class="card">' +
+                    '<div class="card-header">👤 Analysis Details</div>' +
+                    '<div class="warningBanner" style="margin: 0;">' +
+                        '<span class="icon">⚠️</span>' +
+                        '<div class="text">' +
+                            '<strong>Demographics not detected.</strong> For better results, ensure good lighting and face the camera directly during the scan.' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
             }
             
             // Vitals Section
