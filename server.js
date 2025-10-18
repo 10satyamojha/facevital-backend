@@ -5046,29 +5046,31 @@ async function getResultsPage(req, res, next) {
             }
             
             // Parse metabolic age from range - FIXED VERSION
-            let metabolicAge = null;
-            if (demographics.age) {
-                const ageStr = String(demographics.age).trim();
-                console.log('=== AGE DEBUG ===');
-                console.log('Raw age string:', ageStr);
-                
-                if (ageStr.toLowerCase() !== 'unknown' && ageStr !== '') {
-                    // Extract all numbers from formats like "(48-53)" or "45-50"
-                    const numbers = ageStr.match(/\d+/g);
-                    console.log('Extracted numbers:', numbers);
-                    
-                    if (numbers && numbers.length > 0) {
-                        // Calculate average of range
-                        const parsedNumbers = numbers.map(n => parseInt(n, 10));
-                        const sum = parsedNumbers.reduce((acc, num) => acc + num, 0);
-                        metabolicAge = Math.round(sum / parsedNumbers.length);
-                        console.log('Parsed numbers:', parsedNumbers);
-                        console.log('Average age:', metabolicAge);
-                    }
-                }
-            }
-            
-            console.log('Final Metabolic Age:', metabolicAge);
+          let metabolicAge = null;
+
+if (demographics.age) {
+    // Ensure ageStr is always a string
+    const ageStr = String(demographics.age).trim();
+    console.log('=== AGE DEBUG ===');
+    console.log('Raw age string:', ageStr);
+    console.log('Type of ageStr:', typeof ageStr, '| Value:', JSON.stringify(ageStr));
+
+    // Robust number extraction
+    const numbers = ageStr.match(/\d+/g);
+    console.log('Extracted numbers:', numbers);
+
+    if (numbers && numbers.length > 0) {
+        // Convert all to integers
+        const parsedNumbers = numbers.map(n => parseInt(n, 10));
+        const sum = parsedNumbers.reduce((acc, num) => acc + num, 0);
+        metabolicAge = Math.round(sum / parsedNumbers.length);
+        console.log('Parsed numbers:', parsedNumbers);
+        console.log('Average age:', metabolicAge);
+    }
+}
+
+console.log('Final Metabolic Age:', metabolicAge);
+
             
             // Demographics Section - ONLY AGE
             if (metabolicAge) {
