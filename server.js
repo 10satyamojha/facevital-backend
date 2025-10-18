@@ -3407,7 +3407,7 @@ async function getCameraPage(req, res, next) {
 <body>
     <div class="mainContainer">
         <div class="header">
-            <h1>Health Vitals Scanner</h1>
+            <h1>🏥 Health Vitals Scanner</h1>
             <p>Position your face in frame • Scan for 30 seconds</p>
         </div>
 
@@ -3507,7 +3507,7 @@ async function getCameraPage(req, res, next) {
                     script.src = scripts[index];
                     script.crossOrigin = "anonymous";
                     script.onload = () => {
-                        console.log("Loaded:", scripts[index]);
+                        console.log("✅ Loaded:", scripts[index]);
                         loadScript(index + 1);
                     };
                     script.onerror = () => reject(new Error("Failed to load: " + scripts[index]));
@@ -3535,7 +3535,7 @@ async function getCameraPage(req, res, next) {
             });
 
             faceMesh.onResults(onFaceMeshResults);
-            console.log("FaceMesh initialized");
+            console.log("✅ FaceMesh initialized");
         }
 
         function onFaceMeshResults(results) {
@@ -3594,10 +3594,12 @@ async function getCameraPage(req, res, next) {
                 const avgBrightness = totalBrightness / (imageData.data.length / 4);
                 const isLowLight = avgBrightness < MIN_BRIGHTNESS;
 
+                console.log("📏 Face:", (faceSize * 100).toFixed(1) + "% | Center:", !isOffCenter ? "✅" : "❌", "| Light:", Math.round(avgBrightness));
+
                 if (faceSize < MIN_FACE_SIZE) {
                     if (currentAlertType !== 'far') {
                         const alertDiv = document.getElementById("faceAlert");
-                        alertDiv.innerHTML = '🚫 Too far! Move closer';
+                        alertDiv.innerHTML = '🚫 Too far! Move within 1 foot';
                         alertDiv.classList.add("show");
                         alertDiv.classList.remove("warning");
                         currentAlertType = 'far';
@@ -3609,12 +3611,13 @@ async function getCameraPage(req, res, next) {
                             clearInterval(scanningTimerRef);
                             scanningTimerRef = null;
                         }
+                        console.log("⏸️ Paused - too far");
                     }
                 } else if (isOffCenter) {
                     if (currentAlertType !== 'center') {
                         const alertDiv = document.getElementById("faceAlert");
                         let dir = offsetX > CENTER_TOLERANCE ? (faceCenterX < frameCenterX ? 'right' : 'left') : (faceCenterY < frameCenterY ? 'down' : 'up');
-                        alertDiv.innerHTML = '⚠️ Move ' + dir;
+                        alertDiv.innerHTML = '⚠️ Move ' + dir + ' to center';
                         alertDiv.classList.add("show", "warning");
                         currentAlertType = 'center';
                     }
@@ -3622,7 +3625,7 @@ async function getCameraPage(req, res, next) {
                 } else if (isLowLight) {
                     if (currentAlertType !== 'light') {
                         const alertDiv = document.getElementById("faceAlert");
-                        alertDiv.innerHTML = '💡 More light needed';
+                        alertDiv.innerHTML = '💡 More light needed!';
                         alertDiv.classList.add("show", "warning");
                         currentAlertType = 'light';
                     }
@@ -3718,6 +3721,7 @@ async function getCameraPage(req, res, next) {
             
             if (!faceDetected) {
                 faceDetected = true;
+                console.log("✅ Face detected!");
                 
                 if (isScanning && scanningPaused && mediaRecorderRef) {
                     if (mediaRecorderRef.state === 'paused') {
@@ -3732,6 +3736,7 @@ async function getCameraPage(req, res, next) {
                                 if (actualDuration >= ACTUAL_DURATION) stopScanning(); 
                             }, 1000);
                         }
+                        console.log("▶️ Resumed scanning");
                     }
                 }
             }
@@ -3741,9 +3746,10 @@ async function getCameraPage(req, res, next) {
             if (faceDetected && !faceDetectionTimeout) {
                 faceDetectionTimeout = setTimeout(() => {
                     faceDetected = false;
+                    console.log("❌ Face lost!");
                     
                     const alertDiv = document.getElementById("faceAlert");
-                    alertDiv.innerHTML = '⚠️ No face detected';
+                    alertDiv.innerHTML = '⚠️ No face detected!';
                     alertDiv.classList.remove("warning");
                     alertDiv.classList.add("show");
                     currentAlertType = 'lost';
@@ -3757,6 +3763,7 @@ async function getCameraPage(req, res, next) {
                                 clearInterval(scanningTimerRef);
                                 scanningTimerRef = null;
                             }
+                            console.log("⏸️ Paused - no face");
                         }
                     }
                 }, 500);
@@ -3765,15 +3772,20 @@ async function getCameraPage(req, res, next) {
 
         async function initializeScanner() { 
             try { 
+                console.log("🔄 Loading MediaPipe...");
                 await loadMediaPipeScripts(); 
+                console.log("🔄 Initializing FaceMesh...");
                 await initializeFaceMesh();
+                console.log("🔄 Starting camera...");
                 await startCamera(); 
                 setupEventListeners(); 
                 
                 document.getElementById("loadingState").style.display = "none"; 
                 document.getElementById("cameraInterface").style.display = "block";
                 showStatus("✅ Camera ready! Click Start Scanning", "info");
+                console.log("✅ Scanner ready!");
             } catch (error) { 
+                console.error("❌ Init error:", error);
                 showError(error.message || "Failed to initialize"); 
             } 
         }
@@ -3810,8 +3822,8 @@ async function getCameraPage(req, res, next) {
                     camera.start();
                 }
             } catch (error) { 
-                console.error("Camera error:", error);
-                throw new Error("Camera access denied - please allow camera permission"); 
+                console.error("❌ Camera error:", error);
+                throw new Error("Camera access denied - Please allow camera permission in your browser settings"); 
             } 
         }
 
@@ -3823,6 +3835,7 @@ async function getCameraPage(req, res, next) {
         function startScanning() { 
             if (!stream || scanCompleted) return; 
             
+            console.log("🎬 Starting scan...");
             isScanning = true; 
             actualDuration = 0;
             displayDuration = 0;
@@ -3855,6 +3868,7 @@ async function getCameraPage(req, res, next) {
             }; 
             
             mediaRecorderRef.onstop = async () => { 
+                console.log("🛑 Recording stopped");
                 if (scanningTimerRef) { 
                     clearInterval(scanningTimerRef); 
                     scanningTimerRef = null; 
@@ -3890,7 +3904,8 @@ async function getCameraPage(req, res, next) {
                 recordedBlob = new Blob(chunks, { type: "video/webm" });
                 recordedVideoUrl = URL.createObjectURL(recordedBlob);
                 
-                showStatus("✅ Scan complete! Analyzing...", "success");
+                console.log("✅ Video recorded:", (recordedBlob.size / 1024 / 1024).toFixed(2), "MB");
+                showStatus("✅ Scan complete! Analyzing results...", "success");
                 
                 setTimeout(() => {
                     analyzeVideo();
@@ -3898,6 +3913,7 @@ async function getCameraPage(req, res, next) {
             }; 
             
             mediaRecorderRef.start(); 
+            console.log("🎥 Recording started");
             
             scanningTimerRef = setInterval(() => { 
                 if (!scanningPaused) {
@@ -3910,6 +3926,7 @@ async function getCameraPage(req, res, next) {
         }
 
         function stopScanning() { 
+            console.log("⏹️ Stopping scan...");
             if (mediaRecorderRef && mediaRecorderRef.state !== "inactive") {
                 if (mediaRecorderRef.state === "paused") {
                     mediaRecorderRef.resume();
@@ -3928,16 +3945,19 @@ async function getCameraPage(req, res, next) {
                     attempts++;
                     
                     try {
-                        console.log(\`Poll \${attempts}/\${maxAttempts}\`);
+                        console.log(\`📊 Poll \${attempts}/\${maxAttempts}...\`);
                         
                         const statusUrl = \`\${API_BASE_URL}/status/\${jobId}\`;
                         const statusRes = await axios.get(statusUrl, { timeout: 10000 });
                         
                         const { status, progress, is_complete } = statusRes.data;
                         
+                        console.log(\`   Status: \${status}, Progress: \${progress}%\`);
                         showStatus(\`⚙️ \${status}: \${progress}%\`, "warning");
                         
                         if (is_complete) {
+                            console.log("✅ Analysis complete!");
+                            
                             const resultUrl = \`\${API_BASE_URL}/result/\${jobId}\`;
                             const resultRes = await axios.get(resultUrl, { timeout: 10000 });
                             
@@ -3961,9 +3981,10 @@ async function getCameraPage(req, res, next) {
                         }
                         
                     } catch (error) {
-                        console.error("Poll error:", error);
+                        console.error(\`❌ Poll error:\`, error);
                         
                         if (attempts < maxAttempts) {
+                            console.log("   Retrying...");
                             setTimeout(checkStatus, pollInterval);
                         } else {
                             reject(error);
@@ -3987,14 +4008,19 @@ async function getCameraPage(req, res, next) {
                 const fd = new FormData();
                 fd.append("file", recordedBlob, "scan.webm");
 
+                console.log("📤 Uploading to:", API_BASE_URL + "/analyze");
+
                 const uploadRes = await axios.post(API_BASE_URL + "/analyze", fd, {
                     headers: { "Content-Type": "multipart/form-data" },
                     timeout: 60000,
                     onUploadProgress: (progressEvent) => {
                         const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                         showStatus(\`📤 Uploading: \${percent}%\`, "warning");
+                        console.log(\`📤 Upload: \${percent}%\`);
                     }
                 });
+
+                console.log("✅ Upload response:", uploadRes.data);
 
                 if (!uploadRes.data || !uploadRes.data.success) {
                     throw new Error(uploadRes.data?.error || "Upload failed");
@@ -4005,9 +4031,12 @@ async function getCameraPage(req, res, next) {
                     throw new Error("No job_id received");
                 }
 
+                console.log("🆔 Job ID:", jobId);
                 showStatus("⏳ Analyzing... This may take 1-2 minutes", "info");
 
                 const result = await pollForResults(jobId);
+
+                console.log("✅ Final result:", result);
 
                 if (result && result.success) {
                     showStatus("✅ Complete! Redirecting...", "success");
@@ -4022,7 +4051,7 @@ async function getCameraPage(req, res, next) {
                 }
 
             } catch (error) {
-                console.error("Analysis error:", error);
+                console.error("❌ Analysis error:", error);
                 
                 let errorMsg = "Analysis failed";
                 if (error.response) {
@@ -4048,6 +4077,7 @@ async function getCameraPage(req, res, next) {
         }
 
         function showError(msg) { 
+            console.error("❌ Error:", msg);
             document.getElementById("loadingState").style.display = "none"; 
             document.getElementById("cameraInterface").style.display = "none"; 
             document.getElementById("errorText").textContent = msg; 
@@ -4057,7 +4087,7 @@ async function getCameraPage(req, res, next) {
         document.addEventListener("DOMContentLoaded", initializeScanner);
     </script>
 </body>
-</html>\`;
+</html>`;
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(html);
@@ -4065,6 +4095,7 @@ async function getCameraPage(req, res, next) {
     res.status(500).json({ success: false, error: error.message });
   }
 }
+
 async function getResultsPage(req, res, next) {
   try {
     const html = `<!DOCTYPE html>
