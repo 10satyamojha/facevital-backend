@@ -2984,158 +2984,147 @@ ctx.restore();
             }
         }
 
-async function analyzeVideo() {
-        if (!recordedBlob) {
-            showStatus("❌ No video recorded!", "error");
-            return;
-        }
-        
-        showStatus("📤 Uploading video...", "warning");
-        
-        try {
-            // Step 1: Upload video
-            const fd = new FormData();
-            fd.append("file", recordedBlob, "scan.webm");
+ async function pollForResults(jobId) {
+            const maxAttempts = 120; // 10 minutes
+            const pollInterval = 5000; // 5 seconds
+            let attempts = 0;
 
-            console.log("📤 Uploading video to:", AI_API_URL);
-
-            const uploadRes = await axios.post(AI_API_URL, fd, {
-                headers: { "Content-Type": "multipart/form-data" },
-                timeout: 60000,
-                onUploadProgress: (progressEvent) => {
-                    const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                
-                }
-            });
-
-            console.log("✅ Upload response:", uploadRes.data);
-
-            // Validate response
-            if (!uploadRes.data || !uploadRes.data.success) {
-                throw new Error(uploadRes.data?.error || "Upload failed");
-            }
-
-            const jobId = uploadRes.data.job_id;
-            if (!jobId) {
-                throw new Error("No job_id received");
-            }
-
-            console.log("🆔 Job ID:", jobId);
-            showStatus("⏳ Analyzing... This may take 1-2 minutes", "info");
-
-            // Step 2: Poll for results
-            const result = await pollForResults(jobId);
-
-            console.log("✅ Final result:", result);
-
-            if (result && result.success) {
-                showStatus("✅ Complete! Redirecting...", "success");
-                
-                setTimeout(() => {
-                    const dataStr = encodeURIComponent(JSON.stringify(result));
-                    const videoStr = encodeURIComponent(recordedVideoUrl);
-                    window.location.href = `/results?data=${dataStr}&video=${videoStr}`;
-                }, 1000);
-            } else {
-                throw new Error(result?.error || "Analysis failed");
-            }
-
-        } catch (error) {
-            console.error("❌ Analysis error:", error);
-            
-            let errorMsg = "Analysis failed";
-            if (error.response) {
-                if (error.response.data?.error) {
-                    errorMsg = error.response.data.error;
-                } else {
-                    errorMsg = `Server error: ${error.response.status}`;
-                }
-            } else if (error.code === 'ECONNABORTED') {
-                errorMsg = "Request timeout - please try again";
-            } else {
-                errorMsg = error.message;
-            }
-            
-            showStatus("❌ " + errorMsg, "error");
-
-            setTimeout(() => {
-                const controlsGrid = document.getElementById("controlsGrid");
-                controlsGrid.style.display = "flex";
-                controlsGrid.innerHTML = '<button class="controlBtn" onclick="window.location.reload()">🔄 Try Again</button>';
-            }, 2000);
-        }
-    }
-
-    // NEW: Poll for results
-    async function pollForResults(jobId) {
-        const maxAttempts = 120; // 10 minutes
-        const pollInterval = 5000; // 5 seconds
-        let attempts = 0;
-
-        return new Promise((resolve, reject) => {
-            const checkStatus = async () => {
-                attempts++;
-                
-                try {
-                 
+            return new Promise((resolve, reject) => {
+                const checkStatus = async () => {
+                    attempts++;
                     
-                    // Check status endpoint
-                    const statusUrl = `${API_BASE_URL}/status/${jobId}`;
-                    const statusRes = await axios.get(statusUrl, { timeout: 10000 });
-                    
-                    const { status, progress, is_complete } = statusRes.data;
-                    
-                    console.log(`   Status: ${status}, Progress: ${progress}%`);
-                    
-                    // Update UI
-                    showStatus(`⚙️ ${status}: ${progress}%`, "warning");
-                    
-                    // Check if done
-                    if (is_complete) {
-                        console.log("✅ Analysis complete! Fetching result...");
+                    try {
+                        console.log(\`📊 Poll \${attempts}/\${maxAttempts}...\`);
                         
-                        // Get full result
-                        const resultUrl = `${API_BASE_URL}/result/${jobId}`;
-                        const resultRes = await axios.get(resultUrl, { timeout: 10000 });
+                        const statusUrl = \`\${API_BASE_URL}/status/\${jobId}\`;
+                        const statusRes = await axios.get(statusUrl, { timeout: 10000 });
                         
-                        if (resultRes.status === 200) {
-                            resolve(resultRes.data);
-                        } else if (resultRes.status === 202) {
-                            // Still processing, continue polling
+                        const { status, progress, is_complete } = statusRes.data;
+                        
+                        console.log(\`   Status: \${status}, Progress: \${progress}%\`);
+                        showStatus(\`⚙️ \${status}: \${progress}%\`, "warning");
+                        
+                        if (is_complete) {
+                            console.log("✅ Analysis complete! Fetching result...");
+                            
+                            const resultUrl = \`\${API_BASE_URL}/result/\${jobId}\`;
+                            const resultRes = await axios.get(resultUrl, { timeout: 10000 });
+                            
+                            if (resultRes.status === 200) {
+                                resolve(resultRes.data);
+                            } else if (resultRes.status === 202) {
+                                if (attempts < maxAttempts) {
+                                    setTimeout(checkStatus, pollInterval);
+                                } else {
+                                    reject(new Error("Timeout"));
+                                }
+                            } else {
+                                reject(new Error(resultRes.data?.error || "Failed"));
+                            }
+                        } else {
                             if (attempts < maxAttempts) {
                                 setTimeout(checkStatus, pollInterval);
                             } else {
-                                reject(new Error("Timeout"));
+                                reject(new Error("Analysis timeout"));
                             }
-                        } else {
-                            reject(new Error(resultRes.data?.error || "Failed"));
                         }
-                    } else {
-                        // Continue polling
+                        
+                    } catch (error) {
+                        console.error(\`❌ Poll error:\`, error);
+                        
                         if (attempts < maxAttempts) {
+                            console.log("   Retrying...");
                             setTimeout(checkStatus, pollInterval);
                         } else {
-                            reject(new Error("Analysis timeout"));
+                            reject(error);
                         }
                     }
-                    
-                } catch (error) {
-                    console.error(`❌ Poll error:`, error);
-                    
-                    // Retry on network errors
-                    if (attempts < maxAttempts) {
-                        console.log("   Retrying...");
-                        setTimeout(checkStatus, pollInterval);
-                    } else {
-                        reject(error);
-                    }
-                }
-            };
+                };
+                
+                checkStatus();
+            });
+        }
+
+        async function analyzeVideo() {
+            if (!recordedBlob) {
+                showStatus("❌ No video recorded!", "error");
+                return;
+            }
             
-            // Start polling
-            checkStatus();
-        });
-    }
+            showStatus("📤 Uploading video...", "warning");
+            
+            try {
+                // Step 1: Upload video
+                const fd = new FormData();
+                fd.append("file", recordedBlob, "scan.webm");
+
+                console.log("📤 Uploading video to:", AI_API_URL);
+
+                const uploadRes = await axios.post(AI_API_URL, fd, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                    timeout: 60000,
+                    onUploadProgress: (progressEvent) => {
+                        const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                        showStatus(\`📤 Uploading: \${percent}%\`, "warning");
+                    }
+                });
+
+                console.log("✅ Upload response:", uploadRes.data);
+
+                if (!uploadRes.data || !uploadRes.data.success) {
+                    throw new Error(uploadRes.data?.error || "Upload failed");
+                }
+
+                const jobId = uploadRes.data.job_id;
+                if (!jobId) {
+                    throw new Error("No job_id received");
+                }
+
+                console.log("🆔 Job ID:", jobId);
+                showStatus("⏳ Analyzing... This may take 1-2 minutes", "info");
+
+                // Step 2: Poll for results
+                const result = await pollForResults(jobId);
+
+                console.log("✅ Final result:", result);
+
+                if (result && result.success) {
+                    showStatus("✅ Complete! Redirecting...", "success");
+                    
+                    setTimeout(() => {
+                        const dataStr = encodeURIComponent(JSON.stringify(result));
+                        const videoStr = encodeURIComponent(recordedVideoUrl);
+                        window.location.href = \`/results?data=\${dataStr}&video=\${videoStr}\`;
+                    }, 1000);
+                } else {
+                    throw new Error(result?.error || "Analysis failed");
+                }
+
+            } catch (error) {
+                console.error("❌ Analysis error:", error);
+                
+                let errorMsg = "Analysis failed";
+                if (error.response) {
+                    if (error.response.data?.error) {
+                        errorMsg = error.response.data.error;
+                    } else {
+                        errorMsg = \`Server error: \${error.response.status}\`;
+                    }
+                } else if (error.code === 'ECONNABORTED') {
+                    errorMsg = "Request timeout - please try again";
+                } else {
+                    errorMsg = error.message;
+                }
+                
+                showStatus("❌ " + errorMsg, "error");
+
+                setTimeout(() => {
+                    const controlsGrid = document.getElementById("controlsGrid");
+                    controlsGrid.style.display = "flex";
+                    controlsGrid.innerHTML = '<button class="controlBtn" onclick="window.location.reload()">🔄 Try Again</button>';
+                }, 2000);
+            }
+        }
         function showError(msg) { 
             document.getElementById("loadingState").style.display = "none"; 
             document.getElementById("cameraInterface").style.display = "none"; 
