@@ -2033,6 +2033,1117 @@ async function getpage(req, res, next) {
 
 
 
+// async function getCameraPage(req, res, next) {
+//   try {
+//     const html = `<!DOCTYPE html>
+// <html lang="en">
+// <head>
+//     <meta charset="UTF-8">
+//     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+//     <title>Health Vitals Scanner</title>
+//     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+//     <style>
+//         * { box-sizing: border-box; margin: 0; padding: 0; }
+//         body { 
+//             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+//             background: linear-gradient(135deg,);
+//             min-height: 100vh;
+//             padding: 1rem;
+//             display: flex;
+//             align-items: center;
+//             justify-content: center;
+//         }
+//         .mainContainer {
+//             width: 100%;
+//             max-width: 500px;
+//         }
+//         // .videoOverlay {
+//         //     position: absolute;
+//         //     inset: 0;
+//         //     pointer-events: none;
+//         //     z-index: 30;
+//         //     backdrop-filter: blur(20px);
+//         //     -webkit-backdrop-filter: blur(20px);
+//         //     -webkit-mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
+//         //     mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
+//         //     background: rgba(255,255,255,0.10);
+//         // }
+//         // .videoOval {
+//         //     position: absolute;
+//         //     left: 6%;
+//         //     top: 4%;
+//         //     width: 88%;
+//         //     height: 92%;
+//         //     border: 5px dashed #fff;
+//         //     border-radius: 50%;
+//         //     z-index: 31;
+//         //     pointer-events: none;
+//         // }
+//         .header { 
+//             background: rgba(255, 255, 255, 0.95);
+//             backdrop-filter: blur(10px);
+//             padding: 1.5rem; 
+//             border-radius: 20px 20px 0 0; 
+//             text-align: center;
+//             border-bottom: 3px solid rgba(102, 126, 234, 0.3);
+//         }
+//         .header h1 { 
+//             font-size: 1.5rem;
+//             background: linear-gradient(135deg, #000000);
+//             -webkit-background-clip: text;
+//             -webkit-text-fill-color: transparent;
+//             background-clip: text;
+//             font-weight: 500; 
+//             margin-bottom: 0.5rem; 
+//         }
+//         .header p { 
+//             font-size: 0.875rem;
+//             color: #64748b; 
+//             font-weight: 500;
+//         }
+//         .cameraContainer { 
+//             background: rgba(255, 255, 255, 0.98);
+//             backdrop-filter: blur(20px);
+//             border-radius: 0 0 20px 20px; 
+//             padding: 1.5rem; 
+//             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); 
+//             display: flex; 
+//             flex-direction: column; 
+//             align-items: center; 
+//             gap: 1.5rem;
+//         }
+//         .loadingState { 
+//             text-align: center; 
+//             padding: 3rem 1rem; 
+//             color: #64748b; 
+//         }
+//         .loadingSpinner { 
+//             width: 40px; 
+//             height: 40px; 
+//             border: 4px solid #f1f5f9; 
+//             border-top: 4px solid #667eea; 
+//             border-radius: 50%; 
+//             animation: spin 1s linear infinite; 
+//             display: inline-block; 
+//             margin-bottom: 1rem; 
+//         }
+//         @keyframes spin { 
+//             0% { transform: rotate(0deg); } 
+//             100% { transform: rotate(360deg); } 
+//         }
+//         .errorState { 
+//             background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+//             border-radius: 16px; 
+//             padding: 2rem 1.5rem; 
+//             text-align: center; 
+//             border: 2px solid #ef4444; 
+//             width: 100%;
+//             min-height: 300px;
+//             display: flex; 
+//             flex-direction: column; 
+//             align-items: center; 
+//             justify-content: center; 
+//         }
+//         .errorIcon { 
+//             font-size: 4rem;
+//             margin-bottom: 1rem;
+//             animation: shake 0.5s ease-in-out;
+//         }
+//         @keyframes shake {
+//             0%, 100% { transform: translateX(0); }
+//             25% { transform: translateX(-10px); }
+//             75% { transform: translateX(10px); }
+//         }
+//         .errorText { 
+//             font-size: 1.125rem; 
+//             color: #991b1b; 
+//             margin-bottom: 1.5rem;
+//             font-weight: 600; 
+//         }
+//         .controlBtn { 
+//             background: linear-gradient(135deg);
+//             color: #000000ff; 
+//             border: none; 
+//             padding: 1rem 2rem; 
+//            margin-top: 15px;
+//             border-radius: 12px; 
+//             font-size: 1rem; 
+//             font-weight: 700; 
+//             cursor: pointer; 
+//             transition: all 0.3s ease; 
+//             display: flex; 
+//             align-items: center; 
+//             justify-content: center;
+//             gap: 0.75rem; 
+//             min-width: 160px;
+//             min-height: 52px;
+//             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+//             position: relative;
+//             overflow: hidden;
+//         }
+//         .controlBtn::before {
+//             content: '';
+//             position: absolute;
+//             top: 50%;
+//             left: 50%;
+//             width: 0;
+//             height: 0;
+//             border-radius: 50%;
+//             background: rgba(255, 255, 255, 0.3);
+//             transform: translate(-50%, -50%);
+//             transition: width 0.6s, height 0.6s;
+//         }
+//         .controlBtn:hover:not(:disabled)::before {
+//             width: 300px;
+//             height: 300px;
+//         }
+//         .controlBtn:hover:not(:disabled) { 
+//             transform: translateY(-3px); 
+//             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5); 
+//         }
+//         .controlBtn:active:not(:disabled) {
+//             transform: translateY(-1px);
+//         }
+//         .controlBtn:disabled {
+//             background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+//             cursor: not-allowed;
+//             box-shadow: none;
+//         }
+//         .controlBtn .spinner {
+//             display: none;
+//             width: 18px;
+//             height: 18px;
+//             border: 3px solid rgba(255,255,255,0.3);
+//             border-top: 3px solid #ffffff;
+//             border-radius: 50%;
+//             animation: spin 1s linear infinite;
+//         }
+//         .controlBtn.loading .spinner {
+//             display: inline-block;
+//         }
+//         #videoContainer {
+//             position: relative;
+//             width: 100%;
+//             aspect-ratio: 3/4;
+//             border-radius: 20px;
+//             overflow: hidden;
+//             border: 4px solid rgba(102, 126, 234, 0.3);
+//             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+//             background: #000;
+//         }
+//         #videoContainer.scanning {
+//             border-color: #10b981;
+//             box-shadow: 0 10px 40px rgba(16, 185, 129, 0.5);
+//         }
+//         #videoElement, #canvasElement {
+//             position: absolute;
+//             top: 0;
+//             left: 0;
+//             width: 100%;
+//             height: 100%;
+//             object-fit: cover;
+//         }
+//         #canvasElement {
+//             pointer-events: none;
+//             z-index: 20;
+//         }
+//         .scanningIndicator { 
+//             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+//             color: #ffffff; 
+//             padding: 0.75rem 1.25rem; 
+//             border-radius: 50px; 
+//             font-size: 0.875rem; 
+//             font-weight: 700; 
+//             display: flex; 
+//             align-items: center; 
+//             gap: 0.75rem; 
+//             position: absolute; 
+//             top: 1rem; 
+//             left: 1rem; 
+//             z-index: 100; 
+//             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
+//             backdrop-filter: blur(10px);
+//         }
+//         .scanningDot { 
+//             width: 10px; 
+//             height: 10px; 
+//             background: #ffffff; 
+//             border-radius: 50%; 
+//             animation: pulse 1.5s infinite; 
+//         }
+//         @keyframes pulse { 
+//             0%, 100% { opacity: 1; transform: scale(1); } 
+//             50% { opacity: 0.4; transform: scale(0.8); } 
+//         }
+//         .faceAlert {
+//             position: absolute;
+//             bottom: 1.5rem;
+//             left: 50%;
+//             transform: translateX(-50%) translateY(20px);
+//             background: rgba(239, 68, 68, 0.95);
+//             backdrop-filter: blur(10px);
+//             color: white;
+//             padding: 1rem 1.5rem;
+//             border-radius: 50px;
+//             font-weight: 700;
+//             font-size: 0.875rem;
+//             z-index: 110;
+//             display: none;
+//             opacity: 0;
+//             transition: all 0.3s ease;
+//             box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
+//             border: 2px solid rgba(255, 255, 255, 0.3);
+//         }
+//         .faceAlert.show {
+//             display: flex;
+//             align-items: center;
+//             gap: 0.5rem;
+//             opacity: 1;
+//             transform: translateX(-50%) translateY(0);
+//         }
+//         .faceAlert.warning {
+//             background: rgba(245, 158, 11, 0.95);
+//             border-color: rgba(255, 255, 255, 0.3);
+//             box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+//         }
+//         .controlsGrid { 
+//             display: flex; 
+//             gap: 1rem; 
+//             justify-content: center;
+//             width: 100%;
+//             flex-wrap: wrap;
+//         }
+//         .statusMessage {
+//             text-align: center;
+//             padding: 1rem 1.5rem;
+//             border-radius: 12px;
+//             font-weight: 600;
+//             width: 100%;
+//             font-size: 0.875rem;
+//             border: 2px solid;
+//             backdrop-filter: blur(10px);
+//         }
+//         .statusMessage.info {
+//             background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+//             color: #1e40af;
+//             border-color: #3b82f6;
+//         }
+//         .statusMessage.success {
+//             background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+//             color: #065f46;
+//             border-color: #10b981;
+//         }
+//         .statusMessage.error {
+//             background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+//             color: #991b1b;
+//             border-color: #ef4444;
+//         }
+//         .statusMessage.warning {
+//             background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+//             color: #92400e;
+//             border-color: #f59e0b;
+//         }
+//         @media screen and (max-width: 479px) { 
+//             body {
+//                 padding: 0.5rem;
+//             }
+//             .header {
+//                 padding: 1rem;
+//                 border-radius: 16px 16px 0 0;
+//             }
+//             .header h1 {
+//                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);  
+//                 font-size: 1.25rem;
+//             }
+//             .cameraContainer { 
+//                 padding: 1rem;
+//                 border-radius: 0 0 16px 16px;
+//             }
+//             .controlBtn {
+//                 width: 100%;
+//                 min-width: unset;
+//             }
+//             .controlsGrid {
+//                 flex-direction: column;
+//             }
+//             #videoContainer {
+//                 aspect-ratio: 9/16;
+//             }
+//         }
+//     </style>
+// </head>
+// <body>
+//     <div class="mainContainer">
+//         <div class="header">
+//             <h1>🏥 Health Vitals Scanner</h1>
+//             <p>Position your face in frame • Scan for 30 seconds</p>
+//         </div>
+
+//         <div class="cameraContainer">
+//             <div class="loadingState" id="loadingState">
+//                 <div class="loadingSpinner"></div>
+//                 <p style="font-weight: 600; font-size: 1.125rem;">Loading Scanner...</p>
+//                 <p style="margin-top: 0.5rem; font-size: 0.875rem;">Please wait</p>
+//             </div>
+            
+//             <div id="errorState" class="errorState" style="display: none;">
+//                 <div class="errorIcon">⚠️</div>
+//                 <p class="errorText" id="errorText">Failed to access camera</p>
+//                 <button class="controlBtn" id="retryBtn">🔄 Try Again</button>
+//             </div>
+            
+//             <div id="cameraInterface" style="display: none; width: 100%;">
+//                 <div id="videoContainer">
+//                    <video id="videoElement" autoplay playsinline muted></video>
+//                     <canvas id="canvasElement"></canvas>
+//                     <div class="videoOverlay"></div>
+//                     <div class="videoOval"></div>
+//                     <div id="scanningIndicator" class="scanningIndicator" style="display: none;">
+//                         <div class="scanningDot"></div>
+//                         <span id="scanningTime">SCAN 00:00</span>
+//                     </div>
+//                     <div id="faceAlert" class="faceAlert">
+//                         ⚠️ No face detected! Scanning paused
+//                     </div>
+//                 </div>
+                
+//                 <div id="statusMessage" class="statusMessage info" style="display: none;">
+//                     Ready to scan
+//                 </div>
+                
+//                 <div class="controlsGrid" id="controlsGrid">
+//                     <button id="startBtn" class="controlBtn">
+//                         🎯 Start Scanning
+//                     </button>
+//                 </div>
+//             </div>
+//         </div>
+//     </div>
+
+//     <script>
+//         let videoRef, canvasRef, mediaRecorderRef, scanningTimerRef, stream = null;
+//         let faceMesh = null;
+//         let camera = null;
+//         let isScanning = false, actualDuration = 0, displayDuration = 0;
+//         let recordedVideoUrl = null;
+//         let aiPrediction = null;
+        
+//         let faceDetected = false;
+//         let faceDetectionTimeout = null;
+//         let scanningPaused = false;
+//         let recordedBlob = null;
+//         let scanCompleted = false;
+//         let currentAlertType = null;
+//         let lastFaceSize = 0;
+//         let distanceWarningShown = false;
+//         const MIN_FACE_SIZE = 0.40;
+//         const IDEAL_FACE_SIZE = 0.42;
+//         const CENTER_TOLERANCE = 0.15; 
+//         const MIN_BRIGHTNESS = 60; 
+
+
+
+//         const AI_API_URL = "https://facescan.duckdns.org";
+//         const AI_API_URL = API_BASE_URL + "/analyze";
+//         const WIDTH = 1280, HEIGHT = 720;
+//         const ACTUAL_DURATION = 35;
+//         const DISPLAY_DURATION = 30;
+
+//         function formatTime(s) { 
+//             const m = Math.floor(s / 60); 
+//             return m.toString().padStart(2, "0") + ":" + (s % 60).toString().padStart(2, "0"); 
+//         }
+
+//         function showStatus(msg, type) {
+//             const statusEl = document.getElementById("statusMessage");
+//             statusEl.className = "statusMessage " + type;
+//             statusEl.textContent = msg;
+//             statusEl.style.display = "block";
+//         }
+
+//         function hideStatus() {
+//             document.getElementById("statusMessage").style.display = "none";
+//         }
+
+//         function loadMediaPipeScripts() {
+//             return new Promise((resolve, reject) => {
+//                 const scripts = [
+//                     "https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js",
+//                     "https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js",
+//                     "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"
+//                 ];
+                
+//                 function loadScript(index) {
+//                     if (index >= scripts.length) {
+//                         resolve();
+//                         return;
+//                     }
+                    
+//                     const script = document.createElement("script");
+//                     script.src = scripts[index];
+//                     script.crossOrigin = "anonymous";
+//                     script.onload = () => {
+//                         console.log("Loaded:", scripts[index]);
+//                         loadScript(index + 1);
+//                     };
+//                     script.onerror = () => reject(new Error("Failed to load: " + scripts[index]));
+//                     document.head.appendChild(script);
+//                 }
+                
+//                 loadScript(0);
+//             });
+//         }
+
+//         async function initializeFaceMesh() {
+//             if (typeof FaceMesh === 'undefined') {
+//                 throw new Error("FaceMesh not loaded");
+//             }
+
+//             faceMesh = new FaceMesh({
+//                 locateFile: (file) => "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/" + file
+//             });
+
+//             faceMesh.setOptions({
+//                 maxNumFaces: 1,
+//                 refineLandmarks: false,
+//                 minDetectionConfidence: 0.3,
+//                 minTrackingConfidence: 0.3
+//             });
+
+//             faceMesh.onResults(onFaceMeshResults);
+//             console.log("FaceMesh initialized");
+//         }
+
+//         function onFaceMeshResults(results) {
+//             if (!canvasRef || scanCompleted) return;
+            
+//             canvasRef.width = WIDTH;
+//             canvasRef.height = HEIGHT;
+            
+//             const ctx = canvasRef.getContext('2d');
+//             ctx.save();
+//             ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+//             const hasFace = results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0;
+
+//             if (hasFace) {
+//                 const landmarks = results.multiFaceLandmarks[0];
+                
+//                 let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+//                 landmarks.forEach(landmark => {
+//                     minX = Math.min(minX, landmark.x);
+//                     maxX = Math.max(maxX, landmark.x);
+//                     minY = Math.min(minY, landmark.y);
+//                     maxY = Math.max(maxY, landmark.y);
+//                 });
+                
+//                 const faceWidth = maxX - minX;
+//                 const faceHeight = maxY - minY;
+//                 const faceSize = Math.max(faceWidth, faceHeight);
+//                 lastFaceSize = faceSize;
+                
+//                 // Real-time distance feedback
+//                 const facePercentage = (faceSize * 100).toFixed(1);
+//                 console.log("📏 Face size:", facePercentage + "% of frame");
+                
+//               // Calculate face center
+// const faceCenterX = (minX + maxX) / 2;
+// const faceCenterY = (minY + maxY) / 2;
+// const frameCenterX = 0.5;
+// const frameCenterY = 0.5;
+
+// // Check if face is centered
+// const offsetX = Math.abs(faceCenterX - frameCenterX);
+// const offsetY = Math.abs(faceCenterY - frameCenterY);
+// const isOffCenter = offsetX > CENTER_TOLERANCE || offsetY > CENTER_TOLERANCE;
+
+// // Calculate brightness
+// const tempCanvasBright = document.createElement('canvas');
+// tempCanvasBright.width = WIDTH;
+// tempCanvasBright.height = HEIGHT;
+// const tempCtxBright = tempCanvasBright.getContext('2d');
+// tempCtxBright.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
+
+// const faceX = Math.floor(minX * WIDTH);
+// const faceY = Math.floor(minY * HEIGHT);
+// const faceW = Math.floor((maxX - minX) * WIDTH);
+// const faceH = Math.floor((maxY - minY) * HEIGHT);
+// const imageData = tempCtxBright.getImageData(faceX, faceY, faceW, faceH);
+
+// let totalBrightness = 0;
+// for (let i = 0; i < imageData.data.length; i += 4) {
+//     totalBrightness += (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
+// }
+// const avgBrightness = totalBrightness / (imageData.data.length / 4);
+// const isLowLight = avgBrightness < MIN_BRIGHTNESS;
+
+// console.log("📏 Face:", (faceSize * 100).toFixed(1) + "% | Center:", !isOffCenter ? "✅" : "❌", "| Light:", Math.round(avgBrightness));
+
+// if (faceSize < MIN_FACE_SIZE) {
+//     if (currentAlertType !== 'far') {
+//         const alertDiv = document.getElementById("faceAlert");
+//         alertDiv.innerHTML = '🚫 Too far! Move within 1 foot of camera';
+//         alertDiv.classList.add("show");
+//         alertDiv.classList.remove("warning");
+//         currentAlertType = 'far';
+//     }
+//     if (isScanning && !scanningPaused && mediaRecorderRef && mediaRecorderRef.state === 'recording') {
+//         mediaRecorderRef.pause();
+//         scanningPaused = true;
+//         if (scanningTimerRef) {
+//             clearInterval(scanningTimerRef);
+//             scanningTimerRef = null;
+//         }
+//     }
+// } else if (isOffCenter) {
+//     if (currentAlertType !== 'center') {
+//         const alertDiv = document.getElementById("faceAlert");
+//         let dir = offsetX > CENTER_TOLERANCE ? (faceCenterX < frameCenterX ? 'right' : 'left') : (faceCenterY < frameCenterY ? 'down' : 'up');
+//         alertDiv.innerHTML = '⚠️ Move your face ' + dir + ' to center it';
+//         alertDiv.classList.add("show", "warning");
+//         currentAlertType = 'center';
+//     }
+//     handleFaceDetected();
+// } else if (isLowLight) {
+//     if (currentAlertType !== 'light') {
+//         const alertDiv = document.getElementById("faceAlert");
+//         alertDiv.innerHTML = '💡 More light needed! Move to brighter area';
+//         alertDiv.classList.add("show", "warning");
+//         currentAlertType = 'light';
+//     }
+//     handleFaceDetected();
+// } else if (faceSize < IDEAL_FACE_SIZE) {
+//     if (currentAlertType !== 'warning') {
+//         const alertDiv = document.getElementById("faceAlert");
+//         alertDiv.innerHTML = '⚠️ Move a bit closer for best scan quality';
+//         alertDiv.classList.add("show", "warning");
+//         currentAlertType = 'warning';
+//     }
+//     handleFaceDetected();
+// } else {
+//     if (currentAlertType !== null) {
+//         const alertDiv = document.getElementById("faceAlert");
+//         alertDiv.classList.remove("show", "warning");
+//         currentAlertType = null;
+//     }
+//     handleFaceDetected();
+// }
+                
+//                 const padding = 0.10;
+//                 minX = Math.max(0, minX - padding);
+//                 maxX = Math.min(1, maxX + padding);
+//                 minY = Math.max(0, minY - padding);
+//                 maxY = Math.min(1, maxY + padding);
+                
+//                 const tempCanvas = document.createElement('canvas');
+//                 tempCanvas.width = WIDTH;
+//                 tempCanvas.height = HEIGHT;
+//                 const tempCtx = tempCanvas.getContext('2d');
+                
+//                 tempCtx.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
+//                 tempCtx.filter = 'blur(25px) brightness(0.6)';
+//                 tempCtx.drawImage(tempCanvas, 0, 0);
+                
+//                 const centerX = ((minX + maxX) / 2) * WIDTH;
+//                 const centerY = ((minY + maxY) / 2) * HEIGHT;
+//                 const radiusX = ((maxX - minX) / 2) * WIDTH;
+//                 const radiusY = ((maxY - minY) / 2) * HEIGHT;
+                
+//                 ctx.save();
+//                 ctx.beginPath();
+//                 ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+//                 ctx.clip();
+//                 ctx.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
+//                 ctx.restore();
+                
+//                 ctx.save();
+//                 ctx.globalCompositeOperation = "destination-over";
+//                 ctx.drawImage(tempCanvas, 0, 0);
+//                 ctx.globalCompositeOperation = "source-over";
+//                 ctx.restore();
+                
+//                 if (typeof window.FACEMESH_TESSELATION !== 'undefined') {
+//                     window.drawConnectors(ctx, landmarks, window.FACEMESH_TESSELATION, { color: '#FFFFFF', lineWidth: 0.5 });
+//                     window.drawConnectors(ctx, landmarks, window.FACEMESH_FACE_OVAL, { color: '#FFFFFF', lineWidth: 2 });
+//                     window.drawConnectors(ctx, landmarks, window.FACEMESH_LEFT_EYE, { color: '#FFFFFF', lineWidth: 1.5 });
+//                     window.drawConnectors(ctx, landmarks, window.FACEMESH_RIGHT_EYE, { color: '#FFFFFF', lineWidth: 1.5 });
+//                     window.drawConnectors(ctx, landmarks, window.FACEMESH_LEFT_EYEBROW, { color: '#FFFFFF', lineWidth: 1.5 });
+//                     window.drawConnectors(ctx, landmarks, window.FACEMESH_RIGHT_EYEBROW, { color: '#FFFFFF', lineWidth: 1.5 });
+//                     window.drawConnectors(ctx, landmarks, window.FACEMESH_LIPS, { color: '#FFFFFF', lineWidth: 1.5 });
+                    
+//                     landmarks.forEach(lm => {
+//                         ctx.beginPath();
+//                         ctx.arc(lm.x * WIDTH, lm.y * HEIGHT, 1, 0, Math.PI * 2);
+//                         ctx.fillStyle = '#ffffff';
+//                         ctx.fill();
+//                     });
+//                 }
+                
+//             } else {
+//                 handleFaceLost();
+                
+//                 const tempCanvas = document.createElement('canvas');
+//                 tempCanvas.width = WIDTH;
+//                 tempCanvas.height = HEIGHT;
+//                 const tempCtx = tempCanvas.getContext('2d');
+//                 tempCtx.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
+//                 tempCtx.filter = 'blur(10px) brightness(0.7)';
+//                 tempCtx.drawImage(tempCanvas, 0, 0);
+//                 ctx.drawImage(tempCanvas, 0, 0);
+                
+//                 const centerX = WIDTH / 2;
+//                 const centerY = HEIGHT / 2;
+//                 const radiusX = WIDTH * 0.35;
+//                 const radiusY = HEIGHT * 0.45;
+                
+//                 ctx.beginPath();
+//                ctx.ellipse(centerX, centerY, radiusY, radiusX, Math.PI / 2, 0, 2 * Math.PI);
+//                ctx.clip();
+// ctx.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
+// ctx.restore();
+//                ctx.strokeStyle = '#ef4444';
+//                 ctx.lineWidth = 4;
+//                 ctx.setLineDash([15, 15]);
+//                 ctx.stroke();
+//                 ctx.setLineDash([]);
+//             }
+
+//             ctx.restore();
+//         }
+
+//       function handleFaceTooFar() {
+//             const facePercentage = (lastFaceSize * 100).toFixed(1);
+//             console.log("❌ TOO FAR! Face size:", facePercentage + "% (minimum: 40%)");
+//             showDistanceAlert('far');
+//             distanceWarningShown = false; // Reset warning flag
+            
+//             if (isScanning && !scanningPaused && mediaRecorderRef) {
+//                 if (mediaRecorderRef.state === 'recording') {
+//                     mediaRecorderRef.pause();
+//                     scanningPaused = true;
+                    
+//                     if (scanningTimerRef) {
+//                         clearInterval(scanningTimerRef);
+//                         scanningTimerRef = null;
+//                     }
+//                     console.log("⏸️ Scanning paused - face too far");
+//                 }
+//             }
+//         }
+
+//         function handleFaceDistanceWarning() {
+//             if (!distanceWarningShown) {
+//                 const facePercentage = (lastFaceSize * 100).toFixed(1);
+//                 console.log("⚠️ Warning! Face size:", facePercentage + "% (ideal: 50%+)");
+//                 showDistanceAlert('warning');
+//                 distanceWarningShown = true;
+//             }
+//         }
+//       function handleFaceDistanceOk() {
+//             const facePercentage = (lastFaceSize * 100).toFixed(1);
+//             console.log("✅ Perfect distance! Face size:", facePercentage + "%");
+//             hideDistanceAlert();
+//             distanceWarningShown = false;
+//         }
+
+//         function showDistanceAlert(type) {
+//             const alertDiv = document.getElementById("faceAlert");
+//             if (type === 'far') {
+//                 alertDiv.innerHTML = '🚫 Too far! Move within 1 foot of camera';
+//                 alertDiv.classList.add("show");
+//                 alertDiv.classList.remove("warning");
+//             } else {
+               
+//                 alertDiv.classList.add("show", "warning");
+//             }
+//         }
+
+//         function hideDistanceAlert() {
+//             const alertDiv = document.getElementById("faceAlert");
+//             if (alertDiv.textContent.includes('Move closer')) {
+//                 alertDiv.classList.remove("show", "warning");
+//             }
+//         }
+
+//         function handleFaceDetected() {
+//             if (faceDetectionTimeout) {
+//                 clearTimeout(faceDetectionTimeout);
+//                 faceDetectionTimeout = null;
+//             }
+            
+//             if (!faceDetected) {
+//                 faceDetected = true;
+//                 console.log("✅ Face detected!");
+//                 hideFaceAlert();
+                
+//                 if (isScanning && scanningPaused && mediaRecorderRef) {
+//                     if (mediaRecorderRef.state === 'paused') {
+//                         mediaRecorderRef.resume();
+//                         scanningPaused = false;
+                        
+//                         if (!scanningTimerRef) {
+//                             scanningTimerRef = setInterval(() => { 
+//                                 actualDuration++;
+//                                 displayDuration = Math.floor(actualDuration * (DISPLAY_DURATION / ACTUAL_DURATION));
+//                                 document.getElementById("scanningTime").textContent = "SCAN " + formatTime(displayDuration); 
+//                                 if (actualDuration >= ACTUAL_DURATION) stopScanning(); 
+//                             }, 1000);
+//                         }
+//                         console.log("▶️ Scanning resumed");
+//                     }
+//                 }
+//             }
+//         }
+
+//         function handleFaceLost() {
+//             if (faceDetected && !faceDetectionTimeout) {
+//                 faceDetectionTimeout = setTimeout(() => {
+//                     faceDetected = false;
+//                     console.log("❌ Face lost!");
+//                     showFaceAlert();
+                    
+//                     if (isScanning && !scanningPaused && mediaRecorderRef) {
+//                         if (mediaRecorderRef.state === 'recording') {
+//                             mediaRecorderRef.pause();
+//                             scanningPaused = true;
+                            
+//                             if (scanningTimerRef) {
+//                                 clearInterval(scanningTimerRef);
+//                                 scanningTimerRef = null;
+//                             }
+//                             console.log("⏸️ Scanning paused");
+//                         }
+//                     }
+//                 }, 500);
+//             }
+//         }
+
+//         function showFaceAlert() {
+//             const alertDiv = document.getElementById("faceAlert");
+//             alertDiv.innerHTML = '⚠️ No face detected! Scanning paused';
+//             alertDiv.classList.remove("warning");
+//             alertDiv.classList.add("show");
+//         }
+
+//         function hideFaceAlert() {
+//             const alertDiv = document.getElementById("faceAlert");
+//             alertDiv.classList.remove("show", "warning");
+//         }
+
+//         async function initializeScanner() { 
+//             try { 
+//                 await loadMediaPipeScripts(); 
+//                 await initializeFaceMesh();
+//                 await startCamera(); 
+//                 setupEventListeners(); 
+                
+//                 document.getElementById("loadingState").style.display = "none"; 
+//                 document.getElementById("cameraInterface").style.display = "block";
+//                 showStatus("✅ Camera ready! Click 'Start Scanning' to begin", "info");
+//             } catch (error) { 
+//                 showError(error.message || "Failed to initialize"); 
+//             } 
+//         }
+
+//         async function startCamera() { 
+//             try { 
+//                 videoRef = document.getElementById("videoElement");
+//                 canvasRef = document.getElementById("canvasElement");
+                
+//                 if (stream) stream.getTracks().forEach(t => t.stop()); 
+                
+//                 stream = await navigator.mediaDevices.getUserMedia({ 
+//                     video: { 
+//                         width: { ideal: WIDTH },
+//                         height: { ideal: HEIGHT },
+//                         facingMode: "user",
+//                         frameRate: { ideal: 30 }
+//                     }, 
+//                     audio: false 
+//                 }); 
+                
+//                 videoRef.srcObject = stream;
+                
+//                 if (typeof Camera !== 'undefined' && faceMesh) {
+//                     camera = new Camera(videoRef, {
+//                         onFrame: async () => {
+//                             if (!scanCompleted) {
+//                                 await faceMesh.send({image: videoRef});
+//                             }
+//                         },
+//                         width: WIDTH,
+//                         height: HEIGHT
+//                     });
+//                     camera.start();
+//                 }
+//             } catch (error) { 
+//                 throw new Error("Camera access denied"); 
+//             } 
+//         }
+
+//         function setupEventListeners() { 
+//             document.getElementById("startBtn").addEventListener("click", startScanning); 
+//             document.getElementById("retryBtn").addEventListener("click", () => window.location.reload());
+//         }
+
+//         function startScanning() { 
+//             if (!stream || scanCompleted) return; 
+            
+//             isScanning = true; 
+//             actualDuration = 0;
+//             displayDuration = 0;
+//             scanningPaused = false;
+//             scanCompleted = false;
+            
+//             const videoContainer = document.getElementById("videoContainer");
+//             const controlsGrid = document.getElementById("controlsGrid");
+
+//             controlsGrid.style.display = "none";
+            
+//             videoContainer.classList.add("scanning");
+//             document.getElementById("scanningIndicator").style.display = "flex"; 
+//             showStatus("🔬 Scanning in progress... Keep your face in frame", "warning");
+
+//             const chunks = []; 
+//             const options = {
+//                 mimeType: 'video/webm;codecs=vp9',
+//                 videoBitsPerSecond: 5000000
+//             };
+            
+//             if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+//                 options.mimeType = 'video/webm;codecs=vp8';
+//             }
+            
+//             mediaRecorderRef = new MediaRecorder(stream, options);
+
+//             mediaRecorderRef.ondataavailable = e => { 
+//                 if (e.data.size > 0) chunks.push(e.data); 
+//             }; 
+            
+//             mediaRecorderRef.onstop = async () => { 
+//                 if (scanningTimerRef) { 
+//                     clearInterval(scanningTimerRef); 
+//                     scanningTimerRef = null; 
+//                 } 
+//                 isScanning = false;
+//                 scanningPaused = false;
+//                 faceDetected = false;
+//                 scanCompleted = true;
+                
+//                 if (faceDetectionTimeout) {
+//                     clearTimeout(faceDetectionTimeout);
+//                     faceDetectionTimeout = null;
+//                 }
+//                 distanceWarningShown = false;
+                
+//                 videoContainer.classList.remove("scanning");
+//                 document.getElementById("scanningIndicator").style.display = "none"; 
+//                 hideFaceAlert();
+                
+//                 if (camera) {
+//                     camera.stop();
+//                     camera = null;
+//                 }
+//                 if (stream) {
+//                     stream.getTracks().forEach(t => t.stop());
+//                     stream = null;
+//                 }
+                
+//                 if (canvasRef) {
+//                     const ctx = canvasRef.getContext('2d');
+//                     ctx.clearRect(0, 0, WIDTH, HEIGHT);
+//                 }
+                
+//                 recordedBlob = new Blob(chunks, { type: "video/webm" });
+//                 recordedVideoUrl = URL.createObjectURL(recordedBlob);
+                
+//                 showStatus("✅ Scan complete! Analyzing results...", "success");
+                
+//                 setTimeout(() => {
+//                     analyzeVideo();
+//                 }, 1000);
+//             }; 
+            
+//             mediaRecorderRef.start(); 
+            
+//             scanningTimerRef = setInterval(() => { 
+//                 if (!scanningPaused) {
+//                     actualDuration++;
+//                     displayDuration = Math.floor(actualDuration * (DISPLAY_DURATION / ACTUAL_DURATION));
+//                     document.getElementById("scanningTime").textContent = "SCAN " + formatTime(displayDuration); 
+//                     if (actualDuration >= ACTUAL_DURATION) stopScanning(); 
+//                 }
+//             }, 1000); 
+//         }
+
+//         function stopScanning() { 
+//             if (mediaRecorderRef && mediaRecorderRef.state !== "inactive") {
+//                 if (mediaRecorderRef.state === "paused") {
+//                     mediaRecorderRef.resume();
+//                 }
+//                 mediaRecorderRef.stop(); 
+//             }
+//         }
+
+//           async function pollForResults(jobId) {
+//             const maxAttempts = 120; // 10 minutes
+//             const pollInterval = 5000; // 5 seconds
+//             let attempts = 0;
+
+//             return new Promise((resolve, reject) => {
+//                 const checkStatus = async () => {
+//                     attempts++;
+                    
+//                     try {
+//                         console.log(\`📊 Poll \${attempts}/\${maxAttempts}...\`);
+                        
+//                         const statusUrl = \`\${API_BASE_URL}/status/\${jobId}\`;
+//                         const statusRes = await axios.get(statusUrl, { timeout: 10000 });
+                        
+//                         const { status, progress, is_complete } = statusRes.data;
+                        
+//                         console.log(\`   Status: \${status}, Progress: \${progress}%\`);
+//                         showStatus(\`⚙️ \${status}: \${progress}%\`, "warning");
+                        
+//                         if (is_complete) {
+//                             console.log("✅ Analysis complete! Fetching result...");
+                            
+//                             const resultUrl = \`\${API_BASE_URL}/result/\${jobId}\`;
+//                             const resultRes = await axios.get(resultUrl, { timeout: 10000 });
+                            
+//                             if (resultRes.status === 200) {
+//                                 resolve(resultRes.data);
+//                             } else if (resultRes.status === 202) {
+//                                 if (attempts < maxAttempts) {
+//                                     setTimeout(checkStatus, pollInterval);
+//                                 } else {
+//                                     reject(new Error("Timeout"));
+//                                 }
+//                             } else {
+//                                 reject(new Error(resultRes.data?.error || "Failed"));
+//                             }
+//                         } else {
+//                             if (attempts < maxAttempts) {
+//                                 setTimeout(checkStatus, pollInterval);
+//                             } else {
+//                                 reject(new Error("Analysis timeout"));
+//                             }
+//                         }
+                        
+//                     } catch (error) {
+//                         console.error(\`❌ Poll error:\`, error);
+                        
+//                         if (attempts < maxAttempts) {
+//                             console.log("   Retrying...");
+//                             setTimeout(checkStatus, pollInterval);
+//                         } else {
+//                             reject(error);
+//                         }
+//                     }
+//                 };
+                
+//                 checkStatus();
+//             });
+//         }
+
+//         async function analyzeVideo() {
+//             if (!recordedBlob) {
+//                 showStatus("❌ No video recorded!", "error");
+//                 return;
+//             }
+            
+//             showStatus("📤 Uploading video...", "warning");
+            
+//             try {
+//                 // Step 1: Upload video
+//                 const fd = new FormData();
+//                 fd.append("file", recordedBlob, "scan.webm");
+
+//                 console.log("📤 Uploading video to:", AI_API_URL);
+
+//                 const uploadRes = await axios.post(AI_API_URL, fd, {
+//                     headers: { "Content-Type": "multipart/form-data" },
+//                     timeout: 60000,
+//                     onUploadProgress: (progressEvent) => {
+//                         const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+//                         showStatus(\`📤 Uploading: \${percent}%\`, "warning");
+//                     }
+//                 });
+
+//                 console.log("✅ Upload response:", uploadRes.data);
+
+//                 if (!uploadRes.data || !uploadRes.data.success) {
+//                     throw new Error(uploadRes.data?.error || "Upload failed");
+//                 }
+
+//                 const jobId = uploadRes.data.job_id;
+//                 if (!jobId) {
+//                     throw new Error("No job_id received");
+//                 }
+
+//                 console.log("🆔 Job ID:", jobId);
+//                 showStatus("⏳ Analyzing... This may take 1-2 minutes", "info");
+
+//                 // Step 2: Poll for results
+//                 const result = await pollForResults(jobId);
+
+//                 console.log("✅ Final result:", result);
+
+//                 if (result && result.success) {
+//                     showStatus("✅ Complete! Redirecting...", "success");
+                    
+//                     setTimeout(() => {
+//                         const dataStr = encodeURIComponent(JSON.stringify(result));
+//                         const videoStr = encodeURIComponent(recordedVideoUrl);
+//                         window.location.href = \`/results?data=\${dataStr}&video=\${videoStr}\`;
+//                     }, 1000);
+//                 } else {
+//                     throw new Error(result?.error || "Analysis failed");
+//                 }
+
+//             } catch (error) {
+//                 console.error("❌ Analysis error:", error);
+                
+//                 let errorMsg = "Analysis failed";
+//                 if (error.response) {
+//                     if (error.response.data?.error) {
+//                         errorMsg = error.response.data.error;
+//                     } else {
+//                         errorMsg = \`Server error: \${error.response.status}\`;
+//                     }
+//                 } else if (error.code === 'ECONNABORTED') {
+//                     errorMsg = "Request timeout - please try again";
+//                 } else {
+//                     errorMsg = error.message;
+//                 }
+                
+//                 showStatus("❌ " + errorMsg, "error");
+
+//                 setTimeout(() => {
+//                     const controlsGrid = document.getElementById("controlsGrid");
+//                     controlsGrid.style.display = "flex";
+//                     controlsGrid.innerHTML = '<button class="controlBtn" onclick="window.location.reload()">🔄 Try Again</button>';
+//                 }, 2000);
+//             }
+//         }
+//         function showError(msg) { 
+//             document.getElementById("loadingState").style.display = "none"; 
+//             document.getElementById("cameraInterface").style.display = "none"; 
+//             document.getElementById("errorText").textContent = msg; 
+//             document.getElementById("errorState").style.display = "flex"; 
+//         }
+
+//         document.addEventListener("DOMContentLoaded", initializeScanner);
+//     </script>
+// </body>
+// </html>`;
+
+//     res.setHeader('Content-Type', 'text/html; charset=utf-8');
+//     res.send(html);
+//   } catch (error) {
+//     res.status(500).json({ success: false, error: error.message });
+//   }
+// }
 async function getCameraPage(req, res, next) {
   try {
     const html = `<!DOCTYPE html>
@@ -2046,7 +3157,7 @@ async function getCameraPage(req, res, next) {
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background: linear-gradient(135deg,);
+            background: #f5f5f5;
             min-height: 100vh;
             padding: 1rem;
             display: flex;
@@ -2056,57 +3167,31 @@ async function getCameraPage(req, res, next) {
         .mainContainer {
             width: 100%;
             max-width: 500px;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
-        // .videoOverlay {
-        //     position: absolute;
-        //     inset: 0;
-        //     pointer-events: none;
-        //     z-index: 30;
-        //     backdrop-filter: blur(20px);
-        //     -webkit-backdrop-filter: blur(20px);
-        //     -webkit-mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
-        //     mask-image: radial-gradient(ellipse 61% 68% at 50% 50%, transparent 69%, black 71%);
-        //     background: rgba(255,255,255,0.10);
-        // }
-        // .videoOval {
-        //     position: absolute;
-        //     left: 6%;
-        //     top: 4%;
-        //     width: 88%;
-        //     height: 92%;
-        //     border: 5px dashed #fff;
-        //     border-radius: 50%;
-        //     z-index: 31;
-        //     pointer-events: none;
-        // }
         .header { 
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: white;
             padding: 1.5rem; 
-            border-radius: 20px 20px 0 0; 
             text-align: center;
-            border-bottom: 3px solid rgba(102, 126, 234, 0.3);
+            border-bottom: 2px solid #e5e5e5;
         }
         .header h1 { 
             font-size: 1.5rem;
-            background: linear-gradient(135deg, #000000);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 500; 
+            color: #000;
+            font-weight: 600; 
             margin-bottom: 0.5rem; 
         }
         .header p { 
             font-size: 0.875rem;
-            color: #64748b; 
-            font-weight: 500;
+            color: #666; 
+            font-weight: 400;
         }
         .cameraContainer { 
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px);
-            border-radius: 0 0 20px 20px; 
+            background: white;
             padding: 1.5rem; 
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
@@ -2115,13 +3200,13 @@ async function getCameraPage(req, res, next) {
         .loadingState { 
             text-align: center; 
             padding: 3rem 1rem; 
-            color: #64748b; 
+            color: #666; 
         }
         .loadingSpinner { 
             width: 40px; 
             height: 40px; 
-            border: 4px solid #f1f5f9; 
-            border-top: 4px solid #667eea; 
+            border: 4px solid #e5e5e5; 
+            border-top: 4px solid #000; 
             border-radius: 50%; 
             animation: spin 1s linear infinite; 
             display: inline-block; 
@@ -2132,11 +3217,11 @@ async function getCameraPage(req, res, next) {
             100% { transform: rotate(360deg); } 
         }
         .errorState { 
-            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-            border-radius: 16px; 
+            background: #fee;
+            border-radius: 12px; 
             padding: 2rem 1.5rem; 
             text-align: center; 
-            border: 2px solid #ef4444; 
+            border: 2px solid #f00; 
             width: 100%;
             min-height: 300px;
             display: flex; 
@@ -2145,30 +3230,24 @@ async function getCameraPage(req, res, next) {
             justify-content: center; 
         }
         .errorIcon { 
-            font-size: 4rem;
+            font-size: 3rem;
             margin-bottom: 1rem;
-            animation: shake 0.5s ease-in-out;
-        }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
         }
         .errorText { 
-            font-size: 1.125rem; 
-            color: #991b1b; 
+            font-size: 1rem; 
+            color: #c00; 
             margin-bottom: 1.5rem;
             font-weight: 600; 
         }
         .controlBtn { 
-            background: linear-gradient(135deg);
-            color: #000000ff; 
+            background: #000;
+            color: #fff; 
             border: none; 
             padding: 1rem 2rem; 
-           margin-top: 15px;
-            border-radius: 12px; 
+            margin-top: 15px;
+            border-radius: 8px; 
             font-size: 1rem; 
-            font-weight: 700; 
+            font-weight: 600; 
             cursor: pointer; 
             transition: all 0.3s ease; 
             display: flex; 
@@ -2177,44 +3256,24 @@ async function getCameraPage(req, res, next) {
             gap: 0.75rem; 
             min-width: 160px;
             min-height: 52px;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            position: relative;
-            overflow: hidden;
-        }
-        .controlBtn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-        .controlBtn:hover:not(:disabled)::before {
-            width: 300px;
-            height: 300px;
         }
         .controlBtn:hover:not(:disabled) { 
-            transform: translateY(-3px); 
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5); 
+            background: #333;
+            transform: translateY(-2px); 
         }
         .controlBtn:active:not(:disabled) {
-            transform: translateY(-1px);
+            transform: translateY(0);
         }
         .controlBtn:disabled {
-            background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+            background: #ccc;
             cursor: not-allowed;
-            box-shadow: none;
         }
         .controlBtn .spinner {
             display: none;
             width: 18px;
             height: 18px;
             border: 3px solid rgba(255,255,255,0.3);
-            border-top: 3px solid #ffffff;
+            border-top: 3px solid #fff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -2225,15 +3284,13 @@ async function getCameraPage(req, res, next) {
             position: relative;
             width: 100%;
             aspect-ratio: 3/4;
-            border-radius: 20px;
+            border-radius: 12px;
             overflow: hidden;
-            border: 4px solid rgba(102, 126, 234, 0.3);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            border: 3px solid #e5e5e5;
             background: #000;
         }
         #videoContainer.scanning {
-            border-color: #10b981;
-            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.5);
+            border-color: #000;
         }
         #videoElement, #canvasElement {
             position: absolute;
@@ -2248,8 +3305,8 @@ async function getCameraPage(req, res, next) {
             z-index: 20;
         }
         .scanningIndicator { 
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: #ffffff; 
+            background: #000;
+            color: #fff; 
             padding: 0.75rem 1.25rem; 
             border-radius: 50px; 
             font-size: 0.875rem; 
@@ -2261,13 +3318,11 @@ async function getCameraPage(req, res, next) {
             top: 1rem; 
             left: 1rem; 
             z-index: 100; 
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
-            backdrop-filter: blur(10px);
         }
         .scanningDot { 
             width: 10px; 
             height: 10px; 
-            background: #ffffff; 
+            background: #fff; 
             border-radius: 50%; 
             animation: pulse 1.5s infinite; 
         }
@@ -2279,9 +3334,8 @@ async function getCameraPage(req, res, next) {
             position: absolute;
             bottom: 1.5rem;
             left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            background: rgba(239, 68, 68, 0.95);
-            backdrop-filter: blur(10px);
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
             color: white;
             padding: 1rem 1.5rem;
             border-radius: 50px;
@@ -2289,22 +3343,13 @@ async function getCameraPage(req, res, next) {
             font-size: 0.875rem;
             z-index: 110;
             display: none;
-            opacity: 0;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            white-space: nowrap;
         }
         .faceAlert.show {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
+            display: block;
         }
         .faceAlert.warning {
-            background: rgba(245, 158, 11, 0.95);
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+            background: rgba(255,165,0,0.9);
         }
         .controlsGrid { 
             display: flex; 
@@ -2316,58 +3361,45 @@ async function getCameraPage(req, res, next) {
         .statusMessage {
             text-align: center;
             padding: 1rem 1.5rem;
-            border-radius: 12px;
+            border-radius: 8px;
             font-weight: 600;
             width: 100%;
             font-size: 0.875rem;
             border: 2px solid;
-            backdrop-filter: blur(10px);
         }
         .statusMessage.info {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            color: #1e40af;
-            border-color: #3b82f6;
+            background: #e8f4fd;
+            color: #014361;
+            border-color: #0284c7;
         }
         .statusMessage.success {
-            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-            color: #065f46;
-            border-color: #10b981;
+            background: #e8f5e9;
+            color: #1b5e20;
+            border-color: #2e7d32;
         }
         .statusMessage.error {
-            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-            color: #991b1b;
-            border-color: #ef4444;
+            background: #fee;
+            color: #c00;
+            border-color: #f00;
         }
         .statusMessage.warning {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            color: #92400e;
-            border-color: #f59e0b;
+            background: #fff4e5;
+            color: #663c00;
+            border-color: #ff9800;
         }
         @media screen and (max-width: 479px) { 
-            body {
-                padding: 0.5rem;
-            }
-            .header {
-                padding: 1rem;
-                border-radius: 16px 16px 0 0;
-            }
-            .header h1 {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);  
-                font-size: 1.25rem;
-            }
-            .cameraContainer { 
-                padding: 1rem;
-                border-radius: 0 0 16px 16px;
-            }
-            .controlBtn {
-                width: 100%;
-                min-width: unset;
-            }
-            .controlsGrid {
-                flex-direction: column;
-            }
-            #videoContainer {
-                aspect-ratio: 9/16;
+            body { padding: 0.5rem; }
+            .mainContainer { border-radius: 12px; }
+            .header { padding: 1rem; }
+            .header h1 { font-size: 1.25rem; }
+            .cameraContainer { padding: 1rem; }
+            .controlBtn { width: 100%; min-width: unset; }
+            .controlsGrid { flex-direction: column; }
+            #videoContainer { aspect-ratio: 9/16; }
+            .faceAlert { 
+                bottom: 1rem;
+                font-size: 0.75rem;
+                padding: 0.75rem 1.25rem;
             }
         }
     </style>
@@ -2375,7 +3407,7 @@ async function getCameraPage(req, res, next) {
 <body>
     <div class="mainContainer">
         <div class="header">
-            <h1>🏥 Health Vitals Scanner</h1>
+            <h1>Health Vitals Scanner</h1>
             <p>Position your face in frame • Scan for 30 seconds</p>
         </div>
 
@@ -2394,16 +3426,14 @@ async function getCameraPage(req, res, next) {
             
             <div id="cameraInterface" style="display: none; width: 100%;">
                 <div id="videoContainer">
-                   <video id="videoElement" autoplay playsinline muted></video>
+                    <video id="videoElement" autoplay playsinline muted></video>
                     <canvas id="canvasElement"></canvas>
-                    <div class="videoOverlay"></div>
-                    <div class="videoOval"></div>
                     <div id="scanningIndicator" class="scanningIndicator" style="display: none;">
                         <div class="scanningDot"></div>
                         <span id="scanningTime">SCAN 00:00</span>
                     </div>
                     <div id="faceAlert" class="faceAlert">
-                        ⚠️ No face detected! Scanning paused
+                        ⚠️ No face detected
                     </div>
                 </div>
                 
@@ -2421,13 +3451,20 @@ async function getCameraPage(req, res, next) {
     </div>
 
     <script>
+        const API_BASE_URL = "https://facescan.duckdns.org";
+        const WIDTH = 1280, HEIGHT = 720;
+        const ACTUAL_DURATION = 35;
+        const DISPLAY_DURATION = 30;
+        const MIN_FACE_SIZE = 0.40;
+        const IDEAL_FACE_SIZE = 0.42;
+        const CENTER_TOLERANCE = 0.15; 
+        const MIN_BRIGHTNESS = 60;
+
         let videoRef, canvasRef, mediaRecorderRef, scanningTimerRef, stream = null;
         let faceMesh = null;
         let camera = null;
         let isScanning = false, actualDuration = 0, displayDuration = 0;
         let recordedVideoUrl = null;
-        let aiPrediction = null;
-        
         let faceDetected = false;
         let faceDetectionTimeout = null;
         let scanningPaused = false;
@@ -2435,19 +3472,6 @@ async function getCameraPage(req, res, next) {
         let scanCompleted = false;
         let currentAlertType = null;
         let lastFaceSize = 0;
-        let distanceWarningShown = false;
-        const MIN_FACE_SIZE = 0.40;
-        const IDEAL_FACE_SIZE = 0.42;
-        const CENTER_TOLERANCE = 0.15; 
-        const MIN_BRIGHTNESS = 60; 
-
-
-
-        const AI_API_URL = "https://facescan.duckdns.org";
-        const AI_API_URL = API_BASE_URL + "/analyze";
-        const WIDTH = 1280, HEIGHT = 720;
-        const ACTUAL_DURATION = 35;
-        const DISPLAY_DURATION = 30;
 
         function formatTime(s) { 
             const m = Math.floor(s / 60); 
@@ -2542,92 +3566,83 @@ async function getCameraPage(req, res, next) {
                 const faceSize = Math.max(faceWidth, faceHeight);
                 lastFaceSize = faceSize;
                 
-                // Real-time distance feedback
-                const facePercentage = (faceSize * 100).toFixed(1);
-                console.log("📏 Face size:", facePercentage + "% of frame");
-                
-              // Calculate face center
-const faceCenterX = (minX + maxX) / 2;
-const faceCenterY = (minY + maxY) / 2;
-const frameCenterX = 0.5;
-const frameCenterY = 0.5;
+                const faceCenterX = (minX + maxX) / 2;
+                const faceCenterY = (minY + maxY) / 2;
+                const frameCenterX = 0.5;
+                const frameCenterY = 0.5;
 
-// Check if face is centered
-const offsetX = Math.abs(faceCenterX - frameCenterX);
-const offsetY = Math.abs(faceCenterY - frameCenterY);
-const isOffCenter = offsetX > CENTER_TOLERANCE || offsetY > CENTER_TOLERANCE;
+                const offsetX = Math.abs(faceCenterX - frameCenterX);
+                const offsetY = Math.abs(faceCenterY - frameCenterY);
+                const isOffCenter = offsetX > CENTER_TOLERANCE || offsetY > CENTER_TOLERANCE;
 
-// Calculate brightness
-const tempCanvasBright = document.createElement('canvas');
-tempCanvasBright.width = WIDTH;
-tempCanvasBright.height = HEIGHT;
-const tempCtxBright = tempCanvasBright.getContext('2d');
-tempCtxBright.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
+                const tempCanvasBright = document.createElement('canvas');
+                tempCanvasBright.width = WIDTH;
+                tempCanvasBright.height = HEIGHT;
+                const tempCtxBright = tempCanvasBright.getContext('2d');
+                tempCtxBright.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
 
-const faceX = Math.floor(minX * WIDTH);
-const faceY = Math.floor(minY * HEIGHT);
-const faceW = Math.floor((maxX - minX) * WIDTH);
-const faceH = Math.floor((maxY - minY) * HEIGHT);
-const imageData = tempCtxBright.getImageData(faceX, faceY, faceW, faceH);
+                const faceX = Math.floor(minX * WIDTH);
+                const faceY = Math.floor(minY * HEIGHT);
+                const faceW = Math.floor((maxX - minX) * WIDTH);
+                const faceH = Math.floor((maxY - minY) * HEIGHT);
+                const imageData = tempCtxBright.getImageData(faceX, faceY, faceW, faceH);
 
-let totalBrightness = 0;
-for (let i = 0; i < imageData.data.length; i += 4) {
-    totalBrightness += (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
-}
-const avgBrightness = totalBrightness / (imageData.data.length / 4);
-const isLowLight = avgBrightness < MIN_BRIGHTNESS;
+                let totalBrightness = 0;
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    totalBrightness += (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
+                }
+                const avgBrightness = totalBrightness / (imageData.data.length / 4);
+                const isLowLight = avgBrightness < MIN_BRIGHTNESS;
 
-console.log("📏 Face:", (faceSize * 100).toFixed(1) + "% | Center:", !isOffCenter ? "✅" : "❌", "| Light:", Math.round(avgBrightness));
-
-if (faceSize < MIN_FACE_SIZE) {
-    if (currentAlertType !== 'far') {
-        const alertDiv = document.getElementById("faceAlert");
-        alertDiv.innerHTML = '🚫 Too far! Move within 1 foot of camera';
-        alertDiv.classList.add("show");
-        alertDiv.classList.remove("warning");
-        currentAlertType = 'far';
-    }
-    if (isScanning && !scanningPaused && mediaRecorderRef && mediaRecorderRef.state === 'recording') {
-        mediaRecorderRef.pause();
-        scanningPaused = true;
-        if (scanningTimerRef) {
-            clearInterval(scanningTimerRef);
-            scanningTimerRef = null;
-        }
-    }
-} else if (isOffCenter) {
-    if (currentAlertType !== 'center') {
-        const alertDiv = document.getElementById("faceAlert");
-        let dir = offsetX > CENTER_TOLERANCE ? (faceCenterX < frameCenterX ? 'right' : 'left') : (faceCenterY < frameCenterY ? 'down' : 'up');
-        alertDiv.innerHTML = '⚠️ Move your face ' + dir + ' to center it';
-        alertDiv.classList.add("show", "warning");
-        currentAlertType = 'center';
-    }
-    handleFaceDetected();
-} else if (isLowLight) {
-    if (currentAlertType !== 'light') {
-        const alertDiv = document.getElementById("faceAlert");
-        alertDiv.innerHTML = '💡 More light needed! Move to brighter area';
-        alertDiv.classList.add("show", "warning");
-        currentAlertType = 'light';
-    }
-    handleFaceDetected();
-} else if (faceSize < IDEAL_FACE_SIZE) {
-    if (currentAlertType !== 'warning') {
-        const alertDiv = document.getElementById("faceAlert");
-        alertDiv.innerHTML = '⚠️ Move a bit closer for best scan quality';
-        alertDiv.classList.add("show", "warning");
-        currentAlertType = 'warning';
-    }
-    handleFaceDetected();
-} else {
-    if (currentAlertType !== null) {
-        const alertDiv = document.getElementById("faceAlert");
-        alertDiv.classList.remove("show", "warning");
-        currentAlertType = null;
-    }
-    handleFaceDetected();
-}
+                if (faceSize < MIN_FACE_SIZE) {
+                    if (currentAlertType !== 'far') {
+                        const alertDiv = document.getElementById("faceAlert");
+                        alertDiv.innerHTML = '🚫 Too far! Move closer';
+                        alertDiv.classList.add("show");
+                        alertDiv.classList.remove("warning");
+                        currentAlertType = 'far';
+                    }
+                    if (isScanning && !scanningPaused && mediaRecorderRef && mediaRecorderRef.state === 'recording') {
+                        mediaRecorderRef.pause();
+                        scanningPaused = true;
+                        if (scanningTimerRef) {
+                            clearInterval(scanningTimerRef);
+                            scanningTimerRef = null;
+                        }
+                    }
+                } else if (isOffCenter) {
+                    if (currentAlertType !== 'center') {
+                        const alertDiv = document.getElementById("faceAlert");
+                        let dir = offsetX > CENTER_TOLERANCE ? (faceCenterX < frameCenterX ? 'right' : 'left') : (faceCenterY < frameCenterY ? 'down' : 'up');
+                        alertDiv.innerHTML = '⚠️ Move ' + dir;
+                        alertDiv.classList.add("show", "warning");
+                        currentAlertType = 'center';
+                    }
+                    handleFaceDetected();
+                } else if (isLowLight) {
+                    if (currentAlertType !== 'light') {
+                        const alertDiv = document.getElementById("faceAlert");
+                        alertDiv.innerHTML = '💡 More light needed';
+                        alertDiv.classList.add("show", "warning");
+                        currentAlertType = 'light';
+                    }
+                    handleFaceDetected();
+                } else if (faceSize < IDEAL_FACE_SIZE) {
+                    if (currentAlertType !== 'warning') {
+                        const alertDiv = document.getElementById("faceAlert");
+                        alertDiv.innerHTML = '⚠️ Move a bit closer';
+                        alertDiv.classList.add("show", "warning");
+                        currentAlertType = 'warning';
+                    }
+                    handleFaceDetected();
+                } else {
+                    if (currentAlertType !== null) {
+                        const alertDiv = document.getElementById("faceAlert");
+                        alertDiv.classList.remove("show", "warning");
+                        currentAlertType = null;
+                    }
+                    handleFaceDetected();
+                }
                 
                 const padding = 0.10;
                 minX = Math.max(0, minX - padding);
@@ -2690,79 +3705,9 @@ if (faceSize < MIN_FACE_SIZE) {
                 tempCtx.filter = 'blur(10px) brightness(0.7)';
                 tempCtx.drawImage(tempCanvas, 0, 0);
                 ctx.drawImage(tempCanvas, 0, 0);
-                
-                const centerX = WIDTH / 2;
-                const centerY = HEIGHT / 2;
-                const radiusX = WIDTH * 0.35;
-                const radiusY = HEIGHT * 0.45;
-                
-                ctx.beginPath();
-               ctx.ellipse(centerX, centerY, radiusY, radiusX, Math.PI / 2, 0, 2 * Math.PI);
-               ctx.clip();
-ctx.drawImage(results.image, 0, 0, WIDTH, HEIGHT);
-ctx.restore();
-               ctx.strokeStyle = '#ef4444';
-                ctx.lineWidth = 4;
-                ctx.setLineDash([15, 15]);
-                ctx.stroke();
-                ctx.setLineDash([]);
             }
 
             ctx.restore();
-        }
-
-      function handleFaceTooFar() {
-            const facePercentage = (lastFaceSize * 100).toFixed(1);
-            console.log("❌ TOO FAR! Face size:", facePercentage + "% (minimum: 40%)");
-            showDistanceAlert('far');
-            distanceWarningShown = false; // Reset warning flag
-            
-            if (isScanning && !scanningPaused && mediaRecorderRef) {
-                if (mediaRecorderRef.state === 'recording') {
-                    mediaRecorderRef.pause();
-                    scanningPaused = true;
-                    
-                    if (scanningTimerRef) {
-                        clearInterval(scanningTimerRef);
-                        scanningTimerRef = null;
-                    }
-                    console.log("⏸️ Scanning paused - face too far");
-                }
-            }
-        }
-
-        function handleFaceDistanceWarning() {
-            if (!distanceWarningShown) {
-                const facePercentage = (lastFaceSize * 100).toFixed(1);
-                console.log("⚠️ Warning! Face size:", facePercentage + "% (ideal: 50%+)");
-                showDistanceAlert('warning');
-                distanceWarningShown = true;
-            }
-        }
-      function handleFaceDistanceOk() {
-            const facePercentage = (lastFaceSize * 100).toFixed(1);
-            console.log("✅ Perfect distance! Face size:", facePercentage + "%");
-            hideDistanceAlert();
-            distanceWarningShown = false;
-        }
-
-        function showDistanceAlert(type) {
-            const alertDiv = document.getElementById("faceAlert");
-            if (type === 'far') {
-                alertDiv.innerHTML = '🚫 Too far! Move within 1 foot of camera';
-                alertDiv.classList.add("show");
-                alertDiv.classList.remove("warning");
-            } else {
-               
-                alertDiv.classList.add("show", "warning");
-            }
-        }
-
-        function hideDistanceAlert() {
-            const alertDiv = document.getElementById("faceAlert");
-            if (alertDiv.textContent.includes('Move closer')) {
-                alertDiv.classList.remove("show", "warning");
-            }
         }
 
         function handleFaceDetected() {
@@ -2773,8 +3718,6 @@ ctx.restore();
             
             if (!faceDetected) {
                 faceDetected = true;
-                console.log("✅ Face detected!");
-                hideFaceAlert();
                 
                 if (isScanning && scanningPaused && mediaRecorderRef) {
                     if (mediaRecorderRef.state === 'paused') {
@@ -2789,7 +3732,6 @@ ctx.restore();
                                 if (actualDuration >= ACTUAL_DURATION) stopScanning(); 
                             }, 1000);
                         }
-                        console.log("▶️ Scanning resumed");
                     }
                 }
             }
@@ -2799,8 +3741,12 @@ ctx.restore();
             if (faceDetected && !faceDetectionTimeout) {
                 faceDetectionTimeout = setTimeout(() => {
                     faceDetected = false;
-                    console.log("❌ Face lost!");
-                    showFaceAlert();
+                    
+                    const alertDiv = document.getElementById("faceAlert");
+                    alertDiv.innerHTML = '⚠️ No face detected';
+                    alertDiv.classList.remove("warning");
+                    alertDiv.classList.add("show");
+                    currentAlertType = 'lost';
                     
                     if (isScanning && !scanningPaused && mediaRecorderRef) {
                         if (mediaRecorderRef.state === 'recording') {
@@ -2811,23 +3757,10 @@ ctx.restore();
                                 clearInterval(scanningTimerRef);
                                 scanningTimerRef = null;
                             }
-                            console.log("⏸️ Scanning paused");
                         }
                     }
                 }, 500);
             }
-        }
-
-        function showFaceAlert() {
-            const alertDiv = document.getElementById("faceAlert");
-            alertDiv.innerHTML = '⚠️ No face detected! Scanning paused';
-            alertDiv.classList.remove("warning");
-            alertDiv.classList.add("show");
-        }
-
-        function hideFaceAlert() {
-            const alertDiv = document.getElementById("faceAlert");
-            alertDiv.classList.remove("show", "warning");
         }
 
         async function initializeScanner() { 
@@ -2839,7 +3772,7 @@ ctx.restore();
                 
                 document.getElementById("loadingState").style.display = "none"; 
                 document.getElementById("cameraInterface").style.display = "block";
-                showStatus("✅ Camera ready! Click 'Start Scanning' to begin", "info");
+                showStatus("✅ Camera ready! Click Start Scanning", "info");
             } catch (error) { 
                 showError(error.message || "Failed to initialize"); 
             } 
@@ -2877,7 +3810,8 @@ ctx.restore();
                     camera.start();
                 }
             } catch (error) { 
-                throw new Error("Camera access denied"); 
+                console.error("Camera error:", error);
+                throw new Error("Camera access denied - please allow camera permission"); 
             } 
         }
 
@@ -2902,7 +3836,7 @@ ctx.restore();
             
             videoContainer.classList.add("scanning");
             document.getElementById("scanningIndicator").style.display = "flex"; 
-            showStatus("🔬 Scanning in progress... Keep your face in frame", "warning");
+            showStatus("🔬 Scanning... Keep your face in frame", "warning");
 
             const chunks = []; 
             const options = {
@@ -2934,11 +3868,10 @@ ctx.restore();
                     clearTimeout(faceDetectionTimeout);
                     faceDetectionTimeout = null;
                 }
-                distanceWarningShown = false;
                 
                 videoContainer.classList.remove("scanning");
                 document.getElementById("scanningIndicator").style.display = "none"; 
-                hideFaceAlert();
+                document.getElementById("faceAlert").classList.remove("show", "warning");
                 
                 if (camera) {
                     camera.stop();
@@ -2957,7 +3890,7 @@ ctx.restore();
                 recordedBlob = new Blob(chunks, { type: "video/webm" });
                 recordedVideoUrl = URL.createObjectURL(recordedBlob);
                 
-                showStatus("✅ Scan complete! Analyzing results...", "success");
+                showStatus("✅ Scan complete! Analyzing...", "success");
                 
                 setTimeout(() => {
                     analyzeVideo();
@@ -2985,9 +3918,9 @@ ctx.restore();
             }
         }
 
-          async function pollForResults(jobId) {
-            const maxAttempts = 120; // 10 minutes
-            const pollInterval = 5000; // 5 seconds
+        async function pollForResults(jobId) {
+            const maxAttempts = 120;
+            const pollInterval = 5000;
             let attempts = 0;
 
             return new Promise((resolve, reject) => {
@@ -2995,19 +3928,16 @@ ctx.restore();
                     attempts++;
                     
                     try {
-                        console.log(\`📊 Poll \${attempts}/\${maxAttempts}...\`);
+                        console.log(\`Poll \${attempts}/\${maxAttempts}\`);
                         
                         const statusUrl = \`\${API_BASE_URL}/status/\${jobId}\`;
                         const statusRes = await axios.get(statusUrl, { timeout: 10000 });
                         
                         const { status, progress, is_complete } = statusRes.data;
                         
-                        console.log(\`   Status: \${status}, Progress: \${progress}%\`);
                         showStatus(\`⚙️ \${status}: \${progress}%\`, "warning");
                         
                         if (is_complete) {
-                            console.log("✅ Analysis complete! Fetching result...");
-                            
                             const resultUrl = \`\${API_BASE_URL}/result/\${jobId}\`;
                             const resultRes = await axios.get(resultUrl, { timeout: 10000 });
                             
@@ -3031,10 +3961,9 @@ ctx.restore();
                         }
                         
                     } catch (error) {
-                        console.error(\`❌ Poll error:\`, error);
+                        console.error("Poll error:", error);
                         
                         if (attempts < maxAttempts) {
-                            console.log("   Retrying...");
                             setTimeout(checkStatus, pollInterval);
                         } else {
                             reject(error);
@@ -3055,13 +3984,10 @@ ctx.restore();
             showStatus("📤 Uploading video...", "warning");
             
             try {
-                // Step 1: Upload video
                 const fd = new FormData();
                 fd.append("file", recordedBlob, "scan.webm");
 
-                console.log("📤 Uploading video to:", AI_API_URL);
-
-                const uploadRes = await axios.post(AI_API_URL, fd, {
+                const uploadRes = await axios.post(API_BASE_URL + "/analyze", fd, {
                     headers: { "Content-Type": "multipart/form-data" },
                     timeout: 60000,
                     onUploadProgress: (progressEvent) => {
@@ -3069,8 +3995,6 @@ ctx.restore();
                         showStatus(\`📤 Uploading: \${percent}%\`, "warning");
                     }
                 });
-
-                console.log("✅ Upload response:", uploadRes.data);
 
                 if (!uploadRes.data || !uploadRes.data.success) {
                     throw new Error(uploadRes.data?.error || "Upload failed");
@@ -3081,13 +4005,9 @@ ctx.restore();
                     throw new Error("No job_id received");
                 }
 
-                console.log("🆔 Job ID:", jobId);
                 showStatus("⏳ Analyzing... This may take 1-2 minutes", "info");
 
-                // Step 2: Poll for results
                 const result = await pollForResults(jobId);
-
-                console.log("✅ Final result:", result);
 
                 if (result && result.success) {
                     showStatus("✅ Complete! Redirecting...", "success");
@@ -3102,7 +4022,7 @@ ctx.restore();
                 }
 
             } catch (error) {
-                console.error("❌ Analysis error:", error);
+                console.error("Analysis error:", error);
                 
                 let errorMsg = "Analysis failed";
                 if (error.response) {
@@ -3126,6 +4046,7 @@ ctx.restore();
                 }, 2000);
             }
         }
+
         function showError(msg) { 
             document.getElementById("loadingState").style.display = "none"; 
             document.getElementById("cameraInterface").style.display = "none"; 
@@ -3136,7 +4057,7 @@ ctx.restore();
         document.addEventListener("DOMContentLoaded", initializeScanner);
     </script>
 </body>
-</html>`;
+</html>\`;
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(html);
@@ -3144,7 +4065,6 @@ ctx.restore();
     res.status(500).json({ success: false, error: error.message });
   }
 }
-
 async function getResultsPage(req, res, next) {
   try {
     const html = `<!DOCTYPE html>
