@@ -4674,7 +4674,6 @@ async function getCameraPage(req, res, next) {
 //   }
 // }
 
-
 async function getResultsPage(req, res, next) {
   try {
     const html = `<!DOCTYPE html>
@@ -4771,7 +4770,7 @@ async function getResultsPage(req, res, next) {
         }
         .demographics {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: 1fr;
             gap: 1rem;
         }
         .demo-item {
@@ -4896,7 +4895,6 @@ async function getResultsPage(req, res, next) {
             margin-bottom: 1rem;
         }
         
-        /* Desktop: 2 columns for vitals */
         @media screen and (min-width: 768px) {
             .row {
                 grid-template-columns: repeat(2, 1fr);
@@ -4906,14 +4904,12 @@ async function getResultsPage(req, res, next) {
             }
         }
         
-        /* Large Desktop: 3 columns */
         @media screen and (min-width: 1024px) {
             .vitals-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
         }
         
-        /* Mobile optimizations */
         @media screen and (max-width: 767px) {
             body {
                 padding: 0.5rem;
@@ -4929,9 +4925,6 @@ async function getResultsPage(req, res, next) {
             }
             .card-header {
                 font-size: 1.125rem;
-            }
-            .demographics {
-                grid-template-columns: 1fr;
             }
             .demo-item {
                 padding: 1rem;
@@ -4950,9 +4943,6 @@ async function getResultsPage(req, res, next) {
             }
             .vital-value {
                 font-size: 1.5rem;
-            }
-            .vital-meta {
-                align-items: flex-end;
             }
         }
     </style>
@@ -5055,90 +5045,45 @@ async function getResultsPage(req, res, next) {
                 '</div>';
             }
             
-            // Parse metabolic age from range
+            // Parse metabolic age from range - FIXED VERSION
             let metabolicAge = null;
             if (demographics.age) {
                 const ageStr = String(demographics.age).trim();
                 
-                // Skip if "Unknown"
-                if (ageStr.toLowerCase() === 'unknown' || ageStr === '') {
-                    metabolicAge = null;
-                } else {
-                    // Extract first number from range like "(25-32)" or "45-50"
-                    const match = ageStr.match(/(\d+)/);
-                    if (match) {
-                        metabolicAge = match[1];
+                if (ageStr.toLowerCase() !== 'unknown' && ageStr !== '') {
+                    // Extract all numbers from formats like "(48-53)" or "45-50"
+                    const numbers = ageStr.match(/\d+/g);
+                    if (numbers && numbers.length >= 1) {
+                        // Calculate average of range
+                        const sum = numbers.reduce((acc, num) => acc + parseInt(num), 0);
+                        metabolicAge = Math.round(sum / numbers.length);
                     }
                 }
             }
             
-            // Check emotion validity - Show emotion even if confidence is 0
-            const hasEmotion = demographics.emotion && 
-                              demographics.emotion !== 'Not Available' && 
-                              demographics.emotion !== 'Unknown';
-            
-            const isNeutralOnly = hasEmotion && demographics.emotion === 'Neutral' && demographics.emotion_confidence === 0;
-            
-            console.log('=== DEMOGRAPHICS DEBUG ===');
+            console.log('=== AGE DEBUG ===');
             console.log('Raw age:', demographics.age);
             console.log('Parsed Metabolic Age:', metabolicAge);
-            console.log('Raw emotion:', demographics.emotion);
-            console.log('Emotion confidence:', demographics.emotion_confidence);
-            console.log('Has valid data:', metabolicAge || hasEmotion);
             
-            // Demographics Section - Show if we have age OR emotion
-            const showDemographics = metabolicAge || hasEmotion;
-            
-            if (showDemographics) {
+            // Demographics Section - ONLY AGE
+            if (metabolicAge) {
                 html += '<div class="card">' +
                     '<div class="card-header">👤 Analysis Details</div>' +
-                    '<div class="demographics">';
-                
-                if (metabolicAge) {
-                    html += '<div class="demo-item">' +
+                    '<div class="demographics">' +
+                    '<div class="demo-item">' +
                         '<div class="demo-label">Metabolic Age</div>' +
                         '<div class="demo-value">' + metabolicAge + '</div>' +
                         '<div class="vital-unit">Years</div>' +
                         (demographics.age_confidence > 0 ? '<div class="demo-confidence">' + (demographics.age_confidence * 100).toFixed(0) + '% confident</div>' : '') +
-                    '</div>';
-                }
-                
-                if (hasEmotion) {
-                    // Show emotion with appropriate styling
-                    const emotionStyle = isNeutralOnly ? 'font-size: 1.25rem; color: #999;' : 'font-size: 1.5rem;';
-                    const borderStyle = isNeutralOnly ? 'border: 2px dashed #e5e5e5;' : '';
-                    
-                    html += '<div class="demo-item" style="' + borderStyle + '">' +
-                        '<div class="demo-label">Emotion</div>' +
-                        '<div class="demo-value" style="' + emotionStyle + '">';
-                    
-                    if (isNeutralOnly) {
-                        html += '😐 ' + demographics.emotion;
-                    } else {
-                        html += demographics.emotion;
-                    }
-                    
-                    html += '</div>';
-                    
-                    if (demographics.emotion_confidence > 0) {
-                        html += '<div class="demo-confidence" style="margin-top: 0.75rem;">' + 
-                               (demographics.emotion_confidence * 100).toFixed(0) + '% confident</div>';
-                    } else if (isNeutralOnly) {
-                        html += '<div class="vital-unit" style="color: #999; margin-top: 0.5rem;">No strong emotion</div>';
-                    }
-                    
-                    html += '</div>';
-                }
-                
-                html += '</div></div>';
+                    '</div>' +
+                    '</div></div>';
             } else {
-                // Show fallback only if absolutely no data
                 html += '<div class="card">' +
                     '<div class="card-header">👤 Analysis Details</div>' +
                     '<div class="warningBanner" style="margin: 0;">' +
                         '<span class="icon">⚠️</span>' +
                         '<div class="text">' +
-                            '<strong>Demographics not detected.</strong> For better results, ensure good lighting and face the camera directly during the scan.' +
+                            '<strong>Age analysis not available.</strong> For better results, ensure good lighting and face the camera directly during the scan.' +
                         '</div>' +
                     '</div>' +
                 '</div>';
@@ -5296,7 +5241,6 @@ async function getResultsPage(req, res, next) {
     res.status(500).json({ success: false, error: error.message });
   }
 }
-
 
 
 // Routes
